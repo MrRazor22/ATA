@@ -27,7 +27,7 @@ A pervasive manifestation of this decay is the false dichotomy:
 
 Treating code outside the primary runtime as disposable scripts creates an unmaintainable "ugly script sinkhole"—characterized by duplicated loops, hardcoded flags, manual timing logic, and fragile procedural flows. When operational code (a data backfill, a schema migration, a diagnostics probe) breaks in production, it is almost always due to this false dichotomy. 
 
-In ATA, the Triad is not heavyweight ceremony—it is the simplest possible decomposition: a vanilla primitive parameterized by injected policies (layers are optional). Operational tasks do not need sprawling ad-hoc scripts; they are modeled as lean **Drivers** ($\le 50$ lines) that cleanly assemble and execute domain primitives without procedural rot.
+In ATA, the Triad is not heavyweight ceremony—it is the simplest possible decomposition: a vanilla primitive parameterized by injected policies (layers are optional). Operational workflows do not need sprawling, copy-pasted ad-hoc script hacks; entrypoints and runners cleanly assemble and orchestrate domain primitives without procedural rot.
 
 ### 1.3 The "Abstraction Theater" Failure Mode
 Conversely, reacting to script sprawl by creating superficial, top-down wrapper classes without identifying the underlying primitive creates **Abstraction Theater**: lines of code increase, new interfaces are declared, yet the underlying procedural spaghetti remains unchanged.
@@ -43,7 +43,7 @@ ATA rests upon five non-negotiable axioms:
 
 - A Primitive contract defines exclusively **what** the domain capability is, grounded in real-world domain metaphors.
 - A Primitive has **zero direct coupling** to sibling primitives ($\text{CBO} \ll 5$).
-- A Primitive has **minimal method surface area** ($1 \le |\text{methods}(P)| \le 3$), exposing exact semantic behaviors rather than convenience overloads.
+- A Primitive has **minimal method surface area** (focused, single-responsibility contracts, typically 1 to 3 methods; a 15-method interface is an immediate smell of a God contract). Minimal surface area is the natural side-effect of clean design, not an arbitrary quota.
 - **The Subtraction Test:** A primitive is truly irreducible if removing it causes the fundamental domain capability to collapse entirely.
 - **Pragmatic Evolution:** When decomposing a new domain, start minimal/monolithic; divide into separate primitives only when an unmistakable, tangible architectural benefit emerges.
 
@@ -67,12 +67,12 @@ ATA rests upon five non-negotiable axioms:
 - A Layer $\lambda \in \text{End}(P)$ does not belong to a vague "system"; it is an endomorphic decorator implementing the exact interface of **one specific primitive $P$**.
 - **The Multiple Primitives Fallacy:** If an engineer believes a boundary requires multiple primitives, it is almost always a misconception. In virtually every case, there is exactly one root primitive defining *what* the capability is; secondary candidates are merely injected policies or substrate dependencies driving internal steps of that single primitive. If two primitives are genuinely independent, they belong to two distinct boundaries.
 
-### Axiom 5: The External Consumer Principle (Zero-Logic Drivers)
-> **Execution drivers (CLI, Hosts, Entrypoints) are external consumers orchestrating boundaries, NOT an internal "fourth tier" of the Triad.**
+### Axiom 5: The External Consumer Principle (Execution Entrypoints & Runners)
+> **Execution entrypoints (CLIs, host runners, benchmarks, worker loops) are external consumers orchestrating boundaries, NOT an internal "fourth tier" of the Triad.**
 
 - A Triad strictly contains **three elements**: the Primitive, its Injected Policies, and its Composable Layers.
-- A Driver merely instantiates Primitives, binds Policies, stacks Layers, and triggers execution.
-- If a Driver exceeds 40–50 lines or contains domain loops, business logic has leaked across an architectural boundary.
+- Entrypoints, runners, and CLIs merely instantiate Primitives, bind Policies, compose Layers, and execute operational workflows.
+- The goal is preventing lazy, unprincipled procedural script hacks from masquerading as architecture. When an operational flow (such as training or benchmark verification) executes, the core capabilities belong to the underlying domain primitives—the entrypoint simply drives them.
 
 ---
 
@@ -171,8 +171,9 @@ $$\text{System} = \bigcup_{i=1}^K \text{Triad}(P_i), \quad \text{where } \text{T
 
 ### 4.2 The Anatomy of an Irreducible Primitive Contract
 An interface in ATA is strictly **irreducible**:
-1. **Minimal Surface Area (1 to 3 Methods):**
-   - An interface represents an exact, focused set of behaviors. If an interface requires 5+ methods, it has violated Single Responsibility and must be decomposed.
+1. **Minimal Surface Area (Focused Responsibility, Zero Method Bloat):**
+   - Minimal method surface area is the natural side-effect of clean, single-responsibility design.
+   - Writing a 15-method interface monster is an immediate smell of a bloated God contract. An irreducible contract represents an exact, focused capability without convenience overloads.
 2. **Zero Convenience Bloat vs. Distinct Semantic Capabilities:**
    - **Absolute prohibition on helper overloads:** Never attach secondary convenience aliases (`With*` vs `Use*`, `ExecuteDefault`, sync-over-async wrappers) to root contracts.
    - There must exist **exactly one canonical method** for each distinct semantic capability. 
@@ -194,19 +195,20 @@ A pervasive anti-pattern in interface-driven development is speculative, mechani
 
 ## 5. The Universal Boundary Principle
 
-ATA is scale-invariant. Every operational boundary in a system fractally encapsulates its own atomic Triad:
+Every distinct operational capability in a system encapsulates its own atomic Triad ($P + \mathcal{P}(P) + \text{End}(P)$). A **Boundary** is simply the cohesive namespace or directory that holds that Triad:
 
-| Operational Boundary | What the Primitive Does (Tier 1) | Injected Policy: How It Executes (Tier 2) | Composable Layer: Cross-Cutting ($\lambda_F$) (Tier 3) | External Consumer / Driver |
+| Operational Boundary | What the Primitive Does (Tier 1) | Injected Policy: How It Executes (Tier 2) | Composable Layer: Cross-Cutting ($\lambda_F$) (Tier 3) | External Consumer / Runner |
 |---|---|---|---|---|
-| **Runtime Execution** | Execute domain operation | Algorithmic strategies, internal heuristics | Latency profiling, security guardrails, caching | Application Host / CLI |
-| **Verification / Testing** | Evaluate predictions vs. ground truth | Scoring rules, distance metrics, thresholds | Warmup, latency benchmarking, error recording | Test Runner / Benchmark Suite |
-| **Optimization / Training** | Execute mathematical parameter update | Objective loss functions, optimizer policy | Checkpointing, validation triggers, metric streaming | Training Host |
-| **Data Ingestion** | Generate / stream domain records | Source formatters, parsing schemas | Augmentation, replay mixing, partition splitting | Data Ingestion CLI |
+| **Domain Execution / Inference** | Execute primary domain operation | Algorithmic strategies, internal heuristics | Latency profiling, security guardrails, caching | Application Host / CLI / Benchmark Runner |
+| **Optimization / Training** | Execute mathematical parameter update | Objective loss functions, optimizer policy | Checkpointing, validation triggers, metric streaming | Training Runner / Orchestration Job |
+| **Data Ingestion / Synthesis** | Generate / stream domain records | Source formatters, parsing schemas | Augmentation, replay mixing, partition splitting | Data Ingestion Entrypoint |
+
+> **Note on Verification & Benchmarking:** Testing and evaluation are **operational consumers**, not artificial architectural boundaries. Running a benchmark against ground truth is simply exercising the execution primitive (`decide()`) over test data. Inventing fake primitives (`IEvaluator`) or fake layers just to wrap a test loop is Abstraction Theater.
 
 ### The Anti-Pattern Test for Operational Boundaries:
 - If a subsystem consists of a flat file with procedural loops, inline timing, and hardcoded flags, it is violating **Axiom 4** (The Ugly Script Fallacy).
 - If a subsystem creates abstract interfaces that merely wrap single functions without endomorphic decorators, it is violating **Axiom 3** (Abstraction Theater).
-- If an operational driver contains `for` loops, loss calculations, or mutable state, it is violating **Axiom 5** (Driver Bloat).
+- If an operational runner replaces domain primitives with unprincipled ad-hoc procedural hacks, copy-pasted glue, and loose scripts, it is violating **Axiom 5** (The Lazy Hack Fallacy).
 
 ---
 
@@ -290,22 +292,21 @@ When an engineer is stuck or facing architectural drift, apply this 5-step diagn
 4. **Co-location vs. Physical Package Separation:**
    - **In unified libraries:** Co-locate layers within each boundary. Avoid creating a detached top-level `layers/` tree that forces mirror-tree duplication across the codebase.
    - **In multi-package ecosystems:** Separate layer assemblies (e.g. `[Domain].Layers`) only when binary packaging distribution requires a zero-dependency core package.
-5. **Zero Aimless Folders:** Prohibit vague dumping grounds (`scripts/`, `utils/`, `helpers/`, `misc/`, `common/`). One-off operational utilities reside in `drivers/` as lean orchestrators ($\le 50$ lines).
+5. **Zero Aimless Folders:** Prohibit vague dumping grounds (`scripts/`, `utils/`, `helpers/`, `misc/`, `common/`). Operational utilities and runners reside in clean entrypoints (`cli.py`, `examples/`, or runner modules).
 6. **Zero Batch-Dumping:** Never bundle unrelated training, data preparation, evaluation, and benchmark files together in a flat folder.
 7. **Zero Residual Debris:** Build caches (`__pycache__`, `.bin/`), temporary logs, scratch runs, and disposable experiment debris must never linger in source trees. Intrinsic domain assets (fixtures, benchmarks, weights, static seed data) are not residual debris; they belong co-located inside the operational boundary that owns their lifecycle (Rule 11).
 8. **The Single-File Folder / Namespace Anti-Pattern:** Creating a directory or separate logical namespace for a single file is gratuitous nesting and folder ceremony. If a directory or namespace cannot justify having at least 2–3 sibling files, it must NOT exist as a separate folder. Lean boundaries stay flat with explicit naming suffixes (`*Layer`), and driver folders must not be introduced for a single entrypoint.
-9. **The Universal Code Completeness Quad (No Immunity for Consumers):** Every line of code across an entire repository—producers and consumers alike—strictly belongs to one of four canonical forms:
-   - **The Behavioral Triad:** Primitives ($P$), Injected Policies ($\pi$), Composable Layers ($\lambda$).
-   - **Pure Domain Schemas / DTOs (State):** Immutable value objects defining typed interfaces.
-   - **Stateless Extension Utilities (Transforms):** Pure functional transforms with zero side-effects.
-   - **Zero-Logic Composition Roots (Drivers):** Standalone entrypoints ($\le 50$ LOC) that purely bind dependencies and trigger execution.
-   *Anything else (procedural glue scripts, ad-hoc wrapper functions, unprincipled utility dumps) is an architectural smell.*
-10. **The Driver Purity Theorem (Zero Leaked Adaptation or Presentation):** Drivers must NEVER accumulate business logic, ad-hoc mapping adapters, procedural domain loops, or presentation renderers (e.g., ANSI tables, graph printers). Input adaptation belongs to the consuming boundary; report presentation belongs to boundary presentation utilities. A driver strictly parses configuration, instantiates the triad, and invokes execution.
+9. **`Primitive + Policy + Layer` Solves It All:** Every operational domain capability decomposes into this irreducible triad:
+   - **Primitive ($P$):** Defines *what* the capability is. If a capability does not belong to an existing primitive, **it is a new Primitive**.
+   - **Policy ($\pi$):** Defines *how* an internal step executes.
+   - **Layer ($\lambda$):** Decorates cross-cutting concerns without interface drift.
+   - **Boundary:** Simply the cohesive namespace or directory that holds that Triad.
+   - Auxiliary state consists of pure immutable DTOs, and stateless math calculations are pure transforms.
+10. **No Lazy Hack Script Sinkholes (ATA Minimalism Across the Board):** Ad-hoc procedural scripts full of copy-pasted loops, manual timing hacks, and unprincipled glue are symptoms of lazy hacks. The goal of ATA is not banning entrypoints or loops, but ensuring that all real domain logic is modeled cleanly within Primitives, Policies, and Layers. Runners and entrypoints simply instantiate and orchestrate those clean primitives rather than accumulating procedural rot.
 11. **The Functional Ownership Principle (The "Who Uses It?" Axiom):** Every asset, dataset, benchmark fixture, or configuration must be co-located with the specific operational boundary that produces or exclusively consumes it. 
    - A pervasive architectural smell is **Horizontal Format Scattering**—creating top-level directories based on superficial file formats or artifact types (`data/`, `results/`, `output/`, `fixtures/`) rather than functional ownership.
    - To determine the canonical location of any file, dataset, or asset, apply the **Ownership Test**: *"Which primitive or operational boundary produces or exclusively consumes this asset?"*
-   - If an asset is consumed by a Verification boundary (e.g., benchmark test sets, golden evaluation datasets, historical verification metrics), it belongs *inside* the Verification boundary—never scattered across orphan root-level `data/` or `results/` folders.
-   - If an asset is generated by data synthesis policies and consumed by an Optimization primitive, it belongs to the Optimization boundary.
+   - Assets consumed by execution testing (e.g., benchmark golden datasets) belong with that domain, while training corpora belong to the Optimization boundary.
    - Repository roots must never become format-based dumping grounds. Co-locating assets with their consuming boundary preserves encapsulation and eliminates single-file folder sprawl.
 12. **The Pristine Root Principle (Zero Dangling Folders/Files at Root):** Any loose, untyped directory (`data/`, `checkpoints/`, `results/`, `output/`) or dangling file sitting at the repository root is an immediate design smell.
    - A repository root is not a dumping ground for local data, binary weights, or execution dumps.
@@ -364,15 +365,15 @@ When reviewing or building any codebase, ask these diagnostic questions:
 | **How do we add features?** | Endomorphic layer ($\lambda_F: F \to F$) decorating the contract | Modifying the execution loop or bloating the base interface |
 | **Are behaviors behind interfaces?** | Yes, 100% of behavioral components have clean interfaces | Concrete classes directly exposed to callers |
 | **Do interfaces have convenience overloads?** | Zero convenience methods; minimal surface area | Bloated interfaces with multiple `With*`, `Run*`, or helper aliases |
-| **Where do scripts live?** | No `scripts/` folder; lean drivers ($\le 50$ lines) in `drivers/` | Sprawling `scripts/` folder full of procedural spaghetti |
-| **File size and method count?** | $\le 150$ lines per file, $\le 4–5$ methods per class | Large multi-hundred-line monolithic classes |
+| **Where do operational entrypoints live?** | Clean entrypoints/runners driving primitives | Sprawling `scripts/` folder full of copy-pasted procedural hack-loops |
+| **Interface and class focus?** | Focused single-responsibility (minimal methods) | 1000-line God classes or 15-method interface monsters |
 | **Do layers carry `*Layer` suffix?** | Yes, 100% of endomorphic decorators end in `*Layer` | Ambiguous naming (`*Trainer`, `*Manager`, `*Wrapper`) |
 | **How are multi-subsystems partitioned?** | Boundary-first (`boundary/policies/`, `boundary/layers/`) | Tier-oriented bloat (dumping all primitives into one giant `core/`) |
 | **How many primitives per boundary?** | Exactly 1 primitive per boundary | Multiple primitives in one folder causing policy/layer ambiguity |
 | **Are policies and layers subordinated?** | Cleanly scoped in `policies/` and `layers/` subdirectories | Flat adjacent files competing with the root primitive contract |
 | **Are there single-file folders?** | Zero 1-file folders; lean boundaries remain flat | Folders/namespaces wrapping a single file (folder ceremony) |
-| **Is all code in the Completeness Quad?** | Yes, 100% of code is a Triad, DTO, Pure Utility, or Driver | Procedural glue, ad-hoc scripts, or untyped manager code |
-| **Are drivers strictly pure?** | Zero adapters, zero loops, zero formatters in drivers ($\le 50$ LOC) | Business, presentation, or mapping logic leaking into driver |
+| **Are capabilities modeled cleanly?** | Real domain logic encapsulated in Triad ($P + \pi + \lambda$) | Lazy procedural glue and loose hack scripts masquerading as architecture |
+| **Are entrypoints orchestrating primitives?** | Runners instantiate and drive domain primitives | Entrypoints implementing their own ad-hoc domain math and duplicated logic |
 | **Are interfaces 1:1 mirrors?** | Decoupling polymorphism/layers ($\ge 2$ impls or decorator target) | 1:1 mechanical passthrough interfaces adding indirection without abstraction |
 | **Are shared substrates independent?** | Shared foundations are autonomous boundaries injected cleanly | Cross-boundary dependencies demoted to internal policies of a single consumer |
 | **Where do data, fixtures, & metrics live?** | Co-located inside the boundary that consumes/produces them | Horizontal format scattering (`data/`, `results/`, `fixtures/` at root) |
