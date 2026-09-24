@@ -65,7 +65,7 @@ ATA rests upon five non-negotiable axioms:
 
 - A Policy $\pi \in \mathcal{P}(P)$ does not belong to a vague "system"; it is an injected strategy parameterized by **one specific primitive $P$**.
 - A Layer $\lambda \in \text{End}(P)$ does not belong to a vague "system"; it is an endomorphic decorator implementing the exact interface of **one specific primitive $P$**.
-- If a boundary appears to have multiple primitives, it is either two distinct boundaries that must be separated, or one is the root Primitive and the other is an injected Policy/Substrate dependency of that primitive.
+- **The Multiple Primitives Fallacy:** If an engineer believes a boundary requires multiple primitives, it is almost always a misconception. In virtually every case, there is exactly one root primitive defining *what* the capability is; secondary candidates are merely injected policies or substrate dependencies driving internal steps of that single primitive. If two primitives are genuinely independent, they belong to two distinct boundaries.
 
 ### Axiom 5: The External Consumer Principle (Zero-Logic Drivers)
 > **Execution drivers (CLI, Hosts, Entrypoints) are external consumers orchestrating boundaries, NOT an internal "fourth tier" of the Triad.**
@@ -198,33 +198,17 @@ ATA is scale-invariant. Every operational boundary in a system fractally encapsu
 
 ## 6. Repository Topology & Namespace Hygiene
 
-ATA enforces strict geometric alignment between **logical namespaces** and **physical directory structures**. Systems choose between two canonical topologies depending on domain complexity:
+ATA enforces strict geometric alignment between **logical namespaces** and **physical directory structures**. 
 
-### 6.1 Topology A: Tier-First (Compact Single-Domain Repos)
-For small, single-purpose libraries where only one domain capability exists:
-```text
-RepositoryRoot/
-├── src/ (or [PackageName]/)
-│   ├── core/         # Tier 1: Irreducible Primitives (Interfaces & Base Substrates)
-│   ├── policies/     # Tier 2: Injected Policies (Internal strategies)
-│   ├── layers/       # Tier 3: Composable Endomorphic Layers (λ_F: F -> F)
-│   └── data/         # Pure immutable data models, schemas, and taxonomies
-├── drivers/          # Tier 4: Standalone Execution Hosts (CLI drivers, Host apps)
-├── tests/            # Contract verification & regression test suite
-└── examples/         # Declarative consumer demonstrations
-```
-
-### 6.2 Topology B: Boundary-First Cohesive Triad (Multi-Subsystem Systems)
-When a system spans multiple operational boundaries (e.g. Execution, Optimization, Verification, Ingestion), cramming all primitives into one flat `core/` creates **"Tier-Oriented Bloat"** (mixing training loops with inference engines). 
-
-Per **Axiom 4**, each boundary possesses its **own cohesive Triad**:
+### 6.1 The Canonical Topology: Boundary-First Cohesive Triad
+Horizontal tier-first dumping (`core/`, `policies/`, `layers/` at the repository root) is strictly forbidden as an accidental complexity anti-pattern. Instead, each operational boundary commands its own cohesive Triad, centered around **exactly one irreducible primitive** ($1 \text{ Boundary} \equiv 1 \text{ Primitive}$):
 
 ```text
 RepositoryRoot/
 ├── [DomainBoundaryA]/          # Boundary A: Encapsulates Primitive A (Cluttered Scale)
 │   ├── primitive.ext           # THE ONE PRIMITIVE (Contract & Base Implementation)
 │   ├── schema.ext              # Pure immutable domain value objects for Primitive A
-│   ├── policies/               # Injected strategies (partitioned when >= 3 policies)
+│   ├── policies/               # Injected strategies (partitioned when >= 4-5 policies)
 │   │   ├── strategy_1.ext
 │   │   └── strategy_2.ext
 │   └── layers/                 # Composable decorators (λ_A: A -> A)
@@ -234,9 +218,17 @@ RepositoryRoot/
 │   ├── primitive.ext           # THE ONE PRIMITIVE (Contract & Base Implementation)
 │   ├── objective.ext           # Injected policy (flat, no 1-file folder ceremony)
 │   └── checkpoint_layer.ext    # Composable decorator (self-documenting via *Layer suffix)
-├── drivers/                    # External Consumers (CLI, Host apps, Entrypoints)
 └── tests/                      # Contract verification & regression tests
 ```
+
+### 6.2 Extensibility Feature Hint: Satellite Extension Packaging
+When binary distribution, separate deployments, or strict dependency boundaries require a zero-dependency core package, the Triad's modularity naturally enables satellite extension assemblies. 
+
+Extensions (composable layers and/or specialized policies) sit in a separate project without touching or bloating the core primitive, scoped directly by the primitive they augment:
+- **Satellite Package:** `[Domain].Layers` or `[Domain].Extensions`
+- **Namespace & Path:** `[Domain].Layers.[Primitive]` or `[Domain].Extensions.[Primitive]`
+
+Because of **Axiom 4**, any extension decorator or strategy belongs to **one specific primitive $P$** and is namespaced accordingly (`[Domain].Layers.[Primitive]`). The core primitive assembly remains pristine, minimal, and zero-dependency.
 
 ### 6.3 The Clutter-Threshold Rule (When to Subfolder vs. When to Stay Flat)
 A primary failure mode in modular architectures is **Folder Ceremony**—creating nested directories that contain only a single file (e.g., `training/policies/loss.py` or `evaluation/layers/profiling.py`). ATA resolves this through the **Clutter Threshold**:
@@ -252,8 +244,8 @@ A primary failure mode in modular architectures is **Folder Ceremony**—creatin
    - **Policies DO NOT append `*Policy` or `*Strategy` (Prefer `-er`/`-or` Agentive Nouns):** Concrete strategies define *how* an internal step executes. They are typically agentive/doer nouns (`Resolver`, `Selector`, `Sampler`, `Optimizer`, `Router`, `Validator`, `Assembler`). The noun itself defines the strategy; appending `*Policy` or `*Strategy` is redundant enterprise noise. (Non-stringent suggestion, as pure mathematical concepts like `Loss` or `Schedule` remain natural nouns).
    - **Layers MUST carry `*Layer` suffix:** Because they implement the primitive's exact interface, the `*Layer` suffix is non-negotiable (`RetryLayer`, `ProfilingLayer`, `CacheLayer`) to unambiguously distinguish decorators from base implementations.
 
-### 6.4 The 4-Step Discovery Heuristic: How to Structure When in Trouble
-When an engineer is stuck or facing architectural drift, apply this 4-step diagnostic heuristic to discover the correct boundaries and types:
+### 6.4 The 5-Step Discovery Heuristic: How to Structure When in Trouble
+When an engineer is stuck or facing architectural drift, apply this 5-step diagnostic heuristic to discover the correct boundaries, types, and asset locations:
 
 1. **Step 1: The Subtraction Test (Discover the Primitive):**
    *Does removing this component cause the fundamental domain capability to collapse entirely?*
@@ -265,9 +257,13 @@ When an engineer is stuck or facing architectural drift, apply this 4-step diagn
 3. **Step 3: The Parameterization Test (Discover the Policies):**
    *Is this class an injected strategy, formatting rule, objective function, or algorithm configuring an internal step of $P$?*
    - **YES** $\implies$ It is an **Injected Policy** ($\pi \in \mathcal{P}(P)$).
-4. **Step 4: The Subordination & Single-Primitive Check:**
+4. **Step 4: The Functional Ownership Test (The "Who Uses It?" Test):**
+   *Which operational boundary produces or exclusively consumes this asset, dataset, or fixture?*
+   - Co-locate the asset directly inside that consuming boundary (e.g., golden evaluation fixtures and baseline metrics inside the Verification boundary). Never dump assets into untyped horizontal root folders (`data/`, `results/`).
+5. **Step 5: The Subordination & Single-Primitive Check (The Multiple Primitives Fallacy):**
    *Are there multiple primitives or loose files sitting flat at the boundary root?*
-   - If a boundary hosts two primitives, check: does one inject the other? If yes, demote the injected component to a policy (e.g., an injected compute substrate). If not, split them into two distinct boundaries.
+   - If an engineer thinks a boundary needs multiple primitives, it is almost always an illusion: one is the true root primitive defining *what* the capability is, and the secondary candidates are merely injected policies (or substrate dependencies) driving an internal step.
+   - If two primitives are genuinely independent, split them into two distinct boundaries ($1 \text{ Boundary} \equiv 1 \text{ Primitive}$).
    - Keep policies and layers **subordinate**—either via `*Layer` suffix in lean boundaries or in `policies/` and `layers/` subfolders in cluttered boundaries.
 
 ### 6.5 Universal Hygiene Rules:
@@ -278,7 +274,7 @@ When an engineer is stuck or facing architectural drift, apply this 4-step diagn
 3. **Boundary-Scoped Subordination:** Policies and layers must be namespaced to the operational primitive they serve (`boundary/policies/`, `boundary/layers/`). Never dump training objectives and runtime token layout policies into an untyped global bucket.
 4. **Co-location vs. Physical Package Separation:**
    - **In unified libraries:** Co-locate layers within each boundary. Avoid creating a detached top-level `layers/` tree that forces mirror-tree duplication across the codebase.
-   - **In multi-package ecosystems:** Separate layer assemblies (e.g. `AgentCore.Layers`) only when binary packaging distribution requires a zero-dependency core package.
+   - **In multi-package ecosystems:** Separate layer assemblies (e.g. `[Domain].Layers`) only when binary packaging distribution requires a zero-dependency core package.
 5. **Zero Aimless Folders:** Prohibit vague dumping grounds (`scripts/`, `utils/`, `helpers/`, `misc/`, `common/`). One-off operational utilities reside in `drivers/` as lean orchestrators ($\le 50$ lines).
 6. **Zero Batch-Dumping:** Never bundle unrelated training, data preparation, evaluation, and benchmark files together in a flat folder.
 7. **Zero Residual Artifacts:** No lingering scratch files or untracked dumps. Binary weights and multi-gigabyte datasets must be excluded via `.gitignore` and isolated in designated directories.
@@ -290,6 +286,12 @@ When an engineer is stuck or facing architectural drift, apply this 4-step diagn
    - **Zero-Logic Composition Roots (Drivers):** Standalone entrypoints ($\le 50$ LOC) that purely bind dependencies and trigger execution.
    *Anything else (procedural glue scripts, ad-hoc wrapper functions, unprincipled utility dumps) is an architectural smell.*
 10. **The Driver Purity Theorem (Zero Leaked Adaptation or Presentation):** Drivers must NEVER accumulate business logic, ad-hoc mapping adapters, procedural domain loops, or presentation renderers (e.g., ANSI tables, graph printers). Input adaptation belongs to the consuming boundary; report presentation belongs to boundary presentation utilities. A driver strictly parses configuration, instantiates the triad, and invokes execution.
+11. **The Functional Ownership Principle (The "Who Uses It?" Axiom):** Every asset, dataset, benchmark fixture, or configuration must be co-located with the specific operational boundary that produces or exclusively consumes it. 
+   - A pervasive architectural smell is **Horizontal Format Scattering**—creating top-level directories based on superficial file formats or artifact types (`data/`, `results/`, `output/`, `fixtures/`) rather than functional ownership.
+   - To determine the canonical location of any file, dataset, or asset, apply the **Ownership Test**: *"Which primitive or operational boundary produces or exclusively consumes this asset?"*
+   - If an asset is consumed by a Verification boundary (e.g., benchmark test sets, golden evaluation datasets, historical verification metrics), it belongs *inside* the Verification boundary—never scattered across orphan root-level `data/` or `results/` folders.
+   - If an asset is generated by data synthesis policies and consumed by an Optimization primitive, it belongs to the Optimization boundary.
+   - Repository roots must never become format-based dumping grounds. Co-locating assets with their consuming boundary preserves encapsulation and eliminates single-file folder sprawl.
 
 ---
 
@@ -352,3 +354,4 @@ When reviewing or building any codebase, ask these diagnostic questions:
 | **Are there single-file folders?** | Zero 1-file folders; lean boundaries remain flat | Folders/namespaces wrapping a single file (folder ceremony) |
 | **Is all code in the Completeness Quad?** | Yes, 100% of code is a Triad, DTO, Pure Utility, or Driver | Procedural glue, ad-hoc scripts, or untyped manager code |
 | **Are drivers strictly pure?** | Zero adapters, zero loops, zero formatters in drivers ($\le 50$ LOC) | Business, presentation, or mapping logic leaking into driver |
+| **Where do data, fixtures, & metrics live?** | Co-located inside the boundary that consumes/produces them | Horizontal format scattering (`data/`, `results/`, `fixtures/` at root) |
