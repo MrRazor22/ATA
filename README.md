@@ -60,17 +60,19 @@ ATA rests upon five non-negotiable axioms:
 - Layers form an algebraic **Endomorphism Monoid** $(\text{End}(F), \circ, \text{id})$.
 - Any capability added to a system (resilience, security guardrails, caching, latency profiling, durability, audit logging) must be a Layer, never a modification to the primitive or the execution loop.
 
-### Axiom 4: Universal Boundary Invariance
-> **The Triad is scale-invariant and fractal. It applies uniformly to every operational boundary in a system. No subsystem is exempt.**
+### Axiom 4: Universal Boundary Invariance & The Boundary-Primitive Identity
+> **The Triad is scale-invariant, fractal, and atomic per primitive. Every operational boundary encapsulates EXACTLY ONE primary primitive contract; all policies and layers in that boundary are subordinate to that single primitive, never adjacent peers.**
 
-- Optimization, Verification, Ingestion, and Execution each possess their own Triad.
-- There is no category of "just scripts" in a pristine ATA system.
+- A Policy $\pi \in \mathcal{P}(P)$ does not belong to a vague "system"; it is an injected strategy parameterized by **one specific primitive $P$**.
+- A Layer $\lambda \in \text{End}(P)$ does not belong to a vague "system"; it is an endomorphic decorator implementing the exact interface of **one specific primitive $P$**.
+- If a boundary appears to have multiple primitives, it is either two distinct boundaries that must be separated, or one is the root Primitive and the other is an injected Policy/Substrate dependency of that primitive.
 
-### Axiom 5: The Zero-Logic Driver Principle
-> **Execution drivers contain zero business logic, zero iteration loops, and zero state tracking; their sole role is assembling the Triad.**
+### Axiom 5: The External Consumer Principle (Zero-Logic Drivers)
+> **Execution drivers (CLI, Hosts, Entrypoints) are external consumers orchestrating boundaries, NOT an internal "fourth tier" of the Triad.**
 
-- A Driver (CLI, Host, Main) merely instantiates Primitives, binds Policies, stacks Layers, and triggers execution.
-- If a Driver exceeds 40–50 lines, business logic has leaked across an architectural boundary.
+- A Triad strictly contains **three elements**: the Primitive, its Injected Policies, and its Composable Layers.
+- A Driver merely instantiates Primitives, binds Policies, stacks Layers, and triggers execution.
+- If a Driver exceeds 40–50 lines or contains domain loops, business logic has leaked across an architectural boundary.
 
 ---
 
@@ -78,23 +80,27 @@ ATA rests upon five non-negotiable axioms:
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
-│                    Tier 4: Drivers (D)                      │
-│            D: (B, P, Λ) -> System Execution                 │
+│                 External Consumers / Clients                │
+│                 (CLI, Host Apps, Entrypoints)               │
 └──────────────────────────────┬──────────────────────────────┘
                                │ orchestrates
 ┌──────────────────────────────▼──────────────────────────────┐
-│             Tier 3: Composable Layers (Λ)                   │
-│             λ_P: P -> P  ∈  End(P) Monoid                   │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ wraps
-┌──────────────────────────────▼──────────────────────────────┐
-│             Tier 1: Core Primitives (B)                     │
-│               B = {P_1, P_2, ..., P_K}                      │
-└──────────────────────────────▲──────────────────────────────┘
-                               │ injects
-┌──────────────────────────────┴──────────────────────────────┐
-│             Tier 2: Injected Policies (P)                   │
-│             P_i = P_i(policy_1, policy_2, ...)              │
+│                    THE ATOMIC TRIAD                         │
+│                                                             │
+│       ┌──────────────────────────────────────────────┐      │
+│       │      Composable Layers: End(P) Monoid        │      │
+│       │      λ_P: P -> P  (Decorators wrapping P)    │      │
+│       └──────────────────────┬───────────────────────┘      │
+│                              │ wraps                        │
+│       ┌──────────────────────▼───────────────────────┐      │
+│       │         The Core Primitive Contract (P)      │      │
+│       │         (Defines WHAT the boundary does)     │      │
+│       └──────────────────────▲───────────────────────┘      │
+│                              │ injects                      │
+│       ┌──────────────────────┴───────────────────────┐      │
+│       │          Injected Policies: P(P)             │      │
+│       │          (Defines HOW steps execute)         │      │
+│       └──────────────────────────────────────────────┘      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -137,6 +143,16 @@ $$\mathcal{O}(N + M)$$
 - **Behavioral Adaptations:** If an execution step requires dynamic variations or algorithmic branching, it is modeled as an **Injected Policy** (Tier 2), not by mutating layer contracts.
 - **Interface Shape Evolution:** If a requirement demands changing the method signature (e.g. unifying batch and single-item execution), this is a **Primitive Design Issue**. Primitives are the irreducible, policy-free bedrock of domain logic; when capabilities evolve, the primitive contract must be updated directly rather than patched via leaky layer wrappers.
 
+### 3.3 The Atomic Triad Theorem (Atomic Per Primitive)
+A system does not possess *one* monolithic Triad. The Triad is strictly **atomic per primitive contract $P_i$**:
+$$\text{System} = \bigcup_{i=1}^K \text{Triad}(P_i), \quad \text{where } \text{Triad}(P_i) = \Big( P_i, \; \mathcal{P}(P_i), \; \text{End}(P_i) \Big)$$
+
+1. **Policies are Partitioned by Primitive:** $\mathcal{P}(P_i) \cap \mathcal{P}(P_j) = \emptyset$ for $i \ne j$. An injected strategy belongs exclusively to the primitive that injects it.
+2. **Layers are Partitioned by Primitive:** $\text{End}(P_i) \cap \text{End}(P_j) = \emptyset$ for $i \ne j$. An endomorphic decorator implements and wraps strictly contract $P_i$.
+3. **Resolving the Multi-Primitive Illusion:** If an operational boundary appears to host multiple primitives, apply the **Subordination Test**:
+   - Does one component inject the other via constructor initialization? If yes, the injected component is a **Policy / Substrate Dependency**, not a peer root primitive.
+   - If they are genuinely orthogonal and independent, they represent **Two Distinct Boundaries** and must be partitioned into separate boundary namespaces.
+
 ---
 
 ## 4. The Behavioral Interface Mandate
@@ -164,9 +180,9 @@ An interface in ATA is strictly **irreducible**:
 
 ## 5. The Universal Boundary Principle
 
-ATA is scale-invariant. When architecting an entire ecosystem, every operational boundary must be modeled as a Triad:
+ATA is scale-invariant. Every operational boundary in a system fractally encapsulates its own atomic Triad:
 
-| Operational Boundary | What the Primitive Does (Tier 1) | Injected Policy: How It Executes (Tier 2) | Composable Layer: Cross-Cutting ($\lambda_F$) (Tier 3) | Tier 4 Driver (Zero Logic) |
+| Operational Boundary | What the Primitive Does (Tier 1) | Injected Policy: How It Executes (Tier 2) | Composable Layer: Cross-Cutting ($\lambda_F$) (Tier 3) | External Consumer / Driver |
 |---|---|---|---|---|
 | **Runtime Execution** | Execute domain operation | Algorithmic strategies, internal heuristics | Latency profiling, security guardrails, caching | Application Host / CLI |
 | **Verification / Testing** | Evaluate predictions vs. ground truth | Scoring rules, distance metrics, thresholds | Warmup, latency benchmarking, error recording | Test Runner / Benchmark Suite |
@@ -199,34 +215,72 @@ RepositoryRoot/
 ```
 
 ### 6.2 Topology B: Boundary-First Cohesive Triad (Multi-Subsystem Systems)
-When a system spans multiple operational boundaries (e.g. Inference, Training, Verification, Ingestion), cramming all primitives into one flat `core/` creates **"Tier-Oriented Bloat"** (mixing training loops with inference engines). 
+When a system spans multiple operational boundaries (e.g. Execution, Optimization, Verification, Ingestion), cramming all primitives into one flat `core/` creates **"Tier-Oriented Bloat"** (mixing training loops with inference engines). 
 
-Per **Axiom 4 (Universal Boundary Invariance)**, each boundary possesses its **own cohesive Triad**:
+Per **Axiom 4**, each boundary possesses its **own cohesive Triad**:
 
 ```text
 RepositoryRoot/
-├── [DomainBoundaryA]/          # e.g., Execution / Reasoning
-│   ├── primitive.ext           # Tier 1: Boundary Primitive contract & base
-│   ├── policies/               # Tier 2: Injected strategies for this boundary
-│   └── layers/                 # Tier 3: Boundary-specific decorators (λ_A: A -> A)
-├── [DomainBoundaryB]/          # e.g., Optimization / Training
-│   ├── primitive.ext           # Tier 1: Optimization contract & base
-│   ├── policies/               # Tier 2: Objective & optimization policies
-│   └── layers/                 # Tier 3: Optimization decorators (λ_B: B -> B)
-├── [DomainBoundaryC]/          # e.g., Verification / Testing
-│   ├── primitive.ext           # Tier 1: Evaluation contract & base
-│   └── layers/                 # Tier 3: Verification decorators (λ_C: C -> C)
-├── drivers/                    # Tier 4: Standalone Execution Hosts (CLI, host apps)
-└── data/                       # Shared immutable schemas and data builders
+├── [DomainBoundaryA]/          # Boundary A: Encapsulates Primitive A (Cluttered Scale)
+│   ├── primitive.ext           # THE ONE PRIMITIVE (Contract & Base Implementation)
+│   ├── schema.ext              # Pure immutable domain value objects for Primitive A
+│   ├── policies/               # Injected strategies (partitioned when >= 3 policies)
+│   │   ├── strategy_1.ext
+│   │   └── strategy_2.ext
+│   └── layers/                 # Composable decorators (λ_A: A -> A)
+│       ├── profiling_layer.ext
+│       └── guardrail_layer.ext
+├── [DomainBoundaryB]/          # Boundary B: Encapsulates Primitive B (Lean Scale: Flat)
+│   ├── primitive.ext           # THE ONE PRIMITIVE (Contract & Base Implementation)
+│   ├── objective.ext           # Injected policy (flat, no 1-file folder ceremony)
+│   └── checkpoint_layer.ext    # Composable decorator (self-documenting via *Layer suffix)
+├── drivers/                    # External Consumers (CLI, Host apps, Entrypoints)
+└── tests/                      # Contract verification & regression tests
 ```
 
-### 6.3 Universal Hygiene Rules:
-1. **The `*Layer` Suffix Mandate:** Every composable endomorphic decorator ($\lambda_F: F \to F$) must carry the `*Layer` suffix (e.g., `ProfilingLayer`, `RetryLayer`, `CheckpointingLayer`). Its algebraic role must be immediately obvious from its symbol and file name.
-2. **Boundary-Scoped Policies:** Policies must be namespaced to the operational boundary they serve (`boundary/policies/`). Never dump training objectives and runtime token layout policies into an untyped global bucket.
-3. **1:1 Namespace-to-Path Isomorphism:** A type in namespace `App.Execution.Layers.ProfilingLayer` must reside strictly in `App/Execution/Layers/ProfilingLayer.*`.
-4. **Zero Aimless Folders:** Prohibit vague dumping grounds (`scripts/`, `utils/`, `helpers/`, `misc/`, `common/`). Every file must belong to an orthogonal architectural role. One-off operational utilities reside in `drivers/` as lean orchestrators ($\le 50$ lines).
-5. **Zero Batch-Dumping:** Never bundle unrelated training, data preparation, evaluation, and benchmark files together in a flat folder.
-6. **Zero Residual Artifacts:** No lingering scratch files or untracked dumps. Binary weights and multi-gigabyte datasets must be excluded via `.gitignore` and isolated in designated directories.
+### 6.3 The Clutter-Threshold Rule (When to Subfolder vs. When to Stay Flat)
+A primary failure mode in modular architectures is **Folder Ceremony**—creating nested directories that contain only a single file (e.g., `training/policies/loss.py` or `evaluation/layers/profiling.py`). ATA resolves this through the **Clutter Threshold**:
+
+1. **Lean Boundaries ($\le 3–4$ files total):**
+   - Keep the boundary flat! 
+   - A primitive (`trainer.py`), its single policy (`loss.py`), and its single layer (`checkpoint_layer.py`) live directly in the boundary root.
+   - The `*Layer` suffix already provides 100% unambiguous self-documentation; a 1-file `layers/` directory adds pure ceremony without architectural value.
+2. **Cluttered Boundaries ($\ge 4–5$ policies or layers):**
+   - Subordinate policies and layers into dedicated `policies/` and `layers/` subfolders to prevent visual clutter and maintain structural hygiene.
+3. **Naming Suffix Rule:**
+   - **Layers MUST carry `*Layer` suffix:** Because they implement the primitive's exact interface, the `*Layer` suffix is non-negotiable to distinguish decorators from base implementations.
+   - **Policies DO NOT append `*Policy` or `*Strategy`:** Concrete strategies are domain nouns (`SlotAssembler`, `CalibratedLoss`, `SubwordTokenizer`). The noun itself defines the strategy; appending `*Policy` is redundant enterprise noise.
+
+### 6.4 The 4-Step Discovery Heuristic: How to Structure When in Trouble
+When an engineer is stuck or facing architectural drift, apply this 4-step diagnostic heuristic to discover the correct boundaries and types:
+
+1. **Step 1: The Subtraction Test (Discover the Primitive):**
+   *Does removing this component cause the fundamental domain capability to collapse entirely?*
+   - **YES** $\implies$ It is a **Core Primitive** ($P$). Create a boundary for it, placing its irreducible contract and base implementation at the boundary root.
+   - **NO** $\implies$ It is either a policy, a layer, or dead code.
+2. **Step 2: The Endomorphism Test (Discover the Layers):**
+   *Does this class implement the exact same interface contract as $P$, wrapping an inner instance to add a cross-cutting concern (timing, checkpointing, retries, guardrails)?*
+   - **YES** $\implies$ It is a **Composable Layer** ($\lambda_P \in \text{End}(P)$). It MUST carry the `*Layer` suffix.
+3. **Step 3: The Parameterization Test (Discover the Policies):**
+   *Is this class an injected strategy, formatting rule, objective function, or algorithm configuring an internal step of $P$?*
+   - **YES** $\implies$ It is an **Injected Policy** ($\pi \in \mathcal{P}(P)$).
+4. **Step 4: The Subordination & Single-Primitive Check:**
+   *Are there multiple primitives or loose files sitting flat at the boundary root?*
+   - If a boundary hosts two primitives, check: does one inject the other? If yes, demote the injected component to a policy (e.g., an injected compute substrate). If not, split them into two distinct boundaries.
+   - Keep policies and layers **subordinate**—either via `*Layer` suffix in lean boundaries or in `policies/` and `layers/` subfolders in cluttered boundaries.
+
+### 6.5 Universal Hygiene Rules:
+1. **Folder-Namespace 1:1 Isomorphism (No Folders Without Namespaces):**
+   - **A folder without a namespace is a design smell.** Every directory in the source tree must map 1:1 to an explicit logical namespace or package module with its own public API definition. Never create arbitrary filesystem folders ("junk drawers") that do not represent a cohesive logical namespace.
+   - Conversely, every namespace must map 1:1 to its physical path (`App.Execution.Layers.ProfilingLayer` $\iff$ `App/Execution/Layers/ProfilingLayer.*`).
+2. **The `*Layer` Suffix Mandate:** Every composable endomorphic decorator ($\lambda_F: F \to F$) must carry the `*Layer` suffix (e.g., `ProfilingLayer`, `RetryLayer`, `CheckpointingLayer`).
+3. **Boundary-Scoped Subordination:** Policies and layers must be namespaced to the operational primitive they serve (`boundary/policies/`, `boundary/layers/`). Never dump training objectives and runtime token layout policies into an untyped global bucket.
+4. **Co-location vs. Physical Package Separation:**
+   - **In unified libraries:** Co-locate layers within each boundary. Avoid creating a detached top-level `layers/` tree that forces mirror-tree duplication across the codebase.
+   - **In multi-package ecosystems:** Separate layer assemblies (e.g. `AgentCore.Layers`) only when binary packaging distribution requires a zero-dependency core package.
+5. **Zero Aimless Folders:** Prohibit vague dumping grounds (`scripts/`, `utils/`, `helpers/`, `misc/`, `common/`). One-off operational utilities reside in `drivers/` as lean orchestrators ($\le 50$ lines).
+6. **Zero Batch-Dumping:** Never bundle unrelated training, data preparation, evaluation, and benchmark files together in a flat folder.
+7. **Zero Residual Artifacts:** No lingering scratch files or untracked dumps. Binary weights and multi-gigabyte datasets must be excluded via `.gitignore` and isolated in designated directories.
 
 ---
 
@@ -284,3 +338,5 @@ When reviewing or building any codebase, ask these diagnostic questions:
 | **File size and method count?** | $\le 150$ lines per file, $\le 4–5$ methods per class | Large multi-hundred-line monolithic classes |
 | **Do layers carry `*Layer` suffix?** | Yes, 100% of endomorphic decorators end in `*Layer` | Ambiguous naming (`*Trainer`, `*Manager`, `*Wrapper`) |
 | **How are multi-subsystems partitioned?** | Boundary-first (`boundary/policies/`, `boundary/layers/`) | Tier-oriented bloat (dumping all primitives into one giant `core/`) |
+| **How many primitives per boundary?** | Exactly 1 primitive per boundary | Multiple primitives in one folder causing policy/layer ambiguity |
+| **Are policies and layers subordinated?** | Cleanly scoped in `policies/` and `layers/` subdirectories | Flat adjacent files competing with the root primitive contract |
