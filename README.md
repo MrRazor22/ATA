@@ -152,6 +152,10 @@ $$\text{System} = \bigcup_{i=1}^K \text{Triad}(P_i), \quad \text{where } \text{T
 3. **Resolving the Multi-Primitive Illusion:** If an operational boundary appears to host multiple primitives, apply the **Subordination Test**:
    - Does one component inject the other via constructor initialization? If yes, the injected component is a **Policy / Substrate Dependency**, not a peer root primitive.
    - If they are genuinely orthogonal and independent, they represent **Two Distinct Boundaries** and must be partitioned into separate boundary namespaces.
+4. **The Cross-Boundary Substrate Theorem (Shared Foundations vs. Boundary-Internal Policies):**
+   - When a behavioral entity exhibits its own independent lifecycle and is co-consumed across multiple distinct operational boundaries (e.g. across runtime execution, training/optimization, and verification), it is **not** an internal injected policy of any single boundary.
+   - Demoting a shared foundation to an internal policy of one consumer violates functional ownership and forces unnatural, circular cross-boundary dependencies.
+   - Such an entity commands its own **Autonomous Foundation Boundary** ($P_\text{foundation}$) with its own primitive contract, schema, and assets. Consuming operational boundaries inject or depend upon its contract as a substrate dependency, strictly preserving $1 \text{ Boundary} \equiv 1 \text{ Primitive}$.
 
 ---
 
@@ -175,6 +179,16 @@ An interface in ATA is strictly **irreducible**:
    - When new needs arise, first verify if the existing method signature can be cleanly evolved without smell. If a capability (e.g. streaming chunks vs. discrete execution) is genuinely distinct, orthogonal, and required across multiple use cases, exposing a dedicated canonical method is fully valid. What is banned is redundant caller sugar and convenience wrapping.
 3. **Pure Semantic Intent:**
    - An interface defines *what* is achieved in the domain language, completely abstracted from underlying hardware, network, or storage mechanics.
+
+### 4.3 The 1-to-1 Interface Mirroring Fallacy (Indirection vs. Abstraction)
+> **"Never mirror a single concrete class with a 1-to-1 interface or intermediate pass-through wrapper unless there are at least two distinct concrete implementations or consumers."**
+
+A pervasive anti-pattern in interface-driven development is speculative, mechanical interface creation:
+1. **Indirection Without Abstraction:** Declaring an interface that merely mirrors the methods of a single concrete class 1:1 (or introducing an intermediate passthrough wrapper) adds cognitive overhead, symbol clutter, and indirection without providing true polymorphic abstraction.
+2. **When Interfaces Are Mandatory:**
+   - **Operational Boundary Primitives ($P$):** Every operational domain's root primitive contract must have an explicit interface to anchor the endomorphic layer monoid ($\lambda_P: P \to P$) and decouple callers from underlying substrates.
+   - **Swappable Injected Policies ($\pi$):** An interface is required when an internal step admits multiple strategies, algorithms, or swappable behaviors ($\ge 2$ implementations/consumers).
+3. **The Rule of Two (Zero Speculative Abstraction):** If a class represents a single concrete dependency with zero polymorphic alternatives and no composable layer decoration, consume it directly. Do not invent speculative intermediate abstractions.
 
 ---
 
@@ -240,7 +254,8 @@ A primary failure mode in modular architectures is **Folder Ceremony**—creatin
 2. **Cluttered Boundaries ($\ge 4–5$ policies or layers):**
    - Subordinate policies and layers into dedicated `policies/` and `layers/` subfolders to prevent visual clutter and maintain structural hygiene.
 3. **Naming Suffix & Taxonomy Rule:**
-   - **Primitives are Entity Nouns:** Irreducible contracts define *what* the domain capability is using pure domain entity nouns (`Storage`, `Channel`, `Engine`, `Model`).
+   - **Operational Boundaries are Capability Domains:** Boundary namespaces and directory paths represent operational capabilities or lifecycle processes (`inference/`, `execution/`, `training/`, `evaluation/`, `storage/`).
+   - **Primitives are Actor / Entity Nouns:** Irreducible contracts define *what* the domain actor is using pure domain entity nouns (`DecisionEngine`, `EpochTrainer`, `ModelEvaluator`, `BlockStore`). Aligning boundary directories to capabilities and primitive classes to actor nouns prevents redundant namespace stuttering (e.g. `inference.DecisionEngine` instead of `engine.DecisionEngine`) and clarifies domain ownership.
    - **Policies DO NOT append `*Policy` or `*Strategy` (Prefer `-er`/`-or` Agentive Nouns):** Concrete strategies define *how* an internal step executes. They are typically agentive/doer nouns (`Resolver`, `Selector`, `Sampler`, `Optimizer`, `Router`, `Validator`, `Assembler`). The noun itself defines the strategy; appending `*Policy` or `*Strategy` is redundant enterprise noise. (Non-stringent suggestion, as pure mathematical concepts like `Loss` or `Schedule` remain natural nouns).
    - **Layers MUST carry `*Layer` suffix:** Because they implement the primitive's exact interface, the `*Layer` suffix is non-negotiable (`RetryLayer`, `ProfilingLayer`, `CacheLayer`) to unambiguously distinguish decorators from base implementations.
 
@@ -358,5 +373,7 @@ When reviewing or building any codebase, ask these diagnostic questions:
 | **Are there single-file folders?** | Zero 1-file folders; lean boundaries remain flat | Folders/namespaces wrapping a single file (folder ceremony) |
 | **Is all code in the Completeness Quad?** | Yes, 100% of code is a Triad, DTO, Pure Utility, or Driver | Procedural glue, ad-hoc scripts, or untyped manager code |
 | **Are drivers strictly pure?** | Zero adapters, zero loops, zero formatters in drivers ($\le 50$ LOC) | Business, presentation, or mapping logic leaking into driver |
+| **Are interfaces 1:1 mirrors?** | Decoupling polymorphism/layers ($\ge 2$ impls or decorator target) | 1:1 mechanical passthrough interfaces adding indirection without abstraction |
+| **Are shared substrates independent?** | Shared foundations are autonomous boundaries injected cleanly | Cross-boundary dependencies demoted to internal policies of a single consumer |
 | **Where do data, fixtures, & metrics live?** | Co-located inside the boundary that consumes/produces them | Horizontal format scattering (`data/`, `results/`, `fixtures/` at root) |
 | **Are there dangling root folders?** | Clean root: zero loose `data/`, `checkpoints/`, `results/` | Root littered with untyped asset dumping grounds |
