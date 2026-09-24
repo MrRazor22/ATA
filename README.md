@@ -247,9 +247,10 @@ A primary failure mode in modular architectures is **Folder Ceremony**—creatin
    - The `*Layer` suffix already provides 100% unambiguous self-documentation; a 1-file `layers/` directory adds pure ceremony without architectural value.
 2. **Cluttered Boundaries ($\ge 4–5$ policies or layers):**
    - Subordinate policies and layers into dedicated `policies/` and `layers/` subfolders to prevent visual clutter and maintain structural hygiene.
-3. **Naming Suffix Rule:**
-   - **Layers MUST carry `*Layer` suffix:** Because they implement the primitive's exact interface, the `*Layer` suffix is non-negotiable to distinguish decorators from base implementations.
-   - **Policies DO NOT append `*Policy` or `*Strategy`:** Concrete strategies are domain nouns (`SlotAssembler`, `CalibratedLoss`, `SubwordTokenizer`). The noun itself defines the strategy; appending `*Policy` is redundant enterprise noise.
+3. **Naming Suffix & Taxonomy Rule:**
+   - **Primitives are Entity Nouns:** Irreducible contracts define *what* the domain capability is using pure domain entity nouns (`Storage`, `Channel`, `Engine`, `Model`).
+   - **Policies DO NOT append `*Policy` or `*Strategy` (Prefer `-er`/`-or` Agentive Nouns):** Concrete strategies define *how* an internal step executes. They are typically agentive/doer nouns (`Resolver`, `Selector`, `Sampler`, `Optimizer`, `Router`, `Validator`, `Assembler`). The noun itself defines the strategy; appending `*Policy` or `*Strategy` is redundant enterprise noise. (Non-stringent suggestion, as pure mathematical concepts like `Loss` or `Schedule` remain natural nouns).
+   - **Layers MUST carry `*Layer` suffix:** Because they implement the primitive's exact interface, the `*Layer` suffix is non-negotiable (`RetryLayer`, `ProfilingLayer`, `CacheLayer`) to unambiguously distinguish decorators from base implementations.
 
 ### 6.4 The 4-Step Discovery Heuristic: How to Structure When in Trouble
 When an engineer is stuck or facing architectural drift, apply this 4-step diagnostic heuristic to discover the correct boundaries and types:
