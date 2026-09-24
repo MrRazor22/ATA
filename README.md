@@ -281,6 +281,14 @@ When an engineer is stuck or facing architectural drift, apply this 4-step diagn
 5. **Zero Aimless Folders:** Prohibit vague dumping grounds (`scripts/`, `utils/`, `helpers/`, `misc/`, `common/`). One-off operational utilities reside in `drivers/` as lean orchestrators ($\le 50$ lines).
 6. **Zero Batch-Dumping:** Never bundle unrelated training, data preparation, evaluation, and benchmark files together in a flat folder.
 7. **Zero Residual Artifacts:** No lingering scratch files or untracked dumps. Binary weights and multi-gigabyte datasets must be excluded via `.gitignore` and isolated in designated directories.
+8. **The Single-File Folder / Namespace Anti-Pattern:** Creating a directory or separate logical namespace for a single file is gratuitous nesting and folder ceremony. If a directory or namespace cannot justify having at least 2–3 sibling files, it must NOT exist as a separate folder. Lean boundaries stay flat with explicit naming suffixes (`*Layer`), and driver folders must not be introduced for a single entrypoint.
+9. **The Universal Code Completeness Quad (No Immunity for Consumers):** Every line of code across an entire repository—producers and consumers alike—strictly belongs to one of four canonical forms:
+   - **The Behavioral Triad:** Primitives ($P$), Injected Policies ($\pi$), Composable Layers ($\lambda$).
+   - **Pure Domain Schemas / DTOs (State):** Immutable value objects defining typed interfaces.
+   - **Stateless Extension Utilities (Transforms):** Pure functional transforms with zero side-effects.
+   - **Zero-Logic Composition Roots (Drivers):** Standalone entrypoints ($\le 50$ LOC) that purely bind dependencies and trigger execution.
+   *Anything else (procedural glue scripts, ad-hoc wrapper functions, unprincipled utility dumps) is an architectural smell.*
+10. **The Driver Purity Theorem (Zero Leaked Adaptation or Presentation):** Drivers must NEVER accumulate business logic, ad-hoc mapping adapters, procedural domain loops, or presentation renderers (e.g., ANSI tables, graph printers). Input adaptation belongs to the consuming boundary; report presentation belongs to boundary presentation utilities. A driver strictly parses configuration, instantiates the triad, and invokes execution.
 
 ---
 
@@ -340,3 +348,6 @@ When reviewing or building any codebase, ask these diagnostic questions:
 | **How are multi-subsystems partitioned?** | Boundary-first (`boundary/policies/`, `boundary/layers/`) | Tier-oriented bloat (dumping all primitives into one giant `core/`) |
 | **How many primitives per boundary?** | Exactly 1 primitive per boundary | Multiple primitives in one folder causing policy/layer ambiguity |
 | **Are policies and layers subordinated?** | Cleanly scoped in `policies/` and `layers/` subdirectories | Flat adjacent files competing with the root primitive contract |
+| **Are there single-file folders?** | Zero 1-file folders; lean boundaries remain flat | Folders/namespaces wrapping a single file (folder ceremony) |
+| **Is all code in the Completeness Quad?** | Yes, 100% of code is a Triad, DTO, Pure Utility, or Driver | Procedural glue, ad-hoc scripts, or untyped manager code |
+| **Are drivers strictly pure?** | Zero adapters, zero loops, zero formatters in drivers ($\le 50$ LOC) | Business, presentation, or mapping logic leaking into driver |
