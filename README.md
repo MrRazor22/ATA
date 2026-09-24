@@ -182,8 +182,10 @@ ATA is scale-invariant. When architecting an entire ecosystem, every operational
 
 ## 6. Repository Topology & Namespace Hygiene
 
-ATA enforces strict geometric alignment between **logical namespaces** and **physical directory structures**.
+ATA enforces strict geometric alignment between **logical namespaces** and **physical directory structures**. Systems choose between two canonical topologies depending on domain complexity:
 
+### 6.1 Topology A: Tier-First (Compact Single-Domain Repos)
+For small, single-purpose libraries where only one domain capability exists:
 ```text
 RepositoryRoot/
 ├── src/ (or [PackageName]/)
@@ -193,15 +195,38 @@ RepositoryRoot/
 │   └── data/         # Pure immutable data models, schemas, and taxonomies
 ├── drivers/          # Tier 4: Standalone Execution Hosts (CLI drivers, Host apps)
 ├── tests/            # Contract verification & regression test suite
-├── examples/         # Declarative consumer demonstrations
-└── README.md         # Architecture specification & documentation
+└── examples/         # Declarative consumer demonstrations
 ```
 
-### Hygiene Rules:
-1. **1:1 Namespace-to-Path Isomorphism:** A type in namespace `App.Layers.Profiling` must reside strictly in `App/Layers/Profiling.*`.
-2. **Zero Aimless Folders:** Prohibit vague dumping grounds (`scripts/`, `utils/`, `helpers/`, `misc/`, `common/`). Every file must belong to an orthogonal architectural role. One-off operational utilities (migrations, backfills, debug probes) reside in `drivers/` as lean orchestrators ($\le 50$ lines), avoiding the unmaintainable procedural rot of an unstructured `scripts/` sinkhole.
-3. **Zero Batch-Dumping:** Never bundle unrelated training, data preparation, evaluation, and benchmark files together in a flat folder.
-4. **Zero Residual Artifacts:** No lingering scratch files, temporary test scripts, or unorganized dumps. Large binary weights and multi-gigabyte dataset files must be excluded via `.gitignore` and isolated in designated directories.
+### 6.2 Topology B: Boundary-First Cohesive Triad (Multi-Subsystem Systems)
+When a system spans multiple operational boundaries (e.g. Inference, Training, Verification, Ingestion), cramming all primitives into one flat `core/` creates **"Tier-Oriented Bloat"** (mixing training loops with inference engines). 
+
+Per **Axiom 4 (Universal Boundary Invariance)**, each boundary possesses its **own cohesive Triad**:
+
+```text
+RepositoryRoot/
+├── [DomainBoundaryA]/          # e.g., Execution / Reasoning
+│   ├── primitive.ext           # Tier 1: Boundary Primitive contract & base
+│   ├── policies/               # Tier 2: Injected strategies for this boundary
+│   └── layers/                 # Tier 3: Boundary-specific decorators (λ_A: A -> A)
+├── [DomainBoundaryB]/          # e.g., Optimization / Training
+│   ├── primitive.ext           # Tier 1: Optimization contract & base
+│   ├── policies/               # Tier 2: Objective & optimization policies
+│   └── layers/                 # Tier 3: Optimization decorators (λ_B: B -> B)
+├── [DomainBoundaryC]/          # e.g., Verification / Testing
+│   ├── primitive.ext           # Tier 1: Evaluation contract & base
+│   └── layers/                 # Tier 3: Verification decorators (λ_C: C -> C)
+├── drivers/                    # Tier 4: Standalone Execution Hosts (CLI, host apps)
+└── data/                       # Shared immutable schemas and data builders
+```
+
+### 6.3 Universal Hygiene Rules:
+1. **The `*Layer` Suffix Mandate:** Every composable endomorphic decorator ($\lambda_F: F \to F$) must carry the `*Layer` suffix (e.g., `ProfilingLayer`, `RetryLayer`, `CheckpointingLayer`). Its algebraic role must be immediately obvious from its symbol and file name.
+2. **Boundary-Scoped Policies:** Policies must be namespaced to the operational boundary they serve (`boundary/policies/`). Never dump training objectives and runtime token layout policies into an untyped global bucket.
+3. **1:1 Namespace-to-Path Isomorphism:** A type in namespace `App.Execution.Layers.ProfilingLayer` must reside strictly in `App/Execution/Layers/ProfilingLayer.*`.
+4. **Zero Aimless Folders:** Prohibit vague dumping grounds (`scripts/`, `utils/`, `helpers/`, `misc/`, `common/`). Every file must belong to an orthogonal architectural role. One-off operational utilities reside in `drivers/` as lean orchestrators ($\le 50$ lines).
+5. **Zero Batch-Dumping:** Never bundle unrelated training, data preparation, evaluation, and benchmark files together in a flat folder.
+6. **Zero Residual Artifacts:** No lingering scratch files or untracked dumps. Binary weights and multi-gigabyte datasets must be excluded via `.gitignore` and isolated in designated directories.
 
 ---
 
@@ -257,3 +282,5 @@ When reviewing or building any codebase, ask these diagnostic questions:
 | **Do interfaces have convenience overloads?** | Zero convenience methods; minimal surface area | Bloated interfaces with multiple `With*`, `Run*`, or helper aliases |
 | **Where do scripts live?** | No `scripts/` folder; lean drivers ($\le 50$ lines) in `drivers/` | Sprawling `scripts/` folder full of procedural spaghetti |
 | **File size and method count?** | $\le 150$ lines per file, $\le 4–5$ methods per class | Large multi-hundred-line monolithic classes |
+| **Do layers carry `*Layer` suffix?** | Yes, 100% of endomorphic decorators end in `*Layer` | Ambiguous naming (`*Trainer`, `*Manager`, `*Wrapper`) |
+| **How are multi-subsystems partitioned?** | Boundary-first (`boundary/policies/`, `boundary/layers/`) | Tier-oriented bloat (dumping all primitives into one giant `core/`) |
