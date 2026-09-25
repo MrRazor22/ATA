@@ -5,13 +5,13 @@
 
 ## The Core Soul of ATA
 
-> **"Correctly identifying the fundamental primitive of a system naturally minimizes its architecture, because unnecessary abstractions become redundant when the primitive itself correctly represents the underlying problem; once the primitive is correct, composition, injectable policies, and generic layers provide extensibility without requiring the core primitive to continuously grow new abstractions."**
+> **"Correctly identifying the fundamental primitive of a system reveals the true geometry of the problem. When the bedrock primitive accurately represents reality, unnecessary abstractions evaporate; what remains is a complete, minimal basis where every capability is naturally expressed through composition, orthogonal policy, and contract-preserving layers."**
 
-Minimal code and zero architectural smells are not dogmatic quotas or tricks; they are the natural, inevitable side-effects of identifying the true primitive. 
+Minimal code and clean structure are not dogmatic targets or clever tricks—they are the natural, inevitable side-effects of truth in representation.
 
-Software bloat rarely comes from genuine domain complexity. It comes from **convenience-driven drift**—the path of least resistance where developers append helper overloads, boolean flags, pass-through wrappers, and ad-hoc scripts rather than re-examining the bedrock primitive. 
+Most software complexity is synthetic. It does not arise from genuine domain difficulty, but from an inaccurate mental model: building on the wrong primitive. When the bedrock is flawed, developers are forced into **convenience-driven drift**—piling on helper flags, pass-through wrappers, and ad-hoc scripts just to bridge the gap between their code and the actual problem.
 
-ATA does not invent an alien paradigm. It is grounded in proven, classic object-oriented and functional principles, providing a razor-sharp framework to enforce them. **Any classic code smell—whether tight coupling, hidden side-effects, leaky abstractions, mutable shared state, or God objects—is an immediate signal of an ATA violation.**
+ATA provides both a foundational philosophy and a diagnostic lens. Any classic code smell—whether tight coupling, leaky abstractions, mutable shared state, or sprawling classes—is never just a cosmetic flaw or an isolated coding error. It is an immediate signal that the architecture is fighting an inaccurate primitive.
 
 ---
 
