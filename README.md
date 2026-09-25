@@ -101,16 +101,12 @@ RepositoryRoot/
 └── tests/                      # Contract verification & regression tests
 ```
 
-### 3.1 Practical Design Gauges (Rules of Thumb)
-These gauges are not bureaucratic quotas, but practical smoke tests to calibrate design decisions:
-- **~2–4 Methods per Contract:** A healthy primitive contract is focused. If an interface needs dozens of methods, it is likely accumulating multiple responsibilities and drifting into God-object territory.
-- **~150 Lines per File:** A source file exceeding ~150 lines often signals that procedural glue, helper bloat, or secondary concerns have crept into the implementation.
-- **~2–3 Files per Folder (Zero Single-File Folders):** A folder or namespace should justify having at least 2–3 sibling files. Wrapping a single file in a dedicated subfolder adds ceremony without architectural value.
-
-### 3.2 Asset Co-Location & Repository Hygiene
-- **Co-locate Assets with Their Owning Boundary:** Keep domain assets, fixtures, and configurations inside the specific boundary that consumes or produces them. Dumping files into arbitrary root folders based on superficial file extensions (`data/`, `results/`) breaks cohesion.
-- **The Pristine Root:** Keeping the repository root focused—containing primary operational packages, tests, and configuration—prevents untyped dumping grounds from accumulating over time.
-- **Transient Artifacts:** Temporary build caches, scratch outputs, and local logs are ephemeral and should not pollute source trees.
+### Practical Design Gauges
+Gauges are not rigid quotas, but intuitive rules of thumb to help sense when an abstraction is doing too much:
+- **Contract Focus (~2–4 methods):** An irreducible capability contract is focused. A sprawling method list signals that the primitive is taking on multiple responsibilities.
+- **File Proportionality (~150 lines):** A class exceeding a couple hundred lines often signals that procedural glue, helper overloads, or secondary concerns are creeping into the implementation.
+- **Folder Nesting (~2–3 files):** Grouping into subdirectories makes sense when organizing multiple sibling files; a folder wrapping a single file is usually empty ceremony. Keep lean boundaries flat.
+- **Functional Ownership:** Assets, schemas, and configurations naturally live inside the boundary that consumes or produces them, rather than scattered across loose root dumping grounds by file format.
 
 ---
 
