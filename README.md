@@ -11,7 +11,7 @@
 Code smells and bloat are the exact same phenomenon. You cannot introduce a classic architectural smell—a God class, leaky abstraction, mutable shared state, or pass-through convenience wrapper—without generating lines of bloat. Conversely, when you systematically eliminate all smells, the system mathematically collapses to its irreducible minimum. Minimal code is not sparse code; it is code stripped of architectural lies.
 
 ### 2. The Append-Only Trap vs. In-Place Refinement
-Software bloat rarely originates from genuine domain complexity. It stems from **convenience-driven drift**—the path of least resistance where developers and AI coding agents lazily *append* new boolean flags, helper overloads, and wrapper classes instead of doing the hard thinking to refine existing primitives. ATA demands an uncompromising anti-bloat discipline: **always hesitate to add new abstractions; prefer updating and refining existing primitives in place rather than appending layers of duct tape.**
+Software bloat rarely originates from genuine domain complexity. It stems from **convenience-driven drift**—the path of least resistance where developers and AI coding agents lazily *append* new boolean flags, helper overloads, and wrapper classes instead of doing the hard thinking to refine existing primitives. When you fix the underlying primitive, that single resolution strengthens *both* the existing system and the new requirement; convenience wrappers, by contrast, leave the original design rot untouched while introducing new bloat. ATA demands an uncompromising anti-bloat discipline: **always hesitate to add new abstractions; prefer updating and refining existing primitives in place rather than appending layers of duct tape.**
 
 ### 3. The Human-AI Trust Boundary
 Unconstrained AI coding agents generate an ocean of incomprehensible boilerplate, convenience wrappers, and synthetic complexity that no human engineer can review or trust. ATA establishes an unambiguous reviewability boundary: when every line belongs strictly to a bedrock primitive contract, an injected policy, or an endomorphic layer, the architecture becomes self-evident and effortlessly reviewable.
@@ -117,7 +117,7 @@ These gauges are not bureaucratic quotas, but practical smoke tests to calibrate
 
 ## 4. The "Apply ATA" Directive (The Universal Unbloating Lens)
 
-ATA is not limited to writing new source code. It is a universal methodology of **representation reduction**:
+ATA is not limited to writing new source code. It is a universal methodology of **representation reduction**—an X-ray diagnostic lens that sees through accidental ceremony to reveal the lean, minimal truth of any problem:
 - **The Core Mandate:** Update and refine in place. Reject the append-only reflex.
 - **In Documentation:** Avoid mindlessly appending new paragraphs and checklist tables forever. Isolate the core thesis and refine the document in place.
 - **In UI Architecture:** Avoid stacking wrapper containers and overriding CSS patches to fix a visual bug. Refactor the underlying layout primitive.
