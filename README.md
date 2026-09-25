@@ -24,30 +24,30 @@ At its bedrock, ATA reveals that **the Primitive is the sole behavioral atom of 
 │                 THE AXIOMATIC TRIAD (BOUNDARY)              │
 │                                                             │
 │       ┌──────────────────────────────────────────────┐      │
-│       │      Derived Layers: Composable Decorators   │      │
-│       │      (Behavioral extensions wrapping P)      │      │
+│       │      Derived Layers (End(P))                 │      │
+│       │      (Primitives wrapping the same contract) │      │
 │       └──────────────────────┬───────────────────────┘      │
-│                              │ wraps (λ: P -> P)            │
+│                              │ wraps (P -> P)               │
 │       ┌──────────────────────▼───────────────────────┐      │
 │       │      The Core Axiom / Primitive (P)          │      │
-│       │      (Irreducible Bedrock: WHAT it does)     │      │
+│       │      (The root capability contract)          │      │
 │       └──────────────────────▲───────────────────────┘      │
-│                              │ injects (π)                  │
+│                              │ injects                      │
 │       ┌──────────────────────┴───────────────────────┐      │
-│       │      Derived Policies: Swappable Strategies  │      │
-│       │      (HOW internal steps execute)            │      │
+│       │      Derived Policies (P_injected)           │      │
+│       │      (Primitives injected across contracts)  │      │
 │       └──────────────────────────────────────────────┘      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-1. **The Root Primitive ($P$):** The irreducible contract defining *what* the capability is. It exhibits behavior, maintains minimal method surface area, and contains zero hardcoded internal strategies.
+1. **The Root Primitive ($P$):** The irreducible contract defining *what* the capability is.
    - **The Subtraction Test:** A primitive is truly irreducible if removing it causes the fundamental domain capability to collapse entirely. If the capability still functions by swapping an algorithm or default, that component is a policy or layer, not a root primitive.
-2. **The Injected Policy ($\pi$):** When a primitive is injected into another primitive at a different level to drive an internal execution step, it acts as a **Policy** (e.g., an encoding primitive injected into an engine primitive).
+2. **The Injected Policy ($\pi$):** When a primitive is injected into another primitive across different contracts ($P_{\text{injected}} \to P$), it acts as a **Policy**. It supplies an orthogonal capability or strategy without hardcoding implementations inside the consumer.
    - **Policy Orthogonality:** Operational variation (*how* a step executes) is cleanly isolated as swappable policies injected at initialization, leaving the primitive contract invariant. Policies are dependencies of the primitive, rather than subclasses or outer wrappers.
-3. **The Composable Layer ($\lambda: P \to P$):** When a primitive wraps another primitive sharing the **exact same interface contract**, it acts as an endomorphic **Layer**. Layers form an algebraic monoid $(\text{End}(P), \circ, \text{id})$, decorating and extending the behavior of that specific primitive (such as caching, routing, resilience, or telemetry) without interface drift or mutating the core execution loop. Every layer carries the `*Layer` suffix to clearly communicate its decorating role.
+3. **The Composable Layer ($\lambda: P \to P$):** When a primitive wraps another primitive of the **exact same contract**, it acts as an endomorphic **Layer**. Layers form an algebraic monoid $(\text{End}(P), \circ, \text{id})$, augmenting or extending that specific primitive's behavior (e.g. caching, retry, fallback routing, telemetry) while keeping the contract invariant to callers. Every layer carries the `*Layer` suffix to make this decorating role explicit.
 
 Along with primitives, a system consists only of:
-- **State:** Pure, immutable data structures, schemas, and static domain assets passed across disjoint channels. Mutable shared and global state obscures data provenance, introduces hidden temporal coupling, and complicates concurrency; immutable state keeps data flows transparent, predictable, and thread-safe.
+- **State:** Pure, immutable data (schemas, value objects, domain assets). State has no behavior; it is passed between primitives. Shared mutable or global state introduces hidden coupling and temporal bugs; keeping state immutable ensures data flows remain transparent, verifiable, and thread-safe.
 - **Stateless Transforms:** Pure mathematical functions ($f(X) \to Y$) with zero side-effects.
 
 ---
@@ -79,46 +79,38 @@ A healthy contract reflects an irreducible capability:
 
 ---
 
-## 3. Boundary Topology & Physical Hygiene
+## 3. Boundary Topology & Practical Gauges
 
-ATA favors natural geometric alignment between **logical namespaces** and **physical directory structures**. 
-
-### 3.1 The Canonical Topology: Boundary-First Cohesive Triad
-Horizontal tier-first dumping (`core/`, `policies/`, `layers/` at the repository root) separates related components and weakens cohesion. Instead, each operational boundary commands its own cohesive Triad, centered around its root primitive:
+ATA favors natural geometric alignment between logical namespaces and physical directory structures:
 
 ```text
 RepositoryRoot/
-├── [DomainBoundaryA]/          # Boundary A: Encapsulates Primitive A (Subordinated Scale)
-│   ├── primitive.ext           # THE ONE PRIMITIVE (Contract & Base Implementation)
-│   ├── schema.ext              # Pure immutable domain value objects for Primitive A
-│   ├── policies/               # Injected strategies (partitioned when >= 4-5 items)
-│   │   ├── strategy_1.ext
-│   │   └── strategy_2.ext
-│   ├── layers/                 # Composable decorators (λ_A: A -> A)
-│   │   ├── profiling_layer.ext
-│   │   └── guardrail_layer.ext
-│   └── data/                   # Boundary-owned assets (fixtures, baselines, weights)
-├── [DomainBoundaryB]/          # Boundary B: Encapsulates Primitive B (Lean Scale: Flat)
-│   ├── primitive.ext           # THE ONE PRIMITIVE (Contract & Base Implementation)
-│   ├── objective.ext           # Injected policy (flat, no 1-file folder ceremony)
-│   └── checkpoint_layer.ext    # Composable decorator (self-documenting via *Layer suffix)
-├── cli.ext                     # Root runner / composition root
+├── [DomainBoundaryA]/          # Boundary A (Subordinated Scale when cluttered)
+│   ├── primitive.ext           # Root primitive contract and implementation
+│   ├── schema.ext              # Pure immutable domain value objects / schemas
+│   ├── policies/               # Injected primitives (when >= 4-5 items)
+│   │   ├── policy_a.ext
+│   │   └── policy_b.ext
+│   └── layers/                 # Contract-preserving decorators (λ: A -> A)
+│       ├── cache_layer.ext
+│       └── telemetry_layer.ext
+├── [DomainBoundaryB]/          # Boundary B (Lean Scale: Flat)
+│   ├── primitive.ext           # Root primitive contract and implementation
+│   ├── policy.ext              # Injected primitive (flat, no folder ceremony)
+│   └── retry_layer.ext         # Contract-preserving decorator (*Layer suffix)
 └── tests/                      # Contract verification & regression tests
 ```
 
-Application runners, CLIs, or worker loops (`cli.ext`) sit outside domain boundaries as thin composition roots—they instantiate primitives, inject policies, compose layers, and drive execution without containing domain logic.
+### 3.1 Practical Design Gauges (Rules of Thumb)
+These gauges are not bureaucratic quotas, but practical smoke tests to calibrate design decisions:
+- **~2–4 Methods per Contract:** A healthy primitive contract is focused. If an interface needs dozens of methods, it is likely accumulating multiple responsibilities and drifting into God-object territory.
+- **~150 Lines per File:** A source file exceeding ~150 lines often signals that procedural glue, helper bloat, or secondary concerns have crept into the implementation.
+- **~2–3 Files per Folder (Zero Single-File Folders):** A folder or namespace should justify having at least 2–3 sibling files. Wrapping a single file in a dedicated subfolder adds ceremony without architectural value.
 
-### 3.2 The Clutter-Threshold Gauge (When to Subfolder vs. Stay Flat)
-A frequent distraction in modular codebases is **Folder Ceremony**—creating nested directories that wrap only a single file:
-- **Lean Boundaries ($\le 3–4$ sibling files):** Keeping the boundary flat avoids ceremony. The primitive, policy, and layer live side-by-side. The `*Layer` suffix already makes the decorating role self-documenting.
-- **Cluttered Boundaries ($\ge 4–5$ policies or layers):** Subordinating policies and layers into dedicated `policies/` and `layers/` subdirectories maintains visual hygiene as the boundary grows.
-- **Folder Gauge:** A directory or namespace typically justifies having at least 2–3 sibling files; otherwise, keeping it flat reduces cognitive friction.
-
-### 3.3 Functional Asset Ownership & The Pristine Root
-- **The Ownership Test:** *"Which primitive or operational boundary produces or exclusively consumes this asset?"*
-- **Horizontal Format Scattering:** Grouping files by extension or format (`data/`, `results/`, `fixtures/` at root) scatters related domain logic. Assets consumed by execution testing belong with that execution boundary; assets consumed by optimization belong with the optimization boundary.
-- **The Pristine Root:** Keeping the repository root focused—containing primary operational packages, orchestration entrypoints (`cli.ext`), tests, and standard configuration—prevents untyped dumping grounds from accumulating over time.
-- **Zero Residual Debris:** Build caches, temporary logs, scratch runs, and disposable experiment debris are transient and should not linger in source trees.
+### 3.2 Asset Co-Location & Repository Hygiene
+- **Co-locate Assets with Their Owning Boundary:** Keep domain assets, fixtures, and configurations inside the specific boundary that consumes or produces them. Dumping files into arbitrary root folders based on superficial file extensions (`data/`, `results/`) breaks cohesion.
+- **The Pristine Root:** Keeping the repository root focused—containing primary operational packages, tests, and configuration—prevents untyped dumping grounds from accumulating over time.
+- **Transient Artifacts:** Temporary build caches, scratch outputs, and local logs are ephemeral and should not pollute source trees.
 
 ---
 
