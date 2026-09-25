@@ -5,11 +5,16 @@
 
 ## The Core Soul of ATA
 
-> **"Correct design will always be minimal. Minimal code is not code golf or a superficial quota; it is the natural, inevitable side-effect of truth in representation. When the fundamental primitive of a system correctly reflects reality, unnecessary abstractions evaporate; what remains is a complete, minimal basis where every capability is naturally expressed through composition, orthogonal policy, and contract-preserving layers."**
+> **"Correct design will always be minimal. Minimal code is not code golf or a superficial quota; it is the natural, mathematical side-effect of truth in representation. When a system's bedrock primitive accurately reflects reality, unnecessary abstractions evaporate; what remains is a complete, minimal basis where every capability is expressed through composition, orthogonal policy, and contract-preserving layers."**
 
-Software bloat rarely comes from genuine domain complexity. It comes from **convenience-driven drift**—the path of least resistance where developers (and AI coding agents) lazily pile on helper overloads, boolean flags, pass-through wrappers, and ad-hoc scripts instead of doing the hard thinking to isolate and fix the design flaw in the primitive itself. When you actually fix the primitive, it cleanly accommodates both the existing case and the new case with zero wrapper bloat.
+### 1. The Smell-less ≡ Minimal Identity
+Code smells and bloat are the exact same phenomenon. You cannot introduce a classic architectural smell—a God class, leaky abstraction, mutable shared state, or pass-through convenience wrapper—without generating lines of bloat. Conversely, when you systematically eliminate all smells, the system mathematically collapses to its irreducible minimum. Minimal code is not sparse code; it is code stripped of architectural lies.
 
-ATA is an **anti-bloat paradigm**. It demands that whenever a new requirement emerges, you hesitate to invent new abstractions. Instead, think deeply about how the existing primitive or policy can be refined. Any classic code smell—whether tight coupling, hidden side-effects, leaky abstractions, mutable shared state, or sprawling God classes—is never just a cosmetic flaw. It is an immediate signal that the architecture is fighting an inaccurate primitive.
+### 2. The Append-Only Trap vs. In-Place Refinement
+Software bloat rarely originates from genuine domain complexity. It stems from **convenience-driven drift**—the path of least resistance where developers and AI coding agents lazily *append* new boolean flags, helper overloads, and wrapper classes instead of doing the hard thinking to refine existing primitives. ATA demands an uncompromising anti-bloat discipline: **always hesitate to add new abstractions; prefer updating and refining existing primitives in place rather than appending layers of duct tape.**
+
+### 3. The Human-AI Trust Boundary
+Unconstrained AI coding agents generate an ocean of incomprehensible boilerplate, convenience wrappers, and synthetic complexity that no human engineer can review or trust. ATA establishes an unambiguous reviewability boundary: when every line belongs strictly to a bedrock primitive contract, an injected policy, or an endomorphic layer, the architecture becomes self-evident and effortlessly reviewable.
 
 ---
 
@@ -39,13 +44,15 @@ At its bedrock, ATA reveals that **the Primitive is the sole behavioral atom of 
 ```
 
 1. **The Root Primitive ($P$):** The irreducible constant of the domain defining *what* the capability is.
-   - **The Subtraction Test:** A primitive is truly irreducible if removing it causes the fundamental domain capability to collapse entirely. If the capability still functions by swapping an algorithm or default, that component is a policy or layer, not a root primitive. Once you discover the true primitive, you are 80% done—the contract remains invariant.
-2. **The Injected Policy ($\pi$):** When a primitive is injected into another primitive across different contracts ($P_{\text{injected}} \to P$), it acts as a **Policy**. It supplies an orthogonal capability or strategy without hardcoding implementations inside the consumer.
-   - **Policy Orthogonality:** Operational variation (*how* a step executes) is cleanly isolated as swappable policies injected at initialization, leaving the primitive contract invariant. Policies are dependencies of the primitive, rather than subclasses or outer wrappers.
-3. **The Composable Layer ($\lambda: P \to P$):** When a primitive wraps another primitive of the **exact same contract**, it acts as an endomorphic **Layer**. Layers form an algebraic monoid $(\text{End}(P), \circ, \text{id})$, augmenting or extending that specific primitive's behavior (e.g. caching, retry, fallback routing, telemetry) while keeping the contract invariant to callers. Every layer carries the `*Layer` suffix to make this decorating role explicit.
+   - **The Subtraction Test:** A primitive is truly irreducible if removing it causes the fundamental domain capability to collapse entirely.
+   - **The Discovery Test (Merge-or-Split):** Architects often begin with fragmented candidate interfaces (e.g. a registry vs. an executor). The hard work of ATA is testing whether they represent genuinely distinct domain bedrocks or a single cohesive concept. Unifying them around the true real-world metaphor solves 80% of the architecture immediately, leaving the contract invariant.
+2. **The Injected Policy ($\pi$):** When a primitive is injected into another primitive across different contracts ($P_{\text{injected}} \to P$), it acts as a **Policy**.
+   - **Internal Delegation:** A primitive must not hardcode operational choices (e.g. algorithms, compaction, strategies). Hardcoding breeds monoliths. Swappable strategies are injected as interfaces at initialization, keeping the primitive clean, controllable, and invariant.
+3. **The Composable Layer ($\lambda: P \to P$):** When a primitive wraps another primitive of the **exact same contract**, it acts as an endomorphic **Layer**.
+   - **External Flow Control:** Intercepting what flows into and out of the primitive (caching, retry, telemetry, guardrails) belongs neither inside the primitive (which creates a God object) nor in caller code (which leaks mechanics). Layers wrap the contract invariantly, forming an algebraic monoid $(\text{End}(P), \circ, \text{id})$. Every layer carries the `*Layer` suffix.
 
 Along with primitives, a system consists only of:
-- **State:** Pure, immutable data (schemas, value objects, domain assets). State has no behavior; it is passed between primitives. Shared mutable or global state introduces hidden coupling and temporal bugs; keeping state immutable ensures data flows remain transparent, verifiable, and thread-safe.
+- **State:** Pure, immutable data (schemas, DTOs). State has zero behavior; primitives communicate purely through immutable data transfers, eliminating shared mutable coupling.
 - **Stateless Transforms:** Pure mathematical functions ($f(X) \to Y$) with zero side-effects.
 
 ---
@@ -111,10 +118,11 @@ These gauges are not bureaucratic quotas, but practical smoke tests to calibrate
 ## 4. The "Apply ATA" Directive (The Universal Unbloating Lens)
 
 ATA is not limited to writing new source code. It is a universal methodology of **representation reduction**:
+- **The Core Mandate:** Update and refine in place. Reject the append-only reflex.
 - **In Documentation:** Avoid mindlessly appending new paragraphs and checklist tables forever. Isolate the core thesis and refine the document in place.
 - **In UI Architecture:** Avoid stacking wrapper containers and overriding CSS patches to fix a visual bug. Refactor the underlying layout primitive.
 - **In Greenfield Systems:** Model bottom-up from irreducible primitives, inject policies for variation, and compose layers for enhancement.
-- **In Existing / Legacy Systems:** Look through accumulated convenience wrappers and procedural glue, isolate the bedrock primitive doing the actual work, and collapse the architecture down to its lean, minimal representation.
+- **In Legacy Systems:** Look through accumulated convenience wrappers and procedural glue, isolate the bedrock primitive doing the actual work, and collapse the architecture down to its lean, minimal representation.
 
 ---
 
