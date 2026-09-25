@@ -1,4 +1,4 @@
-﻿# Axiomatic Triad Architecture (ATA)
+# Axiomatic Triad Architecture (ATA)
 ## Technical Specification — Version 1.0
 
 ---
@@ -24,13 +24,14 @@ Every operational domain boundary encapsulates exactly one bedrock capability ($
 * **Orthogonality:** Policies are dependencies of the primitive, never outer wrappers or subclass hierarchies.
 
 ### 2.3 The Composable Layer ($\lambda: P \to P$)
-* **Definition:** An endomorphic decorator wrapping a primitive using the **exact same contract**.
+* **Definition:** An endomorphic decorator (Decorator pattern) wrapping a primitive using the **exact same contract**.
 * **Algebraic Monoid Invariant:** Layers form an algebraic monoid $(\text{End}(P), \circ, \text{id})$ under function composition. Every layer must preserve the exact method signatures, types, and semantics of $P$.
+* **Forward Composition & Tier Isolation:** Primitives provide a stateless composition pathway to chain layers forward in execution order, avoiding inside-out constructor nesting. In multi-tier architectures, each boundary decorates its own component; high-level primitives consume dependencies through clean public contracts without managing their underlying layers.
 * **External Flow Invariant:** Cross-cutting flow mechanics (caching, retries, rate-limiting, telemetry, guardrails) reside exclusively in layers. They must never pollute the primitive's internals nor leak into caller orchestration.
 * **Naming Standard:** Every layer implementation must carry the `*Layer` suffix.
 
 ### 2.4 State ($S$) & Stateless Transforms ($T$)
-* **Pure State ($S$):** Pure, immutable schemas and data transfer objects (DTOs). State carries zero behavior. Primitives communicate strictly via immutable data transfers; shared mutable state across boundaries is non-conformant.
+* **Pure State ($S$) & Boundary Isolation:** Schemas and data transfer objects (DTOs) crossing boundaries are pure and immutable. Internal memory optimizations or in-place buffers remain encapsulated within the boundary that owns them; uncoordinated mutable state must never cross boundary contracts.
 * **Stateless Transforms ($T$):** Pure mathematical functions ($f: S_1 \to S_2$) with zero side-effects.
 
 ---

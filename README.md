@@ -42,11 +42,12 @@ At its bedrock, ATA reveals that **the Primitive is the sole behavioral atom of 
    - **The Discovery Test (Merge-or-Split):** Architects often begin with fragmented candidate interfaces (e.g. a registry vs. an executor). The hard work of ATA is testing whether they represent genuinely distinct domain bedrocks or a single cohesive concept. Unifying them around the true real-world metaphor solves 80% of the architecture immediately, leaving the contract invariant.
 2. **The Injected Policy ($\pi$):** When a primitive is injected into another primitive across different contracts ($P_{\text{injected}} \to P$), it acts as a **Policy**.
    - **Internal Delegation:** A primitive must not hardcode operational choices (e.g. algorithms, compaction, strategies). Hardcoding breeds monoliths. Swappable strategies are injected as interfaces at initialization, keeping the primitive clean, controllable, and invariant.
-3. **The Composable Layer ($\lambda: P \to P$):** When a primitive wraps another primitive of the **exact same contract**, it acts as an endomorphic **Layer**.
-   - **External Flow Control:** Intercepting what flows into and out of the primitive (caching, retry, telemetry, guardrails) belongs neither inside the primitive (which creates a God object) nor in caller code (which leaks mechanics). Layers wrap the contract invariantly, forming an algebraic monoid $(\text{End}(P), \circ, \text{id})$. Every layer carries the `*Layer` suffix.
+3. **The Composable Layer ($\lambda: P \to P$):** When a primitive wraps another primitive of the **exact same contract**, it acts as an endomorphic **Layer** (the classic Decorator pattern).
+   - **External Flow Control:** Intercepting what flows into and out of the primitive (caching, retries, telemetry, guardrails) belongs neither inside the primitive (which creates God objects) nor in caller code (which leaks mechanics).
+   - **Forward Composition & Tier Ownership:** Primitives provide a stateless way to add their decorating layers forward in execution order, avoiding inside-out constructor nesting. In multi-tier systems, each primitive decorates its own contract; higher-level boundaries consume dependencies through clean public contracts without managing underlying layers.
 
 Along with primitives, a system consists only of:
-- **State:** Pure, immutable data (schemas, DTOs). State has zero behavior; primitives communicate purely through immutable data transfers, eliminating shared mutable coupling.
+- **State:** Pure, immutable data (schemas, DTOs). State crossing boundaries carries zero behavior; internal performance optimizations or buffers remain encapsulated within the owning boundary.
 - **Stateless Transforms:** Pure mathematical functions ($f(X) \to Y$) with zero side-effects.
 
 ---

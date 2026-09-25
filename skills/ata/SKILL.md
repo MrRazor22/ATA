@@ -1,4 +1,4 @@
-﻿---
+---
 name: ata
 description: >-
   The Axiomatic Triad Architecture (ATA) skill. Activate when designing software,
@@ -47,11 +47,12 @@ Every operational boundary encapsulates **exactly one primary root primitive**:
 * **Injected Policy ($\pi$):** Internal delegation across different contracts ($P_{\text{injected}} \to P$).
   * Handles operational variation (strategies, formats, algorithms).
   * Injected as an interface at initialization; the primitive never hardcodes operational policies.
-* **Composable Layer ($\lambda: P \to P$):** Transparent outer decorator of the **exact same contract**.
+* **Composable Layer ($\lambda: P \to P$):** Transparent outer decorator of the **exact same contract** (Decorator pattern).
   * Handles external flow control (caching, retries, metrics, guardrails).
+  * Composes forward in execution order; each tier decorates its own component independently.
   * Preserves method signatures and semantics; forms an algebraic monoid $(\text{End}(P), \circ, \text{id})$.
   * Every layer carries the `*Layer` suffix.
-* **State ($S$) & Transforms ($T$):** Pure immutable schemas/DTOs with zero behavior. Zero shared mutable state across primitives. Stateless pure functions ($f: S_1 \to S_2$).
+* **State ($S$) & Transforms ($T$):** Pure immutable schemas/DTOs with zero behavior. In-place performance optimizations or buffers remain encapsulated inside the boundary. Stateless pure functions ($f: S_1 \to S_2$).
 
 ---
 
@@ -73,6 +74,7 @@ When commanded to **"Apply ATA"** or refactor a system, execute this 4-phase aud
 1. Inspect the primitive for cross-cutting flow concerns (caching, retry, logging, rate-limiting, guardrails).
 2. Evict them from the primitive's internals into separate endomorphic decorators ($\lambda: P \to P$).
 3. Verify that each layer preserves the exact contract of $P$.
+4. Ensure layers compose forward in execution order rather than inside-out constructor nesting.
 
 ### Phase 4: Representation Reduction & Cleanup
 1. **Purge Convenience Wrappers:** Delete 1:1 pass-through wrappers and obsolete overloads.
