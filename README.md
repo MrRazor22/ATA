@@ -43,50 +43,53 @@ At its bedrock, ATA reveals that **the Primitive is the sole behavioral atom of 
 1. **The Root Primitive ($P$):** The irreducible contract defining *what* the capability is. It exhibits behavior, maintains minimal method surface area, and contains zero hardcoded internal strategies.
    - **The Subtraction Test:** A primitive is truly irreducible if removing it causes the fundamental domain capability to collapse entirely. If the capability still functions by swapping an algorithm or default, that component is a policy or layer, not a root primitive.
 2. **The Injected Policy ($\pi$):** When a primitive is injected into another primitive at a different level to drive an internal execution step, it acts as a **Policy** (e.g., an encoding primitive injected into an engine primitive).
-   - **Policy Orthogonality:** Operational variation (*how* a step executes) must be isolated as swappable policies injected at initialization, leaving the primitive contract invariant. Policies are dependencies of the primitive, never subclasses or outer wrappers.
+   - **Policy Orthogonality:** Operational variation (*how* a step executes) is cleanly isolated as swappable policies injected at initialization, leaving the primitive contract invariant. Policies are dependencies of the primitive, rather than subclasses or outer wrappers.
 3. **The Composable Layer ($\lambda: P \to P$):** When a primitive wraps another primitive sharing the **exact same interface contract**, it acts as an endomorphic **Layer**—decorating cross-cutting operational concerns (retries, rate limiting, persistence, latency profiling, telemetry) externally without interface drift.
-   - **Endomorphic Layer Sufficiency:** Layers form an algebraic monoid $(\text{End}(P), \circ, \text{id})$. Any capability added to a boundary must be a Layer, never a modification to the primitive or its internal execution loop. Every layer carries the `*Layer` suffix to clearly communicate its decorating role.
+   - **Endomorphic Layer Sufficiency:** Layers form an algebraic monoid $(\text{End}(P), \circ, \text{id})$. Cross-cutting concerns compose naturally as outer decorators rather than mutating the core execution loop or leaking operational parameters into the primitive. Every layer carries the `*Layer` suffix to clearly communicate its decorating role.
 
 Along with primitives, a system consists only of:
-- **State:** Pure, immutable data structures, schemas, and static domain assets passed across disjoint channels. **Never mutable shared or global state**, which immediately violates isolation and introduces hidden coupling smells.
+- **State:** Pure, immutable data structures, schemas, and static domain assets passed across disjoint channels. Mutable shared and global state obscures data provenance, introduces hidden temporal coupling, and complicates concurrency; immutable state keeps data flows transparent, predictable, and thread-safe.
 - **Stateless Transforms:** Pure mathematical functions ($f(X) \to Y$) with zero side-effects.
 
 ---
 
-## 2. Composition, Contracts & The Interface Mandate
+## 2. Contracts, Behavior & Design Visibility
 
-### 2.1 Interface-First for Any Object That Exhibits Behavior
-> **"Every class or object that performs computation, execution, transformation, or I/O must be defined by an explicit interface. Never expose or depend directly upon concrete classes."**
+### 2.1 Why Interfaces Matter: The Design Mirror
+In concrete classes, developers can casually treat objects like open-ended scripts—appending arbitrary helper methods, leaking internal accessors, and accumulating convenience side-effects without friction. The code works initially, but design rot accumulates silently.
 
-1. **Unchecked Bloat Creep:** Without an interface contract, classes casually accumulate convenience overloads, internal getters, and procedural mutations, ballooning into God objects.
-2. **Hidden Internal Coupling:** Callers bind to implementation quirks and private data representations, making it impossible to swap substrates or evolve algorithms independently.
-3. **Breakdown of Layering:** Endomorphic layering ($\lambda: P \to P$) mathematically requires a stable contract $P$. Without an interface, decoration degenerates into fragile subclassing, monkey-patching, or procedural glue.
+Modeling behaviors behind explicit interfaces provides an immediate **design mirror**:
+1. **Visible Surface Area:** An interface reflects the true shape of a capability into the open. If an object is trying to do too much, the interface makes the sprawling method surface immediately visible.
+2. **Decoupled Evolution:** Callers bind to semantic intent rather than concrete quirks, allowing substrates, algorithms, and execution environments to evolve independently.
+3. **Natural Composition:** Endomorphic layering ($\lambda: P \to P$) requires a stable, invariant contract. An interface enables decoration without fragile subclassing or procedural glue.
+
+Clean, lean interfaces are not a bureaucratic enforcement mechanism; they are the natural side-effect of decoupled, minimal design.
 
 ### 2.2 The Anatomy of an Irreducible Contract
-An interface in ATA is strictly **irreducible**:
-1. **Minimal Surface Area:** Single-responsibility capability with focused methods (a healthy gauge is ~2–4 canonical methods). When an interface balloons to dozens of methods, it is an unmistakable signal of an unfocused God contract.
+A healthy contract reflects an irreducible capability:
+1. **Minimal Surface Area:** Single-responsibility capability with focused methods (~2–4 canonical methods serves as a practical design gauge). When an interface balloons to dozens of methods, it signals an unfocused God contract.
 2. **Core Contract Purity vs. Extension Helpers:** 
-   - The root contract must contain strictly the irreducible semantic operations. **Zero convenience bloat** or caller sugar on the core interface.
-   - If convenience methods, fluent helpers, or secondary syntactic aliases are desired, they belong strictly in **stateless external extension functions** that wrap the canonical contract. The core interface remains pristine and invariant.
-3. **Pure Semantic Intent:** Defines *what* is achieved in pure domain terms, completely abstracted from underlying hardware, transport, or storage mechanics.
+   - The root contract focuses strictly on essential domain operations.
+   - Convenience helpers, fluent wrappers, or secondary syntactic aliases naturally belong in **stateless external extension functions** that wrap the canonical contract, preserving the purity and invariance of the core interface.
+3. **Pure Semantic Intent:** Expresses *what* is achieved in domain terms, abstracted from underlying hardware, transport, or storage mechanics.
 
-### 2.3 The Rule of Two & The Multiple Primitives Fallacy
-- **The Multiple Primitives Fallacy:** Every operational boundary encapsulates **exactly one primary root primitive** ($1 \text{ Boundary} \equiv 1 \text{ Primitive}$). When an engineer believes a boundary requires multiple primitives, it is almost always a misconception: secondary candidates are either injected policies ($\pi$) or lower-level primitives injected into that single root primitive. Truly independent primitives demand separate boundaries.
-- **The Rule of Two:** Never mirror a single concrete class 1:1 with an interface or intermediate wrapper unless there are at least two distinct concrete implementations or consumers (or an endomorphic layer target). Zero speculative abstractions.
-- **Strict One-Way Dependency Flow:** High-level boundaries compose lower-level primitives. Primitives never import or depend upon their composable layers or callers. Circular dependencies between boundaries or layers are an immediate architectural violation.
+### 2.3 Avoiding Abstraction Theater & The Multiple Primitives Fallacy
+- **The Multiple Primitives Fallacy:** Every operational boundary centers around **one primary root primitive** ($1 \text{ Boundary} \equiv 1 \text{ Primitive}$). When a boundary appears to need multiple primitives, secondary candidates are almost always injected policies ($\pi$) or lower-level substrate primitives driving internal steps. Independent capabilities naturally command separate boundaries.
+- **Avoiding Abstraction Theater:** Interfaces define real domain capabilities ($P$), swappable strategies ($\pi$), or layer decorators ($\lambda$). Creating empty middleman wrappers or mechanical 1:1 passthrough layers for purely internal helper classes introduces indirection without abstraction.
+- **One-Way Dependency Flow:** High-level boundaries compose lower-level primitives. A primitive remains unaware of the layers decorating it or the callers driving it, preventing circular dependencies and preserving modularity.
 
 ---
 
 ## 3. Boundary Topology & Physical Hygiene
 
-ATA enforces strict geometric alignment between **logical namespaces** and **physical directory structures**. 
+ATA favors natural geometric alignment between **logical namespaces** and **physical directory structures**. 
 
 ### 3.1 The Canonical Topology: Boundary-First Cohesive Triad
-Horizontal tier-first dumping (`core/`, `policies/`, `layers/` at the repository root) is an anti-pattern that destroys cohesion. Instead, each operational boundary commands its own cohesive Triad, centered around **exactly one irreducible primitive**:
+Horizontal tier-first dumping (`core/`, `policies/`, `layers/` at the repository root) separates related components and weakens cohesion. Instead, each operational boundary commands its own cohesive Triad, centered around its root primitive:
 
 ```text
 RepositoryRoot/
-├── [DomainBoundaryA]/          # Boundary A: Encapsulates Primitive A (Cluttered Scale)
+├── [DomainBoundaryA]/          # Boundary A: Encapsulates Primitive A (Subordinated Scale)
 │   ├── primitive.ext           # THE ONE PRIMITIVE (Contract & Base Implementation)
 │   ├── schema.ext              # Pure immutable domain value objects for Primitive A
 │   ├── policies/               # Injected strategies (partitioned when >= 4-5 items)
@@ -105,55 +108,51 @@ RepositoryRoot/
 ```
 
 ### 3.2 The Clutter-Threshold Gauge (When to Subfolder vs. Stay Flat)
-A common failure mode in modular architectures is **Folder Ceremony**—creating nested directories that wrap only a single file (e.g., `training/policies/loss.py` or `evaluation/layers/profiling.py`):
-- **Lean Boundaries ($\le 3–4$ sibling files):** Keep the boundary flat. The primitive, policy, and layer live side-by-side at the boundary root. The `*Layer` suffix already makes its decorating role self-documenting; a 1-file folder is pure ceremony.
-- **Cluttered Boundaries ($\ge 4–5$ policies or layers):** Subordinate policies and layers into dedicated `policies/` and `layers/` subdirectories to prevent visual sprawl.
-- **Zero Single-File Folders:** A directory or namespace must justify having at least 2–3 sibling files, or it should remain flat.
+A frequent distraction in modular codebases is **Folder Ceremony**—creating nested directories that wrap only a single file:
+- **Lean Boundaries ($\le 3–4$ sibling files):** Keeping the boundary flat avoids ceremony. The primitive, policy, and layer live side-by-side. The `*Layer` suffix already makes the decorating role self-documenting.
+- **Cluttered Boundaries ($\ge 4–5$ policies or layers):** Subordinating policies and layers into dedicated `policies/` and `layers/` subdirectories maintains visual hygiene as the boundary grows.
+- **Folder Gauge:** A directory or namespace typically justifies having at least 2–3 sibling files; otherwise, keeping it flat reduces cognitive friction.
 
 ### 3.3 Functional Asset Ownership & The Pristine Root
 - **The Ownership Test:** *"Which primitive or operational boundary produces or exclusively consumes this asset?"*
-- **Horizontal Format Scattering (Smell):** Creating top-level dumping grounds based on superficial file formats (`data/`, `results/`, `output/`, `fixtures/`) breaks encapsulation. Assets consumed by execution testing belong with that execution boundary; assets consumed by optimization belong with the optimization boundary.
-- **The Pristine Root Principle:** Any loose, untyped directory (`data/`, `checkpoints/`, `results/`) or dangling file at the repository root is an immediate design smell. A pristine root strictly contains:
-  1. Primary operational domain packages
-  2. Root orchestration entrypoint (`cli.ext`)
-  3. Contract verification test suites (`tests/`)
-  4. Standard packaging configurations (`pyproject.toml`, `.gitignore`, `README.md`, `AGENT.md`)
-- **Zero Residual Debris:** Build caches, temporary logs, scratch runs, and disposable experiment debris must never linger in source trees.
+- **Horizontal Format Scattering:** Grouping files by extension or format (`data/`, `results/`, `fixtures/` at root) scatters related domain logic. Assets consumed by execution testing belong with that execution boundary; assets consumed by optimization belong with the optimization boundary.
+- **The Pristine Root:** Keeping the repository root focused—containing primary operational packages, orchestration entrypoints (`cli.ext`), tests, and standard configuration—prevents untyped dumping grounds from accumulating over time.
+- **Zero Residual Debris:** Build caches, temporary logs, scratch runs, and disposable experiment debris are transient and should not linger in source trees.
 
 ---
 
-## 4. External Consumers & Zero Non-ATA Code
+## 4. Operational Workflows & External Consumers
 
-### 4.1 External Consumers / Runners (Not a Fourth Tier)
-Standalone CLI scripts, host applications, benchmark harnesses, worker loops, and entrypoints are **external consumers orchestrating boundaries**, NOT an internal fourth tier of the Triad:
-- The Triad strictly contains three elements: the Primitive ($P$), Injected Policies ($\pi$), and Composable Layers ($\lambda$).
-- Runners simply instantiate Primitives, inject Policies, compose Layers, and drive workflows.
+### 4.1 External Consumers / Runners
+Standalone CLI scripts, host applications, benchmark harnesses, worker loops, and entrypoints are **external consumers orchestrating boundaries**, not an internal fourth tier of the Triad:
+- The Triad encapsulates the domain capability: the Primitive ($P$), Injected Policies ($\pi$), and Composable Layers ($\lambda$).
+- Runners simply instantiate Primitives, configure Policies, compose Layers, and drive workflows.
 
-### 4.2 The "No Unprincipled Scripts" Directive
-Every capability in a repository (inference, training, data processing, evaluation) decomposes cleanly into the Triad. Operational tasks and evaluation workflows are not excuses for ad-hoc procedural hacks, unprincipled copy-paste loops, or loose script sinkholes:
-- If an evaluation workflow requires metric calculation, that metric is a policy or layer owned by the evaluation boundary, driven cleanly by the runner.
-- Domain logic never belongs inside loose scripts; it must be encapsulated within the Triad so it remains testable, composable, and reusable.
+### 4.2 Workflows Decompose into the Triad
+All operational workflows—from training and data ingestion to benchmarking and evaluation—benefit from decomposing into the Triad:
+- Tasks like evaluation or benchmarking are first-class domain capabilities. Expressing them with clear primitives, swappable policies (e.g., scoring metrics), and composable layers (e.g., latency timers) keeps them robust, testable, and reusable.
+- Keeping domain logic out of loose, ad-hoc scripts ensures operational tooling maintains the same architectural quality as production execution code.
 
 ---
 
-## 5. Diagnostic Smell Detector
+## 5. Design-Time Diagnostic Gauges
 
-Any classic code smell is a direct violation of ATA. When designing, reviewing, or refactoring a codebase, use this diagnostic matrix:
+Rather than rigid rules, ATA relies on practical diagnostic reflections. When designing, reviewing, or refactoring, these questions help highlight latent friction and maintain architectural clarity:
 
-| Diagnostic Question | If YES (Clean ATA Design) | If NO (Architectural Smell Detected) |
+| Diagnostic Reflection | Healthy Indicator (ATA Design) | Friction / Smell to Watch For |
 |---|---|---|
-| **What is the primitive?** | Irreducible contract defining pure domain capability ($P$) | **God Class / Interface Bloat:** Sprawling managers or multiple overlapping types |
-| **How does it execute?** | Internal steps injected via swappable policies ($\pi$) | **Hardcoded Branching:** Boolean toggles, hardcoded algorithms, or inheritance subclasses |
-| **How do we add features?** | Endomorphic layer ($\lambda: P \to P$) decorating the contract | **Core Mutation:** Mutating the execution loop or bloating the base contract |
-| **Are behaviors behind interfaces?** | 100% of behavioral components defined by explicit interfaces | **Tight Coupling:** Callers directly dependent on concrete implementations |
-| **Are contracts clean & pure?** | Minimal surface area (~2–4 methods); zero convenience bloat | **Contract Clutter:** Interfaces bloated with convenience aliases and redundant overloads |
-| **Do interfaces mirror 1:1?** | Interfaces decouple polymorphism or layers ($\ge 2$ impls/consumers) | **Abstraction Theater:** 1:1 mechanical passthrough interfaces adding indirection without value |
-| **How is state managed?** | Pure, immutable data structures passed across disjoint channels | **Mutable Shared State:** Shared mutable objects, global state, or hidden side-effects |
-| **How many primitives per boundary?** | Exactly 1 root primitive per boundary; substrates injected cleanly | **Multiple Primitives Fallacy:** Competing primitives in one folder causing role ambiguity |
-| **How is the repository partitioned?** | Boundary-first (`boundary/policies/`, `boundary/layers/`) | **Tier-First Dumping:** Giant horizontal dumping grounds (`core/`, `policies/` at root) |
-| **Are there single-file folders?** | Lean boundaries stay flat; folders contain $\ge 2–3$ files | **Folder Ceremony:** Gratuitous nesting and namespaces wrapping a single file |
+| **What is the primitive?** | Irreducible contract defining pure domain capability ($P$) | **God Class / Manager Bloat:** Sprawling managers or multiple overlapping types |
+| **How does it execute?** | Internal steps injected via swappable policies ($\pi$) | **Hardcoded Branching:** Boolean switches, hardcoded algorithms, or inheritance hierarchies |
+| **How do we add features?** | Endomorphic layer ($\lambda: P \to P$) decorating the contract | **Core Mutation:** Modifying the execution loop or bloating the base contract |
+| **Are behaviors behind interfaces?** | Behavioral components defined by explicit interfaces | **Hidden Bloat:** Concrete classes accumulating unstructured methods and tight coupling |
+| **Are contracts clean & focused?** | Minimal surface area (~2–4 methods); core contract purity | **Contract Clutter:** Interfaces bloated with convenience aliases and redundant overloads |
+| **Do abstractions add real value?** | Interfaces decouple polymorphism, strategies, or layers | **Abstraction Theater:** Mechanical 1:1 wrappers adding indirection without abstraction |
+| **How is state managed?** | Pure, immutable data structures passed across disjoint channels | **Mutable Shared State:** Shared mutable objects, global variables, or hidden side-effects |
+| **How many primitives per boundary?** | Exactly 1 root primitive per boundary; substrates injected | **Multiple Primitives Fallacy:** Competing primitives in one folder causing role ambiguity |
+| **How is the repository partitioned?** | Boundary-first (`boundary/policies/`, `boundary/layers/`) | **Tier-First Dumping:** Horizontal dumping grounds (`core/`, `policies/` at root) |
+| **Is folder nesting justified?** | Lean boundaries stay flat; folders contain $\ge 2–3$ files | **Folder Ceremony:** Gratuitous nesting and namespaces wrapping a single file |
 | **Where do assets & datasets live?** | Co-located inside the boundary that consumes/produces them | **Horizontal Format Scattering:** Loose `data/`, `results/`, or fixtures scattered at root |
-| **Where do operational workflows live?** | Clean runners orchestrating domain primitives | **Script Sinkholes:** Sprawling procedural scripts with copy-pasted loops and ad-hoc math |
+| **Where do operational workflows live?** | Clean runners orchestrating domain primitives | **Script Sinkholes:** Fragile procedural scripts with copy-pasted loops and ad-hoc math |
 
 ---
 
