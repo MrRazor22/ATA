@@ -23,24 +23,18 @@ Architecture must be effortlessly comprehensible and reviewable. When developers
 At its bedrock, ATA reveals that **the Primitive is the sole behavioral atom of a system**. Every capability in a repository—whether core runtime execution, optimization, data ingestion, or validation—decomposes into this triad:
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│                 THE AXIOMATIC TRIAD (BOUNDARY)              │
-│                                                             │
-│       ┌──────────────────────────────────────────────┐      │
-│       │      Derived Layers (End(P))                 │      │
-│       │      (Primitives wrapping the same contract) │      │
-│       └──────────────────────┬───────────────────────┘      │
-│                              │ wraps (P -> P)               │
-│       ┌──────────────────────▼───────────────────────┐      │
-│       │      The Core Axiom / Primitive (P)          │      │
-│       │      (The root capability contract)          │      │
-│       └──────────────────────▲───────────────────────┘      │
-│                              │ injects                      │
-│       ┌──────────────────────┴───────────────────────┐      │
-│       │      Derived Policies (P_injected)           │      │
-│       │      (Primitives injected across contracts)  │      │
-│       └──────────────────────────────────────────────┘      │
-└─────────────────────────────────────────────────────────────┘
+                  LAYERS  (λ: P ➔ P)
+              Decorates what flows in & out
+                          ▲
+                          │ wraps
+                          │
+  CALLER  ────▶    PRIMITIVE (P)    ────▶  RESULT
+                The Domain Bedrock
+                          │
+                          │ injects
+                          ▼
+                     POLICIES  (π)
+              Supplies swappable strategy
 ```
 
 1. **The Root Primitive ($P$):** The irreducible constant of the domain defining *what* the capability is.
