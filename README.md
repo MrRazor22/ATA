@@ -5,7 +5,7 @@
 
 ## The Core Soul of ATA
 
-> **"Correct design will always be minimal. Minimal code is not about artificially compressing lines or counting characters; it is the natural, mathematical side-effect of truth in representation. When a system's bedrock primitive accurately reflects reality, unnecessary abstractions evaporate; what remains is a complete, minimal basis where every capability is expressed through composition, orthogonal policy, and contract-preserving layers."**
+> **"Correct design will always be minimal. Minimal code is not about brevity for brevity's sake, writing clever one-liners, or chasing line counts; it is the natural, inevitable side-effect of truth in representation. When a system's bedrock primitive accurately reflects reality, unnecessary abstractions evaporate; what remains is a complete, minimal basis where every capability is expressed through composition, orthogonal policy, and contract-preserving layers."**
 
 ### 1. The Smell-less ≡ Minimal Identity
 Code smells and bloat are the exact same phenomenon. You cannot introduce a classic architectural smell—a God class, leaky abstraction, mutable shared state, or pass-through convenience wrapper—without generating lines of bloat. Conversely, when you systematically eliminate all smells, the system mathematically collapses to its irreducible minimum. Minimal code is not sparse code; it is code stripped of architectural lies.
