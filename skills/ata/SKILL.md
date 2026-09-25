@@ -26,6 +26,21 @@ This skill equips coding agents with the **Theory of Primitives and Representati
 
 Every operational boundary encapsulates **exactly one primary root primitive**:
 
+```text
+                  LAYERS  (λ: P ➔ P)
+              Decorates what flows in & out
+                          ▲
+                          │ wraps
+                          │
+  CALLER  ────▶    PRIMITIVE (P)    ────▶  RESULT
+                The Domain Bedrock
+                          │
+                          │ injects
+                          ▼
+                     POLICIES  (π)
+              Supplies swappable strategy
+```
+
 * **Root Primitive ($P$):** The irreducible capability contract defining *what* the domain does.
   * *The Subtraction Test:* Removing $P$ causes the domain capability to collapse.
   * *The Discovery Test (Merge-or-Split):* Unify fragmented candidate interfaces around the true real-world metaphor.
