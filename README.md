@@ -1,17 +1,15 @@
 # Axiomatic Triad Architecture (ATA)
-## A Foundational Theory of Bedrock Primitives and Composition
+## A Foundational Theory of Bedrock Primitives and Representation Reduction
 
 ---
 
 ## The Core Soul of ATA
 
-> **"Correctly identifying the fundamental primitive of a system reveals the true geometry of the problem. When the bedrock primitive accurately represents reality, unnecessary abstractions evaporate; what remains is a complete, minimal basis where every capability is naturally expressed through composition, orthogonal policy, and contract-preserving layers."**
+> **"Correct design will always be minimal. Minimal code is not code golf or a superficial quota; it is the natural, inevitable side-effect of truth in representation. When the fundamental primitive of a system correctly reflects reality, unnecessary abstractions evaporate; what remains is a complete, minimal basis where every capability is naturally expressed through composition, orthogonal policy, and contract-preserving layers."**
 
-Minimal code and clean structure are not dogmatic targets or clever tricks—they are the natural, inevitable side-effects of truth in representation.
+Software bloat rarely comes from genuine domain complexity. It comes from **convenience-driven drift**—the path of least resistance where developers (and AI coding agents) lazily pile on helper overloads, boolean flags, pass-through wrappers, and ad-hoc scripts instead of doing the hard thinking to isolate and fix the design flaw in the primitive itself. When you actually fix the primitive, it cleanly accommodates both the existing case and the new case with zero wrapper bloat.
 
-Most software complexity is synthetic. It does not arise from genuine domain difficulty, but from an inaccurate mental model: building on the wrong primitive. When the bedrock is flawed, developers are forced into **convenience-driven drift**—piling on helper flags, pass-through wrappers, and ad-hoc scripts just to bridge the gap between their code and the actual problem.
-
-ATA provides both a foundational philosophy and a diagnostic lens. Any classic code smell—whether tight coupling, leaky abstractions, mutable shared state, or sprawling classes—is never just a cosmetic flaw or an isolated coding error. It is an immediate signal that the architecture is fighting an inaccurate primitive.
+ATA is an **anti-bloat paradigm**. It demands that whenever a new requirement emerges, you hesitate to invent new abstractions. Instead, think deeply about how the existing primitive or policy can be refined. Any classic code smell—whether tight coupling, hidden side-effects, leaky abstractions, mutable shared state, or sprawling God classes—is never just a cosmetic flaw. It is an immediate signal that the architecture is fighting an inaccurate primitive.
 
 ---
 
@@ -40,8 +38,8 @@ At its bedrock, ATA reveals that **the Primitive is the sole behavioral atom of 
 └─────────────────────────────────────────────────────────────┘
 ```
 
-1. **The Root Primitive ($P$):** The irreducible contract defining *what* the capability is.
-   - **The Subtraction Test:** A primitive is truly irreducible if removing it causes the fundamental domain capability to collapse entirely. If the capability still functions by swapping an algorithm or default, that component is a policy or layer, not a root primitive.
+1. **The Root Primitive ($P$):** The irreducible constant of the domain defining *what* the capability is.
+   - **The Subtraction Test:** A primitive is truly irreducible if removing it causes the fundamental domain capability to collapse entirely. If the capability still functions by swapping an algorithm or default, that component is a policy or layer, not a root primitive. Once you discover the true primitive, you are 80% done—the contract remains invariant.
 2. **The Injected Policy ($\pi$):** When a primitive is injected into another primitive across different contracts ($P_{\text{injected}} \to P$), it acts as a **Policy**. It supplies an orthogonal capability or strategy without hardcoding implementations inside the consumer.
    - **Policy Orthogonality:** Operational variation (*how* a step executes) is cleanly isolated as swappable policies injected at initialization, leaving the primitive contract invariant. Policies are dependencies of the primitive, rather than subclasses or outer wrappers.
 3. **The Composable Layer ($\lambda: P \to P$):** When a primitive wraps another primitive of the **exact same contract**, it acts as an endomorphic **Layer**. Layers form an algebraic monoid $(\text{End}(P), \circ, \text{id})$, augmenting or extending that specific primitive's behavior (e.g. caching, retry, fallback routing, telemetry) while keeping the contract invariant to callers. Every layer carries the `*Layer` suffix to make this decorating role explicit.
@@ -101,12 +99,22 @@ RepositoryRoot/
 └── tests/                      # Contract verification & regression tests
 ```
 
-### Practical Design Gauges
-Gauges are not rigid quotas, but intuitive rules of thumb to help sense when an abstraction is doing too much:
-- **Contract Focus (~2–4 methods):** An irreducible capability contract is focused. A sprawling method list signals that the primitive is taking on multiple responsibilities.
-- **File Proportionality (~150 lines):** A class exceeding a couple hundred lines often signals that procedural glue, helper overloads, or secondary concerns are creeping into the implementation.
-- **Folder Nesting (~2–3 files):** Grouping into subdirectories makes sense when organizing multiple sibling files; a folder wrapping a single file is usually empty ceremony. Keep lean boundaries flat.
+### 3.1 Practical Design Gauges (Rules of Thumb)
+These gauges are not bureaucratic quotas, but practical smoke tests to calibrate design decisions:
+- **~2–4 Methods per Contract:** A healthy primitive contract is focused. If an interface needs dozens of methods, it is likely accumulating multiple responsibilities and drifting into God-object territory.
+- **~150 Lines per File:** A source file exceeding ~150 lines often signals that procedural glue, helper bloat, or secondary concerns have crept into the implementation.
+- **~2–3 Files per Folder (Zero Single-File Folders):** A folder or namespace should justify having at least 2–3 sibling files. Wrapping a single file in a dedicated subfolder adds ceremony without architectural value. Keep lean boundaries flat.
 - **Functional Ownership:** Assets, schemas, and configurations naturally live inside the boundary that consumes or produces them, rather than scattered across loose root dumping grounds by file format.
+
+---
+
+## 4. The "Apply ATA" Directive (The Universal Unbloating Lens)
+
+ATA is not limited to writing new source code. It is a universal methodology of **representation reduction**:
+- **In Documentation:** Avoid mindlessly appending new paragraphs and checklist tables forever. Isolate the core thesis and refine the document in place.
+- **In UI Architecture:** Avoid stacking wrapper containers and overriding CSS patches to fix a visual bug. Refactor the underlying layout primitive.
+- **In Greenfield Systems:** Model bottom-up from irreducible primitives, inject policies for variation, and compose layers for enhancement.
+- **In Existing / Legacy Systems:** Look through accumulated convenience wrappers and procedural glue, isolate the bedrock primitive doing the actual work, and collapse the architecture down to its lean, minimal representation.
 
 ---
 
