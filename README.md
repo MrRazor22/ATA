@@ -3,429 +3,172 @@
 
 ---
 
-## The Core Thesis & The Soul of ADA
+### The Core Thesis & The Soul of ADA
 
 > **"Correctly identifying the fundamental primitive of a system naturally minimizes its architecture, because unnecessary abstractions become redundant when the primitive itself correctly represents the underlying problem; once the primitive is correct, composition, injectable policies, and generic layers provide extensibility without requiring the core primitive to continuously grow new abstractions."**
 
 ### 1. Correct Code Will Always Be Minimal
-A perfect, smell-less design will **always be minimal**. 
-- This does not mean complex problems can be solved in three lines of code. It means that whatever the intrinsic size of the problem, the correct design is the **minimal possible representation** of that solution.
-- Not all minimal code is correct (code golf is an anti-pattern), but **correct code is always minimal**.
-- We do not write minimal code just to reduce lines. **Minimal code is the natural side-effect of good design.**
+A smell-less design is **naturally minimal**. 
+- Whatever the intrinsic difficulty of a domain, the correct design is its **minimal possible representation**.
+- Not all minimal code is correct (code golf is an anti-pattern), but **correct code is always minimal**. Minimal code is the natural side-effect of good design.
 
-### 2. The Root Cause of Bloat: Developer Laziness & Convenient Wrappers
-Software repositories bloat into unmaintainable monsters because of a fundamental laziness:
-- When a new requirement emerges that doesn't fit existing interfaces, developers (and AI coding agents) lazily invent **convenient wrappers, helper overloads, and speculative abstraction layers** instead of doing the hard mental work to find the latent design flaw in the core.
-- If you stop and think deeply to fix the root design smell in the existing primitive, the resulting refinement fits **both the existing cases and the new case perfectly**—eliminating the need for any wrapper at all.
-- **The Anti-Bloat Imperative:** Always hesitate to add new abstractions. Work hard to think deeply about how existing abstractions can be refined, reused, or fundamentally fixed. Never patch over architecture with convenience bloat.
+### 2. The Root Cause of Bloat: Developer Laziness & Convenience Layers
+Software bloats when developers ask *"What feature do I add?"* rather than *"What is the irreducible primitive of this domain?"*:
+- **Convenience Bloat:** When a requirement doesn't fit, developers lazily invent wrapper layers, helper overloads, and pass-through adapters instead of fixing the latent design flaw in the primitive.
+- **The "Inside vs. Outside" Script Fallacy:** Treating operational tasks (training, benchmarks, evaluation) as loose procedural scripts creates untyped hack sinkholes.
+- **Abstraction Theater:** Wrapping procedural spaghetti in superficial interfaces without identifying the underlying primitive creates indirection without abstraction.
+- **The Anti-Bloat Imperative:** If you fix the root design smell in the existing primitive, the refinement cleanly covers both existing and new requirements—eliminating the need for wrappers.
 
-### 3. How Derivations Naturally Emerge: The Axiom, Injected Policies, and Composable Layers
-The Axiomatic Derivation Architecture (ADA) is not an arbitrary design pattern or aesthetic preference. It is the natural, inevitable structure that emerges when you relentlessly eliminate bloat:
-1. **The Axiom / Primitive (The Irreducible Constant):**
-   - For any system, you must model the fundamental primitive right. Once you get the primitive right, **you are 80% done**.
-   - The primitive is the irreducible constant (the domain Axiom)—if you remove it, the system cannot function. 
-   - You discover it through first-principles real-world OOP modeling and deep thought (e.g., asking whether a tool registry and tool executor are genuinely two things, or just one focused primitive).
-2. **Injectable Policies (Keeping the Primitive Pure & Invariant):**
-   - A primitive must not hardcode operational strategies (compaction, tokenization, objective algorithms, heuristics).
-   - If a primitive hardcodes these, it will constantly mutate and bloat. 
-   - Instead, we inject strategies as clean policy interfaces. The primitive remains pure, stable, and invariant forever; the policies provide swappable execution details.
-3. **Composable Layers (External Boundary Control Without God Objects):**
-   - When you need control over what enters or leaves a primitive (retries, rate limiting, persistence, guardrails, latency profiling), putting that logic inside the primitive creates a monolithic God object.
-   - Wrapping it in an endomorphic Layer ($\lambda: P \to P$) gives complete control over the operational boundary without adding a single line of bloat to the primitive.
-4. **Disjoint Channels & Zero Shared Ugly State:**
-   - Primitives share pure, immutable data contracts (DTOs), never ugly mutable global state.
+### 3. A Universal Lens for Representation Reduction
+At its deepest level, ADA is a method for **reducing and restructuring representations** across technical domains:
+- **In Software Systems:** Primitive ($P$) + Injected Policies ($\pi$) + Composable Layers ($\lambda$).
+- **In Storage Systems:** Block Storage Engine (Axiom) + Eviction/Partitioning (Policies) + WAL/Encryption/Caching (Layers).
+- **In Documentation:** Canonical System Spec (Axiom) + Audience Lenses (Policies) + Version/Auth Guards (Layers). Docs rot when developers lazily append contradictory convenience pages instead of updating the bedrock spec.
+- **In User Interfaces:** Semantic Layout Component (Axiom) + Breakpoint/Theme Policies + Auth/Boundary Layers.
 
-### 4. A Universal Theory of Representation Reduction (With Code as Its Primary Proving Ground)
-At its deepest conceptual level, ADA proposes a general methodology for **reducing and restructuring representations**:
-- Rather than accepting runaway complexity as inevitable, ADA asserts that any coherent domain—whether software systems, data storage engines, documentation, or user interfaces—can be mapped to an irreducible bedrock truth (the **Axiom**), with all operational behaviors and transformations derived cleanly around it.
-- **The Triad as Software Manifestation:** In software engineering, this reduction manifests concretely as the Triad: **Axiom (Primitive) + Injected Policies + Composable Layers**. While this document formalizes and proves ADA primarily through software architecture and codebases (where the mathematics of contracts, injected strategies, and endomorphic monoids can be rigorously demonstrated), the underlying habit of mind is universal:
-  - **In Data & Storage Systems:** The Storage Block Engine is the Axiom; Indexing, Eviction, and Partitioning strategies are Injected Policies; Encryption, WAL Durability, and Caching are Composable Layers.
-  - **In Documentation:** The Canonical System Spec is the Axiom; audience rendering lenses (quickstarts, deep dives, API references) are Injected Policies; version tags, security callouts, and localizations are Composable Layers. (Docs rot when developers lazily append contradictory convenience pages instead of updating the bedrock spec).
-  - **In User Interfaces:** The Semantic Layout Component is the Axiom; theme and breakpoint policies are Injected Policies; auth guards, telemetry, and error boundaries are Composable Layers.
-
-### 5. Applying ADA: Greenfield Design vs. Legacy Unbloating
-When applying ADA in practice, it serves two distinct operational modes:
-1. **Greenfield Construction (Bottom-Up Derivation):** Identify the irreducible domain primitive first. Model it using first-principles real-world metaphors, parameterize it with clean injected policies, and decorate cross-cutting concerns with endomorphic layers. Never invent speculative wrapper tiers.
-2. **Legacy Infrastructure Unbloating (The Diagnostic Lens):** When confronted with a sprawling, overengineered codebase or bloated system, use ADA to look *through* the accidental complexity:
-   - Identify what the system was actually trying to achieve at its bedrock core (the latent Axiom).
-   - Strip away the accumulated layers of convenience wrappers, pass-through managers, and procedural glue.
-   - Re-derive the required capabilities cleanly via policies and layers, achieving the exact same operational results with a fraction of the original complexity and code.
+### 4. Applying ADA: Greenfield vs. Legacy
+- **Greenfield Construction:** Identify the irreducible domain primitive first. Parameterize internal execution via injected policies, and decorate cross-cutting concerns via composable layers.
+- **Legacy Infrastructure Unbloating (The Diagnostic Lens):** Look *through* accidental complexity: isolate what the system was actually trying to achieve (the latent Axiom), strip away accumulated convenience wrappers and glue, and re-derive the capability cleanly.
 
 ---
 
-## Abstract
+## 1. The Architecture: The Axiom & Its Derivations
 
-Modern software engineering across distributed systems, autonomous agents, and machine learning repeatedly succumbs to **Accidental Complexity Sprawl**. Systems grow unmaintainable not from intrinsic domain difficulty, but from premature convenience abstractions, leaky boundaries, and the absence of an irreducible architectural basis. 
-
-The **Axiomatic Derivation Architecture (ADA)** is a foundational structural theory of representation reduction. It establishes that any coherent domain decomposes into an irreducible domain bedrock (**The Axiom** or **Primitive**), from which all operational variations are derived via swappable strategies (**Injected Policies**), all cross-cutting capabilities are derived via algebraic endomorphic decorators (**Composable Layers**), and all operational workflows are orchestrated by clean consumers and runners without inventing redundant abstractions. 
-
-While the philosophy of axiomatic reduction generalizes across technical representations—from storage engines to documentation—this paper grounds and formalizes ADA specifically within **software systems engineering**. We prove the mathematical sufficiency of endomorphic composition, define the Universal Boundary Principle, and demonstrate through real-world case studies how ADA collapses multi-thousand-line systems into lean, zero-bloat architectures.
-
----
-
-## 1. The Core Problem: Accidental Complexity & Feature-First Drift
-
-### 1.1 The "Feature-First" Pathology
-When engineers design systems by asking *"What feature do I need to add?"* rather than *"What is the irreducible mathematical basis of this domain?"*, architectural decay begins immediately:
-1. **The God Class Problem:** Concrete classes bloat with helper methods, leaky getters, and procedural state flags.
-2. **Combinatorial Explosion:** Extending $N$ features across $M$ concerns requires $O(N \times M)$ specialized classes or complex inheritance trees.
-3. **Leaky Boundaries:** Callers couple to concrete implementation details, making it impossible to replace underlying components without cascading refactors.
-
-### 1.2 The "Inside vs. Outside" Boundary Fallacy
-A pervasive manifestation of this decay is the false dichotomy:
-> *"The core engine is our Architecture and follows strict rules, but everything outside that boundary (training, migrations, verification, operational tooling) is just 'scripts' where anything goes."*
-
-Treating code outside the primary runtime as disposable scripts creates an unmaintainable "ugly script sinkhole"—characterized by duplicated loops, hardcoded flags, manual timing logic, and fragile procedural flows. When operational code (a data backfill, a schema migration, a diagnostics probe) breaks in production, it is almost always due to this false dichotomy. 
-
-In ADA, derivation is not heavyweight ceremony—it is the simplest possible decomposition: an irreducible bedrock axiom parameterized by injected policies (layers are optional). Operational workflows do not need sprawling, copy-pasted ad-hoc script hacks; entrypoints and runners cleanly assemble and orchestrate domain primitives without procedural rot.
-
-### 1.3 The "Abstraction Theater" Failure Mode
-Conversely, reacting to script sprawl by creating superficial, top-down wrapper classes without identifying the underlying primitive creates **Abstraction Theater**: lines of code increase, new interfaces are declared, yet the underlying procedural spaghetti remains unchanged.
-
----
-
-## 2. The Five Axioms of ADA
-
-ADA rests upon five non-negotiable axioms:
-
-### Axiom 1: The Irreducible Primitive Basis (The Domain Axiom)
-> **Every bounded software domain decomposes into an irreducible, orthogonal basis set of behavioral contracts with minimal cardinality $K$.**
-
-- A Primitive contract defines exclusively **what** the domain capability is, grounded in real-world domain metaphors.
-- A Primitive has **zero direct coupling** to sibling primitives ($\text{CBO} \ll 5$).
-- A Primitive has **minimal method surface area** (focused, single-responsibility contracts, typically 1 to 3 methods; a 15-method interface is an immediate smell of a God contract). Minimal surface area is the natural side-effect of clean design, not an arbitrary quota.
-- **The Subtraction Test:** A primitive is truly irreducible if removing it causes the fundamental domain capability to collapse entirely.
-- **Pragmatic Evolution:** When decomposing a new domain, start minimal/monolithic; divide into separate primitives only when an unmistakable, tangible architectural benefit emerges.
-
-### Axiom 2: Policy Orthogonality (Derived Execution)
-> **Operational variation (*how* a step executes) must be isolated as swappable policies injected into the primitive at initialization, leaving the primitive contract invariant.**
-
-- Internal algorithms, formatting strategies, objective functions, and heuristics are Policies.
-- Policies are dependencies of the primitive, never subclasses or outer wrappers.
-
-### Axiom 3: Endomorphic Layer Sufficiency (Derived Boundary Decoration)
-> **Every cross-cutting concern is mathematically expressible as an endomorphic decorator ($\lambda_F: F \to F$) wrapping a primitive without interface drift.**
-
-- A Layer implements the exact same contract $F$ as the primitive it decorates.
-- Layers form an algebraic **Endomorphism Monoid** $(\text{End}(F), \circ, \text{id})$.
-- Any capability added to a system (resilience, security guardrails, caching, latency profiling, durability, audit logging) must be a Layer, never a modification to the primitive or the execution loop.
-
-### Axiom 4: Universal Boundary Invariance & The Boundary-Primitive Identity
-> **Derivation is scale-invariant, fractal, and atomic per primitive. Every operational boundary encapsulates EXACTLY ONE primary primitive (Axiom); all policies and layers in that boundary are derived and subordinate to that single primitive, never adjacent peers.**
-
-- A Policy $\pi \in \mathcal{P}(P)$ does not belong to a vague "system"; it is an injected strategy parameterized by **one specific primitive $P$**.
-- A Layer $\lambda \in \text{End}(P)$ does not belong to a vague "system"; it is an endomorphic decorator implementing the exact interface of **one specific primitive $P$**.
-- **The Multiple Primitives Fallacy:** If an engineer believes a boundary requires multiple primitives, it is almost always a misconception. In virtually every case, there is exactly one root primitive defining *what* the capability is; secondary candidates are merely injected policies or substrate dependencies driving internal steps of that single primitive. If two primitives are genuinely independent, they belong to two distinct boundaries.
-
-### Axiom 5: The External Consumer Principle (Execution Entrypoints & Runners)
-> **Execution entrypoints (CLIs, host runners, benchmarks, worker loops) are external consumers orchestrating boundaries, NOT an internal tier of the architecture.**
-
-- An operational boundary strictly contains its irreducible Axiom (Primitive) and its clean Derivations (Injected Policies and Composable Layers).
-- Entrypoints, runners, and CLIs merely instantiate Primitives, bind Policies, compose Layers, and execute operational workflows.
-- The goal is preventing lazy, unprincipled procedural script hacks from masquerading as architecture. When an operational flow (such as training or benchmark verification) executes, the core capabilities belong to the underlying domain primitives—the entrypoint simply drives them.
-
----
-
-## 3. Mathematical Formalization of ADA
+Every operational domain decomposes into an irreducible bedrock truth (**The Axiom** or **Primitive**) and its clean **Derivations**:
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
-│                 External Consumers / Clients                │
-│                 (CLI, Host Apps, Entrypoints)               │
+│                 External Consumers & Runners                │
+│                 (CLIs, Host Apps, Orchestrators)            │
 └──────────────────────────────┬──────────────────────────────┘
                                │ orchestrates
 ┌──────────────────────────────▼──────────────────────────────┐
 │             THE AXIOMATIC DERIVATION (BOUNDARY)             │
 │                                                             │
 │       ┌──────────────────────────────────────────────┐      │
-│       │      Derived Layers: End(P) Monoid           │      │
-│       │      λ_P: P -> P  (Decorators wrapping P)    │      │
+│       │      Derived Layers: Composable Decorators   │      │
+│       │      (Cross-cutting concerns wrapping P)     │      │
 │       └──────────────────────┬───────────────────────┘      │
 │                              │ wraps                        │
 │       ┌──────────────────────▼───────────────────────┐      │
-│       │      The Core Axiom / Primitive Contract (P) │      │
+│       │      The Core Axiom / Primitive (P)          │      │
 │       │      (Irreducible Bedrock: WHAT it does)     │      │
 │       └──────────────────────▲───────────────────────┘      │
 │                              │ injects                      │
 │       ┌──────────────────────┴───────────────────────┐      │
-│       │      Derived Policies: P(P)                  │      │
-│       │      (Swappable Strategies: HOW it executes) │      │
+│       │      Derived Policies: Swappable Strategies  │      │
+│       │      (HOW internal steps execute)            │      │
 │       └──────────────────────────────────────────────┘      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 3.1 The Primitive Basis Set ($\mathcal{B}$)
-Let a domain $\mathcal{D}$ be represented by an execution capability space $\mathcal{S}$. The primitive basis set $\mathcal{B} = \{P_1, P_2, \dots, P_K\}$ satisfies:
-1. **Spanning:** Every valid domain operation $s \in \mathcal{S}$ is expressible as a composition of elements in $\mathcal{B}$.
-2. **Minimal Basis Cardinality ($K$):** No proper subset $\mathcal{B}' \subset \mathcal{B}$ can span $\mathcal{S}$.
-   $$K = |\mathcal{B}|$$
-   In production architectures:
-   - For Autonomous Agents: $K = 3$ (Reasoning $\mathcal{L}$, Acting $\mathcal{T}$, Remembering $\mathcal{C}$).
-   - For Neural Decision Systems: $K = 2$ (Domain Decision $\mathcal{D}$, Hardware Tensor Substrate $\mathcal{S}$).
-   - For Key-Value Engines: $K = 2$ (Storage Block I/O, Key Index).
-
-#### Theory vs. Empirical Discovery:
-- **Theoretical Basis vs. Engineering Approximation:** While $K$ represents the objective mathematical minimum basis of the capability space (analogous to Boyce-Codd Normal Form in database theory), engineers rarely possess an omniscient domain model upfront. Practitioners converge toward $K$ through **empirical discovery heuristics**.
-- **Real-World OOP Modeling:** Primitives are discovered by identifying the irreducible real-world entities and metaphors of the domain, not by speculating over hypothetical axes of future change.
-- **The Subtraction Test:** A candidate primitive is irreducible if and only if removing it causes the fundamental domain capability to collapse entirely.
-- **The Foundation Smell Test:** When a new requirement does not fit an existing primitive, resist the temptation to invent convenience abstractions or ad-hoc primitives. A new requirement usually exposes a latent smell or narrowness in the *original foundation*. Refactor the root primitive so it naturally accommodates both old and new requirements.
-- **Pragmatic Monolith-First Rule:** If the basis set of a nascent domain is unclear, start minimal or monolithic. Never split prematurely; partition into separate primitives only when the division yields distinct, undeniable architectural independence.
-
-### 3.2 The Composable Layer Monoid $(\text{End}(P), \circ, \text{id})$
-For any primitive contract $P$, a layer $\lambda_P$ is an endomorphism:
-$$\lambda_P: P \to P$$
-The set of all layers over $P$ under function composition forms an algebraic monoid:
-- **Closure:** $\forall \lambda_1, \lambda_2 \in \text{End}(P), \quad \lambda_2 \circ \lambda_1 \in \text{End}(P)$
-- **Associativity:** $(\lambda_1 \circ \lambda_2) \circ \lambda_3 = \lambda_1 \circ (\lambda_2 \circ \lambda_3)$
-- **Identity:** $\exists \, \text{id} \in \text{End}(P) \quad \text{such that} \quad \text{id} \circ \lambda = \lambda \circ \text{id} = \lambda$
-
-**Combinatorial Complexity Reduction:**
-*(Formalizing the classical Decorator/Strategy advantage over subclass explosion; Gamma et al., 1994)*:
-Let $N$ be the number of concrete substrate implementations of primitive $P$, and let $M$ be cross-cutting concerns. Under inheritance or subclassing, composing every concern across all implementations requires $\mathcal{O}(N \times M)$ distinct classes. 
-
-Under the ADA Endomorphism Monoid $(\text{End}(P), \circ)$, each concern is implemented once as an endomorphic decorator $\lambda_i \in \text{End}(P)$. Composing $M$ concerns over an implementation $p \in N$ is achieved dynamically via monoid evaluation:
-$$(\lambda_M \circ \lambda_{M-1} \circ \dots \circ \lambda_1)(p)$$
-Total structural complexity scales strictly as:
-$$\mathcal{O}(N + M)$$
-
-#### Boundary Dynamics: Diagnostics, Policies, and Contract Evolution:
-- **Layer Diagnostics & Side Channels:** When a layer produces auxiliary information (e.g. latency metrics, trace identifiers, cache hit rates), it exposes those properties or inspection methods directly on the concrete layer class or via pipeline inspection extensions. The decorated interface contract $P$ remains pure and invariant.
-- **Behavioral Adaptations:** If an execution step requires dynamic variations or algorithmic branching, it is modeled as an **Injected Policy** (Tier 2), not by mutating layer contracts.
-- **Interface Shape Evolution:** If a requirement demands changing the method signature (e.g. unifying batch and single-item execution), this is a **Primitive Design Issue**. Primitives are the irreducible, policy-free bedrock of domain logic; when capabilities evolve, the primitive contract must be updated directly rather than patched via leaky layer wrappers.
-
-### 3.3 The Atomic Derivation Theorem (Atomic Per Primitive)
-A system does not possess *one* monolithic derivation. Derivation is strictly **atomic per primitive contract $P_i$**:
-$$\text{Boundary}(P_i) = \Big( P_i, \; \mathcal{P}(P_i), \; \text{End}(P_i) \Big)$$
-
-1. **Policies are Partitioned by Primitive:** $\mathcal{P}(P_i) \cap \mathcal{P}(P_j) = \emptyset$ for $i \ne j$. An injected strategy belongs exclusively to the primitive that injects it.
-2. **Layers are Partitioned by Primitive:** $\text{End}(P_i) \cap \text{End}(P_j) = \emptyset$ for $i \ne j$. An endomorphic decorator implements and wraps strictly contract $P_i$.
-3. **Resolving the Multi-Primitive Illusion:** If an operational boundary appears to host multiple primitives, apply the **Subordination Test**:
-   - Does one component inject the other via constructor initialization? If yes, the injected component is a **Policy / Substrate Dependency**, not a peer root primitive.
-   - If they are genuinely orthogonal and independent, they represent **Two Distinct Boundaries** and must be partitioned into separate boundary namespaces.
-4. **The Cross-Boundary Substrate Theorem (Shared Foundations vs. Boundary-Internal Policies):**
-   - When a behavioral entity exhibits its own independent lifecycle and is co-consumed across multiple distinct operational boundaries (e.g. across runtime execution, training/optimization, and verification), it is **not** an internal injected policy of any single boundary.
-   - Demoting a shared foundation to an internal policy of one consumer violates functional ownership and forces unnatural, circular cross-boundary dependencies.
-   - Such an entity commands its own **Autonomous Foundation Boundary** ($P_\text{foundation}$) with its own primitive contract, schema, and assets. Consuming operational boundaries inject or depend upon its contract as a substrate dependency, strictly preserving $1 \text{ Boundary} \equiv 1 \text{ Primitive}$.
+### The Irreducible Components:
+1. **The Core Axiom / Primitive ($P$):** Irreducible contract defining *what* the capability is, grounded in real-world domain metaphors. Minimal surface area, single responsibility, pure semantic intent.
+2. **Derived Injected Policies ($\pi$):** Swappable strategies injected at initialization defining *how* internal steps execute (algorithms, tokenizers, loss objectives). Keeps the primitive stable and invariant forever. Named with pure agentive/doer nouns (`Resolver`, `Selector`, `Sampler`), avoiding redundant `*Policy` suffixes.
+3. **Derived Composable Layers ($\lambda$):** Endomorphic decorators ($\lambda: P \to P$) wrapping the primitive externally without interface drift. Any cross-cutting concern (retries, rate limiting, persistence, guardrails, latency profiling) is a Layer—never internal logic. Every layer must carry the `*Layer` suffix.
+4. **External Consumers & Runners:** Host applications, CLI entrypoints, and benchmark harnesses that instantiate and drive boundaries from the outside. Verification and evaluation are operational consumers, not architectural boundaries; running a benchmark against ground truth is simply exercising the execution primitive (`decide()`) over test data.
+5. **Universal Boundary Invariance ($1 \text{ Boundary} \equiv 1 \text{ Primitive}$):** Every operational boundary encapsulates exactly ONE primary primitive. Shared foundations (e.g. neural weights substrates) co-consumed across multiple boundaries command their own autonomous foundation boundary.
 
 ---
 
-## 4. The Behavioral Interface Mandate
+## 2. The Behavioral Interface Mandate
 
-### 4.1 Interface-First for Any Object That Exhibits Behavior
+### 2.1 Interface-First for Any Object That Exhibits Behavior
 > **"Every class or object that performs computation, transformation, execution, or I/O must be defined by an explicit interface. Never expose or depend directly upon concrete classes."**
 
 #### Why Concrete Classes Without Interfaces Cause Decay:
-1. **Unchecked Bloat Creep:** Without an interface contract, developers casually append convenience methods, internal getters, and procedural mutations. The class inevitably blooms into an unmaintainable multi-method God Object.
+1. **Unchecked Bloat Creep:** Without an interface contract, developers casually append convenience methods, internal getters, and procedural mutations, causing classes to balloon into God objects.
 2. **Hidden Internal Coupling:** Callers bind to implementation quirks and private data representations, making refactoring or swapping substrates impossible.
 3. **Breakdown of Layering:** Endomorphic layering ($\lambda_P: P \to P$) mathematically requires a stable contract $P$. Without an interface, decoration degenerates into fragile subclassing or procedural monkey-patching.
 
-### 4.2 The Anatomy of an Irreducible Primitive Contract
+### 2.2 The Anatomy of an Irreducible Contract
 An interface in ADA is strictly **irreducible**:
-1. **Minimal Surface Area (Focused Responsibility, Zero Method Bloat):**
-   - Minimal method surface area is the natural side-effect of clean, single-responsibility design.
-   - Writing a 15-method interface monster is an immediate smell of a bloated God contract. An irreducible contract represents an exact, focused capability without convenience overloads.
-2. **Zero Convenience Bloat vs. Distinct Semantic Capabilities:**
-   - **Absolute prohibition on helper overloads:** Never attach secondary convenience aliases (`With*` vs `Use*`, `ExecuteDefault`, sync-over-async wrappers) to root contracts.
-   - There must exist **exactly one canonical method** for each distinct semantic capability. 
-   - When new needs arise, first verify if the existing method signature can be cleanly evolved without smell. If a capability (e.g. streaming chunks vs. discrete execution) is genuinely distinct, orthogonal, and required across multiple use cases, exposing a dedicated canonical method is fully valid. What is banned is redundant caller sugar and convenience wrapping.
-3. **Pure Semantic Intent:**
-   - An interface defines *what* is achieved in the domain language, completely abstracted from underlying hardware, network, or storage mechanics.
+1. **Minimal Surface Area:** Single-responsibility capability with minimal methods. A 15-method interface monster is an immediate smell of a bloated God contract.
+2. **Zero Convenience Bloat:** Exactly one canonical method per distinct semantic capability. Absolute prohibition on helper overloads (`With*`, `Run*`, sync-over-async wrappers). Redundant caller sugar is forbidden.
+3. **Pure Semantic Intent:** Defines *what* is achieved in domain language, completely abstracted from underlying hardware, network, or storage mechanics.
 
-### 4.3 The 1-to-1 Interface Mirroring Fallacy (Indirection vs. Abstraction)
+### 2.3 The Rule of Two (No 1-to-1 Mirror Interfaces)
 > **"Never mirror a single concrete class with a 1-to-1 interface or intermediate pass-through wrapper unless there are at least two distinct concrete implementations or consumers."**
-
-A pervasive anti-pattern in interface-driven development is speculative, mechanical interface creation:
-1. **Indirection Without Abstraction:** Declaring an interface that merely mirrors the methods of a single concrete class 1:1 (or introducing an intermediate passthrough wrapper) adds cognitive overhead, symbol clutter, and indirection without providing true polymorphic abstraction.
-2. **When Interfaces Are Mandatory:**
-   - **Operational Boundary Primitives ($P$):** Every operational domain's root primitive contract must have an explicit interface to anchor the endomorphic layer monoid ($\lambda_P: P \to P$) and decouple callers from underlying substrates.
-   - **Swappable Injected Policies ($\pi$):** An interface is required when an internal step admits multiple strategies, algorithms, or swappable behaviors ($\ge 2$ implementations/consumers).
-3. **The Rule of Two (Zero Speculative Abstraction):** If a class represents a single concrete dependency with zero polymorphic alternatives and no composable layer decoration, consume it directly. Do not invent speculative intermediate abstractions.
+- **Indirection Without Abstraction:** Declaring an interface that merely mirrors a single concrete class 1:1 adds cognitive clutter without polymorphic value.
+- **When Interfaces Are Mandatory:**
+  - **Boundary Primitives ($P$):** The root primitive must have an explicit interface to anchor the endomorphic layer decorator ($\lambda_P: P \to P$) and decouple callers.
+  - **Swappable Injected Policies ($\pi$):** Required when an internal step admits multiple strategies or algorithms ($\ge 2$ implementations or consumers).
+- If a class represents a single concrete dependency with zero polymorphic alternatives and no layer decoration, consume it directly. Zero speculative abstractions.
 
 ---
 
-## 5. The Universal Boundary Principle
-
-Every distinct operational capability in a system encapsulates its own atomic derivation ($P + \mathcal{P}(P) + \text{End}(P)$). A **Boundary** is simply the cohesive namespace or directory that holds that derivation:
-
-| Operational Boundary | What the Primitive Does (Tier 1) | Injected Policy: How It Executes (Tier 2) | Composable Layer: Cross-Cutting ($\lambda_F$) (Tier 3) | External Consumer / Runner |
-|---|---|---|---|---|
-| **Domain Execution / Inference** | Execute primary domain operation | Algorithmic strategies, internal heuristics | Latency profiling, security guardrails, caching | Application Host / CLI / Benchmark Runner |
-| **Optimization / Training** | Execute mathematical parameter update | Objective loss functions, optimizer policy | Checkpointing, validation triggers, metric streaming | Training Runner / Orchestration Job |
-| **Data Ingestion / Synthesis** | Generate / stream domain records | Source formatters, parsing schemas | Augmentation, replay mixing, partition splitting | Data Ingestion Entrypoint |
-
-> **Note on Verification & Benchmarking:** Testing and evaluation are **operational consumers**, not artificial architectural boundaries. Running a benchmark against ground truth is simply exercising the execution primitive (`decide()`) over test data. Inventing fake primitives (`IEvaluator`) or fake layers just to wrap a test loop is Abstraction Theater.
-
-### The Anti-Pattern Test for Operational Boundaries:
-- If a subsystem consists of a flat file with procedural loops, inline timing, and hardcoded flags, it is violating **Axiom 4** (The Ugly Script Fallacy).
-- If a subsystem creates abstract interfaces that merely wrap single functions without endomorphic decorators, it is violating **Axiom 3** (Abstraction Theater).
-- If an operational runner replaces domain primitives with unprincipled ad-hoc procedural hacks, copy-pasted glue, and loose scripts, it is violating **Axiom 5** (The Lazy Hack Fallacy).
-
----
-
-## 6. Repository Topology & Namespace Hygiene
+## 3. Boundary & Repository Topology
 
 ADA enforces strict geometric alignment between **logical namespaces** and **physical directory structures**. 
 
-### 6.1 The Canonical Topology: Boundary-First Cohesive Derivation
-Horizontal tier-first dumping (`core/`, `policies/`, `layers/` at the repository root) is strictly forbidden as an accidental complexity anti-pattern. Instead, each operational boundary commands its own cohesive derivation, centered around **exactly one irreducible primitive** ($1 \text{ Boundary} \equiv 1 \text{ Primitive}$):
+### 3.1 The Canonical Topology: Boundary-First Cohesive Derivation
+Horizontal tier-first dumping (`core/`, `policies/`, `layers/` at root) is strictly forbidden. Every operational boundary commands its own cohesive derivation centered around **exactly one irreducible primitive** ($1 \text{ Boundary} \equiv 1 \text{ Primitive}$):
 
 ```text
 RepositoryRoot/
 ├── [DomainBoundaryA]/          # Boundary A: Encapsulates Primitive A (Cluttered Scale)
-│   ├── primitive.ext           # THE ONE PRIMITIVE (Contract & Base Implementation)
-│   ├── schema.ext              # Pure immutable domain value objects for Primitive A
-│   ├── policies/               # Injected strategies (partitioned when >= 4-5 policies)
+│   ├── primitive.ext           # THE ONE PRIMITIVE (Contract & Implementation)
+│   ├── schema.ext              # Pure immutable domain value objects
+│   ├── policies/               # Injected strategies (partitioned when >= 4-5 items)
 │   │   ├── strategy_1.ext
 │   │   └── strategy_2.ext
-│   └── layers/                 # Composable decorators (λ_A: A -> A)
-│       ├── profiling_layer.ext
-│       └── guardrail_layer.ext
+│   ├── layers/                 # Composable decorators (λ_A: A -> A)
+│   │   ├── profiling_layer.ext
+│   │   └── guardrail_layer.ext
+│   └── data/                   # Boundary-owned assets (fixtures, baselines, weights)
 ├── [DomainBoundaryB]/          # Boundary B: Encapsulates Primitive B (Lean Scale: Flat)
-│   ├── primitive.ext           # THE ONE PRIMITIVE (Contract & Base Implementation)
+│   ├── primitive.ext           # THE ONE PRIMITIVE (Contract & Implementation)
 │   ├── objective.ext           # Injected policy (flat, no 1-file folder ceremony)
 │   └── checkpoint_layer.ext    # Composable decorator (self-documenting via *Layer suffix)
+├── cli.ext                     # Root external runner / orchestration entrypoint
 └── tests/                      # Contract verification & regression tests
 ```
 
-### 6.2 Extensibility Feature Hint: Satellite Extension Packaging
-When binary distribution, separate deployments, or strict dependency boundaries require a zero-dependency core package, the architecture's modularity naturally enables satellite extension assemblies. 
+### 3.2 The Clutter-Threshold Rule (When to Subfolder vs. Stay Flat)
+- **Lean Boundaries ($\le 3–4$ files):** Keep the boundary flat. The primitive (`trainer.py`), policy (`loss.py`), and layer (`checkpoint_layer.py`) live directly at the boundary root.
+- **Cluttered Boundaries ($\ge 4–5$ policies or layers):** Subordinate policies and layers into dedicated `policies/` and `layers/` subfolders.
+- **Zero Single-File Folders:** Never create a directory or separate namespace for a single file.
 
-Extensions (composable layers and/or specialized policies) sit in a separate project without touching or bloating the core primitive, scoped directly by the primitive they augment:
-- **Satellite Package:** `[Domain].Layers` or `[Domain].Extensions`
-- **Namespace & Path:** `[Domain].Layers.[Primitive]` or `[Domain].Extensions.[Primitive]`
-
-Because of **Axiom 4**, any extension decorator or strategy belongs to **one specific primitive $P$** and is namespaced accordingly (`[Domain].Layers.[Primitive]`). The core primitive assembly remains pristine, minimal, and zero-dependency.
-
-### 6.3 The Clutter-Threshold Rule (When to Subfolder vs. When to Stay Flat)
-A primary failure mode in modular architectures is **Folder Ceremony**—creating nested directories that contain only a single file (e.g., `training/policies/loss.py` or `evaluation/layers/profiling.py`). ADA resolves this through the **Clutter Threshold**:
-
-1. **Lean Boundaries ($\le 3–4$ files total):**
-   - Keep the boundary flat! 
-   - A primitive (`trainer.py`), its single policy (`loss.py`), and its single layer (`checkpoint_layer.py`) live directly in the boundary root.
-   - The `*Layer` suffix already provides 100% unambiguous self-documentation; a 1-file `layers/` directory adds pure ceremony without architectural value.
-2. **Cluttered Boundaries ($\ge 4–5$ policies or layers):**
-   - Subordinate policies and layers into dedicated `policies/` and `layers/` subfolders to prevent visual clutter and maintain structural hygiene.
-3. **Naming Suffix & Taxonomy Rule:**
-   - **Operational Boundaries are Capability Domains:** Boundary namespaces and directory paths represent operational capabilities or lifecycle processes (`inference/`, `execution/`, `training/`, `evaluation/`, `storage/`).
-   - **Primitives are Actor / Entity Nouns:** Irreducible contracts define *what* the domain actor is using pure domain entity nouns (`DecisionEngine`, `EpochTrainer`, `ModelEvaluator`, `BlockStore`). Aligning boundary directories to capabilities and primitive classes to actor nouns prevents redundant namespace stuttering (e.g. `inference.DecisionEngine` instead of `engine.DecisionEngine`) and clarifies domain ownership.
-   - **Policies DO NOT append `*Policy` or `*Strategy` (Prefer `-er`/`-or` Agentive Nouns):** Concrete strategies define *how* an internal step executes. They are typically agentive/doer nouns (`Resolver`, `Selector`, `Sampler`, `Optimizer`, `Router`, `Validator`, `Assembler`). The noun itself defines the strategy; appending `*Policy` or `*Strategy` is redundant enterprise noise. (Non-stringent suggestion, as pure mathematical concepts like `Loss` or `Schedule` remain natural nouns).
-   - **Layers MUST carry `*Layer` suffix:** Because they implement the primitive's exact interface, the `*Layer` suffix is non-negotiable (`RetryLayer`, `ProfilingLayer`, `CacheLayer`) to unambiguously distinguish decorators from base implementations.
-
-### 6.4 The 5-Step Discovery Heuristic: How to Structure When in Trouble
-When an engineer is stuck or facing architectural drift, apply this 5-step diagnostic heuristic to discover the correct boundaries, types, and asset locations:
-
-1. **Step 1: The Subtraction Test (Discover the Primitive):**
-   *Does removing this component cause the fundamental domain capability to collapse entirely?*
-   - **YES** $\implies$ It is a **Core Primitive** ($P$). Create a boundary for it, placing its irreducible contract and base implementation at the boundary root.
-   - **NO** $\implies$ It is either a policy, a layer, or dead code.
-2. **Step 2: The Endomorphism Test (Discover the Layers):**
-   *Does this class implement the exact same interface contract as $P$, wrapping an inner instance to add a cross-cutting concern (timing, checkpointing, retries, guardrails)?*
-   - **YES** $\implies$ It is a **Composable Layer** ($\lambda_P \in \text{End}(P)$). It MUST carry the `*Layer` suffix.
-3. **Step 3: The Parameterization Test (Discover the Policies):**
-   *Is this class an injected strategy, formatting rule, objective function, or algorithm configuring an internal step of $P$?*
-   - **YES** $\implies$ It is an **Injected Policy** ($\pi \in \mathcal{P}(P)$).
-4. **Step 4: The Functional Ownership Test (The "Who Uses It?" Test):**
-   *Which operational boundary produces or exclusively consumes this asset, dataset, or fixture?*
-   - Co-locate the asset directly inside that consuming boundary (e.g., golden evaluation fixtures and baseline metrics inside the Verification boundary). Never dump assets into untyped horizontal root folders (`data/`, `results/`).
-5. **Step 5: The Subordination & Single-Primitive Check (The Multiple Primitives Fallacy):**
-   *Are there multiple primitives or loose files sitting flat at the boundary root?*
-   - If an engineer thinks a boundary needs multiple primitives, it is almost always an illusion: one is the true root primitive defining *what* the capability is, and the secondary candidates are merely injected policies (or substrate dependencies) driving an internal step.
-   - If two primitives are genuinely independent, split them into two distinct boundaries ($1 \text{ Boundary} \equiv 1 \text{ Primitive}$).
-   - Keep policies and layers **subordinate**—either via `*Layer` suffix in lean boundaries or in `policies/` and `layers/` subfolders in cluttered boundaries.
-
-### 6.5 Universal Hygiene Rules:
-1. **Folder-Namespace 1:1 Isomorphism (No Folders Without Namespaces):**
-   - **A folder without a namespace is a design smell.** Every directory in the source tree must map 1:1 to an explicit logical namespace or package module with its own public API definition. Never create arbitrary filesystem folders ("junk drawers") that do not represent a cohesive logical namespace.
-   - Conversely, every namespace must map 1:1 to its physical path (`App.Execution.Layers.ProfilingLayer` $\iff$ `App/Execution/Layers/ProfilingLayer.*`).
-2. **The `*Layer` Suffix Mandate:** Every composable endomorphic decorator ($\lambda_F: F \to F$) must carry the `*Layer` suffix (e.g., `ProfilingLayer`, `RetryLayer`, `CheckpointingLayer`).
-3. **Boundary-Scoped Subordination:** Policies and layers must be namespaced to the operational primitive they serve (`boundary/policies/`, `boundary/layers/`). Never dump training objectives and runtime token layout policies into an untyped global bucket.
-4. **Co-location vs. Physical Package Separation:**
-   - **In unified libraries:** Co-locate layers within each boundary. Avoid creating a detached top-level `layers/` tree that forces mirror-tree duplication across the codebase.
-   - **In multi-package ecosystems:** Separate layer assemblies (e.g. `[Domain].Layers`) only when binary packaging distribution requires a zero-dependency core package.
-5. **Zero Aimless Folders:** Prohibit vague dumping grounds (`scripts/`, `utils/`, `helpers/`, `misc/`, `common/`). Operational utilities and runners reside in clean entrypoints (`cli.py`, `examples/`, or runner modules).
-6. **Zero Batch-Dumping:** Never bundle unrelated training, data preparation, evaluation, and benchmark files together in a flat folder.
-7. **Zero Residual Debris:** Build caches (`__pycache__`, `.bin/`), temporary logs, scratch runs, and disposable experiment debris must never linger in source trees. Intrinsic domain assets (fixtures, benchmarks, weights, static seed data) are not residual debris; they belong co-located inside the operational boundary that owns their lifecycle (Rule 11).
-8. **The Single-File Folder / Namespace Anti-Pattern:** Creating a directory or separate logical namespace for a single file is gratuitous nesting and folder ceremony. If a directory or namespace cannot justify having at least 2–3 sibling files, it must NOT exist as a separate folder. Lean boundaries stay flat with explicit naming suffixes (`*Layer`), and driver folders must not be introduced for a single entrypoint.
-9. **The Axiom and Its Derivations Solve It All:** Every operational domain capability decomposes into an irreducible bedrock axiom and its clean derivations:
-   - **Axiom / Primitive ($P$):** Defines *what* the capability is. If a capability does not belong to an existing primitive, **it is a new Primitive**.
-   - **Derived Policy ($\pi$):** Defines *how* an internal step executes.
-   - **Derived Layer ($\lambda$):** Decorates cross-cutting concerns without interface drift.
-   - **Boundary:** Simply the cohesive namespace or directory that holds that derivation.
-   - Auxiliary state consists of pure immutable DTOs, and stateless math calculations are pure transforms.
-10. **No Lazy Hack Script Sinkholes (ADA Minimalism Across the Board):** Ad-hoc procedural scripts full of copy-pasted loops, manual timing hacks, and unprincipled glue are symptoms of lazy hacks. The goal of ADA is not banning entrypoints or loops, but ensuring that all real domain logic is modeled cleanly within Primitives, Policies, and Layers. Runners and entrypoints simply instantiate and orchestrate those clean primitives rather than accumulating procedural rot.
-11. **The Functional Ownership Principle (The "Who Uses It?" Axiom):** Every asset, dataset, benchmark fixture, or configuration must be co-located with the specific operational boundary that produces or exclusively consumes it. 
-   - A pervasive architectural smell is **Horizontal Format Scattering**—creating top-level directories based on superficial file formats or artifact types (`data/`, `results/`, `output/`, `fixtures/`) rather than functional ownership.
-   - To determine the canonical location of any file, dataset, or asset, apply the **Ownership Test**: *"Which primitive or operational boundary produces or exclusively consumes this asset?"*
-   - Assets consumed by execution testing (e.g., benchmark golden datasets) belong with that domain, while training corpora belong to the Optimization boundary.
-   - Repository roots must never become format-based dumping grounds. Co-locating assets with their consuming boundary preserves encapsulation and eliminates single-file folder sprawl.
-12. **The Pristine Root Principle (Zero Dangling Folders/Files at Root):** Any loose, untyped directory (`data/`, `checkpoints/`, `results/`, `output/`) or dangling file sitting at the repository root is an immediate design smell.
-   - A repository root is not a dumping ground for local data, binary weights, or execution dumps.
-   - Every single asset, corpus, weight checkpoint, fixture, or metric belongs strictly inside the specific operational boundary that produces or consumes it (e.g., `[domain]/data/`, `[domain]/checkpoints/`).
-   - A pristine repository root strictly contains: (1) The primary operational domain package(s), (2) Root orchestration entrypoint (`cli.ext`), (3) Contract verification test suite (`tests/`), and (4) Standard packaging configuration (`pyproject.toml`, `.gitignore`, `README.md`, `AGENT.md`). Everything else is an architectural leak.
+### 3.3 Functional Asset Ownership & The Pristine Root
+- **The Functional Ownership Principle:** Every dataset, benchmark fixture, or weight checkpoint must be co-located with the specific operational boundary that produces or exclusively consumes it (e.g. golden evaluation fixtures in `inference/data/`). Never scatter assets into horizontal dumping grounds at root (`data/`, `results/`).
+- **The Pristine Root Principle:** The repository root contains only primary operational packages, orchestration entrypoint (`cli.ext`), contract tests (`tests/`), and standard packaging configs (`pyproject.toml`, `.gitignore`, `README.md`, `AGENT.md`). Everything else is an architectural leak.
+- **Zero Residual Debris:** Build caches (`__pycache__`), temporary logs, scratch runs, and disposable experiment debris must never linger in source trees.
 
 ---
 
-## 7. Concrete Domain Instantiations
+## 4. Concrete Domain Instantiations
 
-ADA has been empirically proven across two fundamentally different software domains:
+ADA has been empirically proven across fundamentally different software domains:
 
-### 7.1 Domain A: Autonomous Agent Execution (e.g., AgentCore)
-- **The Primitive Triple ($K = 3$):**
-  - $\mathcal{L}$ (`ILLM`): Reasoning (`GenerateAsync`) — 16 lines.
-  - $\mathcal{T}$ (`IToolbox`): Acting (`GetDefinitionsAsync`, `ExecuteAsync`) — 28 lines.
-  - $\mathcal{C}$ (`IContext`): Remembering (`WriteAsync`, `ReadAsync`) — 20 lines.
+### 4.1 Autonomous Agent Execution (e.g., [AgentCore](file:///D:/CodeBase/AgentCore))
+- **The Primitive Triple:**
+  - Reasoning: `ILLM` (`GenerateAsync`) — 16 lines.
+  - Acting: `IToolbox` (`GetDefinitionsAsync`, `ExecuteAsync`) — 28 lines.
+  - Remembering: `IContext` (`WriteAsync`, `ReadAsync`) — 20 lines.
 - **The Execution Loop:** ReAct fixed-point loop expressed in **35 lines of code**.
-- **The Layer Suite:**
-  - $\lambda_\mathcal{L}$: `InputGuardrailLayer`, `RetryLayer`, `ToolCallDetectionLayer`.
-  - $\lambda_\mathcal{T}$: `ToolApprovalLayer`, `ToolDiscoveryLayer`.
-  - $\lambda_\mathcal{C}$: `ChatPersistenceLayer` (WAL durability).
+- **The Layer Suite:** `InputGuardrailLayer`, `RetryLayer`, `ToolApprovalLayer`, `ChatPersistenceLayer` (WAL durability).
 - **Result:** Complete agent framework implemented in under 1,000 lines of code, outperforming 20,000-line competing frameworks in latency, complexity metrics, and test coverage.
 
-### 7.2 Domain B: Neural Decision Engines (e.g., NanoLLM)
-- **The Decision Basis ($K = 2$):**
-  - $\mathcal{D}$ (`IDecisionEngine`): Domain semantic decision (`decide`).
-  - $\mathcal{S}$ (`ISubstrate`): Hardware tensor compute (`forward`).
+### 4.2 Neural Decision Engines (e.g., [NanoLLM](file:///D:/CodeBase/NanoLLM))
+- **The Decision Basis:**
+  - `IDecisionEngine`: Domain semantic decision (`decide`).
+  - `NanoModel`: Foundational tensor substrate (`forward`).
 - **Injected Policies:** `ISlotAssembler` (token layout), `IResolver` (logit calibration), `CalibratedLoss` (multi-task objective).
 - **Composable Layers:** `ProfilingLayer` (CUDA-synchronized latency), `HierarchicalLayer` ($O(\sqrt{N})$ clustered routing).
 - **Result:** Sub-35ms calibrated decision-making on 149M parameters, beating commercial frontier models on tool-routing accuracy and latency.
 
 ---
 
-## 8. Related Work & The ADA Delta
+## 5. Summary Checklist: The ADA Smell Detector
 
-ADA synthesizes established software engineering foundations while imposing a strict, zero-bloat constraint system across all operational boundaries:
-
-| Paradigm / Prior Art | Foundational Contribution | The ADA Delta & Structural Synthesis |
+| Diagnostic Question | If YES (Clean Design) | If NO (Smell Detected) |
 |---|---|---|
-| **Ports & Adapters (Hexagonal)** (Cockburn, 2005) | Boundary isolation via abstract ports and swappable adapters. | Hexagonal architectures typically treat operational tooling (training, migrations, eval) as unconstrained outer drivers. ADA enforces **Universal Boundary Invariance (Axiom 4)**: every operational boundary fractally adheres to the Axiom and its Derivations, eliminating disposable script sinkholes. |
-| **Strategy & Decorator Patterns** (Gamma et al., 1994) | Object composition over inheritance; dynamic behavioral decoration. | ADA formalizes decorators as an algebraic **Endomorphism Monoid** ($\lambda_F: F \to F$) with strict contract invariance. Dynamic algorithmic variations are strictly isolated to **Injected Policies** (Tier 2), preventing decorator parameter leakage. |
-| **Composition Root** (Seemann, 2011) | Centralized dependency injection wiring at application entry points. | ADA formalizes this as **External Consumers (Axiom 5)**: lean runners and entrypoints driving domain primitives directly without accumulating ad-hoc procedural rot. |
-| **Clean Architecture / ISP** (Martin, 2002) | Interface Segregation and Dependency Inversion. | Clean Architecture frequently degenerates into "Abstraction Theater" with proliferating DTO mappings and intermediate wrapper layers. ADA enforces **Irreducible Primitives** (minimal surface area, single responsibility, zero convenience bloat) with mathematical basis spanning. |
-
----
-
-## 9. Summary Checklist: The ADA Smell Detector
-
-When reviewing or building any codebase, ask these diagnostic questions:
-
-| Question | If YES | If NO (Smell Detected) |
-|---|---|---|
-| **What is the primitive?** | Irreducible contract defining pure domain capability | God class, procedural manager, or multiple overlapping types |
-| **How does it execute?** | Injected policy interface configured at construction | Hardcoded toggles, boolean switches, or inheritance subclasses |
-| **How do we add features?** | Endomorphic layer ($\lambda_F: F \to F$) decorating the contract | Modifying the execution loop or bloating the base interface |
-| **Are behaviors behind interfaces?** | Yes, 100% of behavioral components have clean interfaces | Concrete classes directly exposed to callers |
-| **Do interfaces have convenience overloads?** | Zero convenience methods; minimal surface area | Bloated interfaces with multiple `With*`, `Run*`, or helper aliases |
-| **Where do operational entrypoints live?** | Clean entrypoints/runners driving primitives | Sprawling `scripts/` folder full of copy-pasted procedural hack-loops |
-| **Interface and class focus?** | Focused single-responsibility (minimal methods) | 1000-line God classes or 15-method interface monsters |
-| **Do layers carry `*Layer` suffix?** | Yes, 100% of endomorphic decorators end in `*Layer` | Ambiguous naming (`*Trainer`, `*Manager`, `*Wrapper`) |
-| **How are multi-subsystems partitioned?** | Boundary-first (`boundary/policies/`, `boundary/layers/`) | Tier-oriented bloat (dumping all primitives into one giant `core/`) |
-| **How many primitives per boundary?** | Exactly 1 primitive per boundary | Multiple primitives in one folder causing policy/layer ambiguity |
-| **Are policies and layers subordinated?** | Cleanly scoped in `policies/` and `layers/` subdirectories | Flat adjacent files competing with the root primitive contract |
-| **Are there single-file folders?** | Zero 1-file folders; lean boundaries remain flat | Folders/namespaces wrapping a single file (folder ceremony) |
-| **Are capabilities modeled cleanly?** | Real domain logic modeled in the Axiom and its Derivations ($P + \pi + \lambda$) | Lazy procedural glue and loose hack scripts masquerading as architecture |
-| **Are entrypoints orchestrating primitives?** | Runners instantiate and drive domain primitives | Entrypoints implementing their own ad-hoc domain math and duplicated logic |
-| **Are interfaces 1:1 mirrors?** | Decoupling polymorphism/layers ($\ge 2$ impls or decorator target) | 1:1 mechanical passthrough interfaces adding indirection without abstraction |
-| **Are shared substrates independent?** | Shared foundations are autonomous boundaries injected cleanly | Cross-boundary dependencies demoted to internal policies of a single consumer |
-| **Where do data, fixtures, & metrics live?** | Co-located inside the boundary that consumes/produces them | Horizontal format scattering (`data/`, `results/`, `fixtures/` at root) |
-| **Are there dangling root folders?** | Clean root: zero loose `data/`, `checkpoints/`, `results/` | Root littered with untyped asset dumping grounds |
+| **Irreducible Primitive?** | Contract defines pure domain capability ($P$) | God class, procedural manager, or multiple overlapping types |
+| **Injected Execution?** | Internal steps injected via swappable policy interfaces ($\pi$) | Hardcoded switches, boolean toggles, or inheritance subclasses |
+| **Cross-Cutting Layers?** | Composable endomorphic decorator ($\lambda: P \to P$) with `*Layer` suffix | Bloating the execution loop or mutating the base contract |
+| **Behavior Behind Interfaces?** | 100% of behavioral components defined by explicit interfaces | Concrete classes directly exposed to callers |
+| **Method Surface & Overloads?** | Minimal methods, zero convenience aliases or `With*` sugar | Bloated interfaces with convenience overloads and helper wrappers |
+| **Interface Mirroring?** | Decouples polymorphism or layer decoration ($\ge 2$ impls/consumers) | 1:1 mechanical passthrough interfaces adding indirection without abstraction |
+| **Boundary Independence?** | Exactly 1 primitive per boundary; shared substrates autonomous | Multiple primitives per boundary, or horizontal tier-first dumping (`core/`) |
+| **Asset Ownership & Clean Root?** | Assets co-located in consuming boundary; pristine root | Loose `data/`, `results/`, or scripts scattered at repo root |
 
