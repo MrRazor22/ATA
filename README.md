@@ -1,11 +1,11 @@
 # Axiomatic Triad Architecture (ATA)
-## A Foundational Theory of Bedrock Primitives and Representation Reduction
+## The Theory of Primitives
 
 ---
 
 ## The Core Soul of ATA
 
-> **"Correct design will always be minimal. Minimal code is not code golf or a superficial quota; it is the natural, mathematical side-effect of truth in representation. When a system's bedrock primitive accurately reflects reality, unnecessary abstractions evaporate; what remains is a complete, minimal basis where every capability is expressed through composition, orthogonal policy, and contract-preserving layers."**
+> **"Correct design will always be minimal. Minimal code is not about artificially compressing lines or counting characters; it is the natural, mathematical side-effect of truth in representation. When a system's bedrock primitive accurately reflects reality, unnecessary abstractions evaporate; what remains is a complete, minimal basis where every capability is expressed through composition, orthogonal policy, and contract-preserving layers."**
 
 ### 1. The Smell-less ≡ Minimal Identity
 Code smells and bloat are the exact same phenomenon. You cannot introduce a classic architectural smell—a God class, leaky abstraction, mutable shared state, or pass-through convenience wrapper—without generating lines of bloat. Conversely, when you systematically eliminate all smells, the system mathematically collapses to its irreducible minimum. Minimal code is not sparse code; it is code stripped of architectural lies.
@@ -13,8 +13,8 @@ Code smells and bloat are the exact same phenomenon. You cannot introduce a clas
 ### 2. The Append-Only Trap vs. In-Place Refinement
 Software bloat rarely originates from genuine domain complexity. It stems from **convenience-driven drift**—the path of least resistance where developers and AI coding agents lazily *append* new boolean flags, helper overloads, and wrapper classes instead of doing the hard thinking to refine existing primitives. When you fix the underlying primitive, that single resolution strengthens *both* the existing system and the new requirement; convenience wrappers, by contrast, leave the original design rot untouched while introducing new bloat. ATA demands an uncompromising anti-bloat discipline: **always hesitate to add new abstractions; prefer updating and refining existing primitives in place rather than appending layers of duct tape.**
 
-### 3. The Human-AI Trust Boundary
-Unconstrained AI coding agents generate an ocean of incomprehensible boilerplate, convenience wrappers, and synthetic complexity that no human engineer can review or trust. ATA establishes an unambiguous reviewability boundary: when every line belongs strictly to a bedrock primitive contract, an injected policy, or an endomorphic layer, the architecture becomes self-evident and effortlessly reviewable.
+### 3. Human Reviewability as the True North
+Architecture must be effortlessly comprehensible and reviewable. When developers—and increasingly, unconstrained AI coding agents—fall into convenience-driven drift, codebases become unreviewable sinkholes of boilerplate and wrapper layers. ATA ensures every line of code has an unambiguous, self-evident purpose, keeping systems human-scale and verifiable.
 
 ---
 
@@ -86,7 +86,7 @@ A healthy contract reflects an irreducible capability:
 
 ## 3. Boundary Topology & Practical Gauges
 
-ATA favors natural geometric alignment between logical namespaces and physical directory structures:
+ATA favors natural alignment between logical boundaries and physical directory structures, keeping each primitive and its derivations co-located rather than scattered across generic folders:
 
 ```text
 RepositoryRoot/
