@@ -17,7 +17,7 @@ ATA does not invent an alien paradigm. It is grounded in proven, classic object-
 
 ## 1. The Unified Foundation: Everything is a Primitive
 
-At its bedrock, ATA reveals that **the Primitive is the sole behavioral atom of a system**. What we call the Triad is simply the three natural roles a primitive plays in composition:
+At its bedrock, ATA reveals that **the Primitive is the sole behavioral atom of a system**. Every capability in a repository—whether core runtime execution, optimization, data ingestion, or validation—decomposes into this triad:
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
@@ -25,7 +25,7 @@ At its bedrock, ATA reveals that **the Primitive is the sole behavioral atom of 
 │                                                             │
 │       ┌──────────────────────────────────────────────┐      │
 │       │      Derived Layers: Composable Decorators   │      │
-│       │      (Cross-cutting concerns wrapping P)     │      │
+│       │      (Behavioral extensions wrapping P)      │      │
 │       └──────────────────────┬───────────────────────┘      │
 │                              │ wraps (λ: P -> P)            │
 │       ┌──────────────────────▼───────────────────────┐      │
@@ -44,8 +44,7 @@ At its bedrock, ATA reveals that **the Primitive is the sole behavioral atom of 
    - **The Subtraction Test:** A primitive is truly irreducible if removing it causes the fundamental domain capability to collapse entirely. If the capability still functions by swapping an algorithm or default, that component is a policy or layer, not a root primitive.
 2. **The Injected Policy ($\pi$):** When a primitive is injected into another primitive at a different level to drive an internal execution step, it acts as a **Policy** (e.g., an encoding primitive injected into an engine primitive).
    - **Policy Orthogonality:** Operational variation (*how* a step executes) is cleanly isolated as swappable policies injected at initialization, leaving the primitive contract invariant. Policies are dependencies of the primitive, rather than subclasses or outer wrappers.
-3. **The Composable Layer ($\lambda: P \to P$):** When a primitive wraps another primitive sharing the **exact same interface contract**, it acts as an endomorphic **Layer**—decorating cross-cutting operational concerns (retries, rate limiting, persistence, latency profiling, telemetry) externally without interface drift.
-   - **Endomorphic Layer Sufficiency:** Layers form an algebraic monoid $(\text{End}(P), \circ, \text{id})$. Cross-cutting concerns compose naturally as outer decorators rather than mutating the core execution loop or leaking operational parameters into the primitive. Every layer carries the `*Layer` suffix to clearly communicate its decorating role.
+3. **The Composable Layer ($\lambda: P \to P$):** When a primitive wraps another primitive sharing the **exact same interface contract**, it acts as an endomorphic **Layer**. Layers form an algebraic monoid $(\text{End}(P), \circ, \text{id})$, decorating and extending the behavior of that specific primitive (such as caching, routing, resilience, or telemetry) without interface drift or mutating the core execution loop. Every layer carries the `*Layer` suffix to clearly communicate its decorating role.
 
 Along with primitives, a system consists only of:
 - **State:** Pure, immutable data structures, schemas, and static domain assets passed across disjoint channels. Mutable shared and global state obscures data provenance, introduces hidden temporal coupling, and complicates concurrency; immutable state keeps data flows transparent, predictable, and thread-safe.
@@ -103,9 +102,11 @@ RepositoryRoot/
 │   ├── primitive.ext           # THE ONE PRIMITIVE (Contract & Base Implementation)
 │   ├── objective.ext           # Injected policy (flat, no 1-file folder ceremony)
 │   └── checkpoint_layer.ext    # Composable decorator (self-documenting via *Layer suffix)
-├── cli.ext                     # Root external runner / orchestration entrypoint
+├── cli.ext                     # Root runner / composition root
 └── tests/                      # Contract verification & regression tests
 ```
+
+Application runners, CLIs, or worker loops (`cli.ext`) sit outside domain boundaries as thin composition roots—they instantiate primitives, inject policies, compose layers, and drive execution without containing domain logic.
 
 ### 3.2 The Clutter-Threshold Gauge (When to Subfolder vs. Stay Flat)
 A frequent distraction in modular codebases is **Folder Ceremony**—creating nested directories that wrap only a single file:
@@ -118,41 +119,6 @@ A frequent distraction in modular codebases is **Folder Ceremony**—creating ne
 - **Horizontal Format Scattering:** Grouping files by extension or format (`data/`, `results/`, `fixtures/` at root) scatters related domain logic. Assets consumed by execution testing belong with that execution boundary; assets consumed by optimization belong with the optimization boundary.
 - **The Pristine Root:** Keeping the repository root focused—containing primary operational packages, orchestration entrypoints (`cli.ext`), tests, and standard configuration—prevents untyped dumping grounds from accumulating over time.
 - **Zero Residual Debris:** Build caches, temporary logs, scratch runs, and disposable experiment debris are transient and should not linger in source trees.
-
----
-
-## 4. Operational Workflows & External Consumers
-
-### 4.1 External Consumers / Runners
-Standalone CLI scripts, host applications, benchmark harnesses, worker loops, and entrypoints are **external consumers orchestrating boundaries**, not an internal fourth tier of the Triad:
-- The Triad encapsulates the domain capability: the Primitive ($P$), Injected Policies ($\pi$), and Composable Layers ($\lambda$).
-- Runners simply instantiate Primitives, configure Policies, compose Layers, and drive workflows.
-
-### 4.2 Workflows Decompose into the Triad
-All operational workflows—from training and data ingestion to benchmarking and evaluation—benefit from decomposing into the Triad:
-- Tasks like evaluation or benchmarking are first-class domain capabilities. Expressing them with clear primitives, swappable policies (e.g., scoring metrics), and composable layers (e.g., latency timers) keeps them robust, testable, and reusable.
-- Keeping domain logic out of loose, ad-hoc scripts ensures operational tooling maintains the same architectural quality as production execution code.
-
----
-
-## 5. Design-Time Diagnostic Gauges
-
-Rather than rigid rules, ATA relies on practical diagnostic reflections. When designing, reviewing, or refactoring, these questions help highlight latent friction and maintain architectural clarity:
-
-| Diagnostic Reflection | Healthy Indicator (ATA Design) | Friction / Smell to Watch For |
-|---|---|---|
-| **What is the primitive?** | Irreducible contract defining pure domain capability ($P$) | **God Class / Manager Bloat:** Sprawling managers or multiple overlapping types |
-| **How does it execute?** | Internal steps injected via swappable policies ($\pi$) | **Hardcoded Branching:** Boolean switches, hardcoded algorithms, or inheritance hierarchies |
-| **How do we add features?** | Endomorphic layer ($\lambda: P \to P$) decorating the contract | **Core Mutation:** Modifying the execution loop or bloating the base contract |
-| **Are behaviors behind interfaces?** | Behavioral components defined by explicit interfaces | **Hidden Bloat:** Concrete classes accumulating unstructured methods and tight coupling |
-| **Are contracts clean & focused?** | Minimal surface area (~2–4 methods); core contract purity | **Contract Clutter:** Interfaces bloated with convenience aliases and redundant overloads |
-| **Do abstractions add real value?** | Interfaces decouple polymorphism, strategies, or layers | **Abstraction Theater:** Mechanical 1:1 wrappers adding indirection without abstraction |
-| **How is state managed?** | Pure, immutable data structures passed across disjoint channels | **Mutable Shared State:** Shared mutable objects, global variables, or hidden side-effects |
-| **How many primitives per boundary?** | Exactly 1 root primitive per boundary; substrates injected | **Multiple Primitives Fallacy:** Competing primitives in one folder causing role ambiguity |
-| **How is the repository partitioned?** | Boundary-first (`boundary/policies/`, `boundary/layers/`) | **Tier-First Dumping:** Horizontal dumping grounds (`core/`, `policies/` at root) |
-| **Is folder nesting justified?** | Lean boundaries stay flat; folders contain $\ge 2–3$ files | **Folder Ceremony:** Gratuitous nesting and namespaces wrapping a single file |
-| **Where do assets & datasets live?** | Co-located inside the boundary that consumes/produces them | **Horizontal Format Scattering:** Loose `data/`, `results/`, or fixtures scattered at root |
-| **Where do operational workflows live?** | Clean runners orchestrating domain primitives | **Script Sinkholes:** Fragile procedural scripts with copy-pasted loops and ad-hoc math |
 
 ---
 
