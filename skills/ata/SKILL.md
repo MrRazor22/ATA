@@ -67,7 +67,8 @@ Every operational boundary encapsulates **exactly one root primitive** ($1 \text
 Topology should reflect natural, timeless software engineering rather than rigid framework dogmas:
 
 * **Flat First within Boundaries:** Forcing single files into dogmatic `/policies/` and `/layers/` folders creates ceremony and noise. Within a boundary, start flat:
-  * Files clearly state their role—either via natural domain names (`sqlite_source.py`, `retry_decorator.py`) or convention suffixes (`_policy`, `_layer`, `_primitive`).
+  * Concrete strategies are named naturally for what they actually are (`sqlite_source.py`, `cosine_similarity.py`), without forcing redundant `_policy` suffixes.
+  * For decorators, a `_layer` or `Layer` naming hint (`retry_layer.py`, `caching_layer.py`) is helpful because it instantly distinguishes transparent decorators from standalone primitives sharing the same interface.
   * Grouping into subfolders is an optional human choice when implementations multiply, not a mandatory dogmatic ritual.
 * **Fractal Boundary Promotion:** When a policy grows rich and complex—requiring internal sub-policies or dedicated layers—it naturally **promotes into its own primitive boundary folder** nested directly inside the parent boundary that owns it:
   ```text
