@@ -24,20 +24,20 @@ description: >-
 ### II. Human-AI Synthesis & Operational Discipline
 * **Universal Discipline for Humans and AI Alike:** ATA is not merely an AI agent prompt or a coder's trick; it is a universal intellectual discipline for humans and AI alike. Both humans and LLMs tend toward the lazy append-only trap—adding wrapper classes, helper flags, and convenience layers rather than thinking deeply to discover the irreducible primitive. ATA stops this decay, saving massive context tokens and computational cost while preserving radical maintainability.
 * **Unified Representation, Not a Patchwork of Ideas:** ATA is not a loose assembly of disparate design patterns; it is a unified theory of representational truth. Token efficiency, compute savings, radical maintainability, human verifiability, and zero code smell are not separate goals—they are one-to-one complementary mathematical side-effects of bedrock primitives accurately mirroring reality.
-* **Reject the Append-Only Trap:** Never lazily append helper flags, pass-through overloads, or wrapper classes. Prefer updating and refining existing primitives in place.
+* **Reject the Append-Only Trap:** Never append helper flags, convenience overloads, or pass-through wrappers. Before introducing any new type or file, exhaustively refine existing bedrock primitives in place—never add convenience bloat to evade the deep thinking required to uncover irreducible domain reality.
 * **The Supreme Question: "Who is actually using it?":** Every design decision begins and ends here. Never build abstractions, middleman primitives, or registries in a vacuum for speculative callers. If there is no concrete caller actively demanding the shape of an abstraction right now, it does not exist.
 
 ### III. Disciplined Modeling over Dogma
 * **Intellectual Honesty Over Dogma:** Never apply ATA blindly or religiously. If applying an ATA rule creates practical friction, awkward ceremony, or a design smell in a specific scenario, honestly identify and challenge it rather than force-fitting dogma.
-* **Triad Components Are Optional Stages, Not Mandatory Rituals:** Primitives ($P$), policies ($\pi$), and layers ($\lambda$) are evolutionary stages of domain capability. Forcing a boundary to fabricate policies or decorator layers when a single clean primitive interface suffices is dogmatic over-engineering and an anti-ATA smell.
+* **Triad Components Are Distinct Roles, Not Mandatory Rituals:** Primitives ($P$), policies ($\pi$), and layers ($\lambda$) model distinct structural dimensions (mechanism vs. heuristic vs. flow). If a capability has no volatile heuristics or cross-cutting flow, the bedrock primitive contract ($P$) is already 100% complete. Fabricating policies or decorator layers when none are demanded by domain reality is dogmatic bloat.
 * **Interface-First Collaborative Dialogue:** 80% of architecture is determined at interface boundaries ($P$ and $\pi$). Never rush into generating large implementation files based on an unverified contract. Interactively design and lock the core interfaces with the user first; when the primitive contract is true, the implementation is trivial.
-* **ATA is Simply Master-Crafted OOP:** ATA is not an exotic, alien paradigm or academic ceremony. If an engineer looks at an ATA codebase and finds it bizarre, confusing, or esoteric, **ATA has failed**. To any seasoned developer, an ATA project simply looks like a clean, master-designed system: clear domain primitives, swappable strategies injected via DI, clean extension/layer pipelines, and an intuitive directory layout.
+* **ATA is Timeless Engineering Restraint:** ATA is not an esoteric ceremony or alien syntax. To any seasoned engineer or thinker, an ATA system simply looks like master-crafted architecture: irreducible bedrock primitives, decoupled volatile heuristics, clean transparent pipelines, and intuitive domain boundaries.
 
 ---
 
 ## 2. The Operational Triad: Primitives, Policies, Layers
 
-Every operational boundary encapsulates **exactly one root primitive** ($1 \text{ Boundary} \equiv 1 \text{ Primitive}$). *(Note: $P, \pi, \lambda$ are natural behavioral stages, not mandatory ceremonial boilerplate. Never force policies or layers into a boundary where a single primitive contract suffices).*
+Every operational boundary encapsulates **exactly one root primitive** ($1 \text{ Boundary} \equiv 1 \text{ Primitive}$). *(Note: $P, \pi, \lambda$ model distinct structural roles, not ceremonial boilerplate. Never force policies or layers into a boundary where the bedrock primitive contract ($P$) is already complete).*
 
 ```text
                   LAYERS  (λ: P ➔ P)
@@ -57,7 +57,7 @@ Every operational boundary encapsulates **exactly one root primitive** ($1 \text
 ### 1. The Root Primitive ($P$): Bedrock Domain Mechanism
 * **Mandatory Interface Contract:** An interface is strictly required for every root primitive and policy ($P$ and $\pi$). Without an interface, implementation classes inevitably collect arbitrary convenience methods and leak internal state.
 * **The Dual Necessity Test for Primitive Revision:** A primitive contract must never be altered solely to appease an isolated downstream extension or external caller—doing so is narrow, hardcoded appeasement. During design or refinement, a change to $P$ is legitimate if and only if it satisfies both conditions:
-  1. **Universal Enablement:** The revision completes the primitive's domain metaphor such that all potential extensions benefit as a natural, beautiful side-effect.
+  1. **Universal Enablement:** The revision completes the primitive's domain metaphor such that all potential extensions benefit as a natural, necessary side-effect of a complete abstraction.
   2. **Irreducible Necessity:** If the proposed change were removed, the bedrock primitive contract would be fundamentally incomplete in itself.
 * **No Callbacks, Events, or Notifications in Core Primitives:** Inlining callbacks, event emitters, lifecycle hooks, or notification handlers inside a root primitive is a severe anti-ATA smell indicating incorrect output granularity. Primitives yield state naturally via their contract stream; downstream consumers, layers, or reactive extensions attach to that stream externally.
 * **Ban Static Classes & Global Mutable State:** Static utility classes and global mutable state are anti-ATA smells that obscure dependencies and prevent testing. Manage state strictly through explicit boundaries and DI composition roots. Monolithic static helper classes that accumulate arbitrary behavior without interfaces are strictly prohibited.
@@ -68,7 +68,7 @@ Every operational boundary encapsulates **exactly one root primitive** ($1 \text
 ### 2. The Injected Policy ($\pi$): Swappable Volatility
 * **Mechanism vs. Heuristic:** Primitives implement unopinionated mechanics; policies encapsulate opinionated strategies, scoring criteria, thresholds, and provider-specific details ($P_{\pi} \to P$).
 * **The Policy Composition Rule:** A policy must remain atomic. If a policy begins needing subordinate policies of its own, **it cannot secretly juggle them**. It must either be split into two orthogonal policies injected into the parent primitive, or it has matured into its own autonomous child primitive managing a sub-boundary.
-* **Beware the Composite Policy Trap:** Avoid forcing an aggregation of multiple policies into a single composite class implementing that same policy interface (`CompositeSource : ISource`), unless the domain genuinely represents a monoid/reduction. Forcing multi-source orchestration, batching, or concurrency into an atomic heuristic interface leaks coordination smells into pure strategies.
+* **Beware the Composite Policy Trap:** Avoid forcing an aggregation of multiple policies into a single composite class implementing that same policy interface (e.g. `CompositeSource` wrapping multiple `Source` policies), unless the domain genuinely represents a monoid/reduction. Forcing multi-source orchestration, batching, or concurrency into an atomic heuristic interface leaks coordination smells into pure strategies.
 
 ### 3. The Composable Layer ($\lambda: P \to P$): Transparent Flow Decorators
 * **Contract-Preserving Decorators:** Transparently wrap the exact same contract ($P \to P$). Handle cross-cutting flow (caching, retries, rate limits, circuit breakers, telemetry) strictly outside the primitive.
@@ -88,17 +88,17 @@ Every operational boundary encapsulates **exactly one root primitive** ($1 \text
 Topology should reflect natural, timeless software engineering rather than rigid framework dogmas:
 
 * **Flat First within Boundaries & Co-located Derivations:** Keep derivations beside their boundary; do not split into one-type-per-file or extra folders when a single file stays readable. Forcing single files into dogmatic `/policies/` and `/layers/` folders creates ceremony and noise. Within a boundary, start flat:
-  * Concrete strategies are named naturally for what they actually are (`sqlite_source.py`, `cosine_similarity.py`), without forcing redundant `_policy` suffixes.
-  * For decorators, a `_layer` or `Layer` naming hint (`retry_layer.py`, `caching_layer.py`) is helpful because it instantly distinguishes transparent decorators from standalone primitives sharing the same interface.
+  * Concrete strategies are named naturally for what they actually are (`SqliteSource`, `CosineSimilarity`), without forcing redundant `Policy` suffixes.
+  * For decorators, a `Layer` naming hint (`RetryLayer`, `CachingLayer`) is helpful because it instantly distinguishes transparent decorators from standalone primitives sharing the same interface.
   * Grouping into subfolders is an optional human choice when implementations multiply, not a mandatory dogmatic ritual.
 * **Namespace and Folder Alignment:** Namespaces and folders should mirror natural primitive boundaries rather than technical stereotypes (`/models`, `/controllers`, `/services`). Aligning folders with boundaries clarifies domain architecture at a glance.
 * **Fractal Boundary Promotion:** When a policy grows rich and complex—requiring internal sub-policies or dedicated layers—it naturally **promotes into its own primitive boundary folder** nested directly inside the parent boundary that owns it:
   ```text
   evaluator/
-    evaluator_primitive.py
+    evaluator_boundary       # Primary bedrock primitive
     heuristics/              # Promoted policy boundary
-      heuristic_primitive.py
-      threshold_policy.py
+      heuristic_primitive
+      threshold_policy
   ```
 * **Natural Sibling Placement for Shared Primitives:** Boundary hierarchy mirrors usage hierarchy. If a primitive is consumed by multiple peer primitives, it naturally belongs at their shared sibling level. Never bury a shared dependency deep inside one of its consumers.
 

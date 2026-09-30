@@ -22,14 +22,14 @@
 
 ### III. Disciplined Modeling over Dogma
 * **Intellectual Honesty Over Dogma:** ATA is not a dogmatic religion. If applying an ATA pattern introduces practical friction, unnatural ceremony, or a design smell in a specific scenario, acknowledge it openly and adapt.
-* **Triad Stages Are Possibilities, Not Obligations:** Primitives ($P$), policies ($\pi$), and layers ($\lambda$) represent stages of behavioral maturity. Forcing every boundary to instantiate all three when a simple primitive suffices is an anti-ATA smell. Apply them only when the domain naturally fractures along volatility and flow boundaries.
+* **Triad Components Are Distinct Roles, Not Mandatory Rituals:** Primitives ($P$), policies ($\pi$), and layers ($\lambda$) model distinct structural dimensions (mechanism vs. heuristic vs. flow). If a capability has no volatile heuristics or cross-cutting flow, the bedrock primitive contract ($P$) is already 100% complete. Fabricating policies or decorator layers when none are demanded by domain reality is dogmatic bloat.
 * **Active Architectural Interrogation:** Continuously challenge emerging designs: *Why does this feel heavy? Where is the bloat hiding? Why hasn't this collapsed into the effortless clarity ATA demands?* If an interface does not feel immediately obvious and minimal, the true primitive has not yet been discovered.
 
 ---
 
 ## 2. The Operational Triad
 
-Every operational boundary encapsulates **exactly one root primitive** ($1 \text{ Boundary} \equiv 1 \text{ Primitive}$). *(Note: $P, \pi, \lambda$ are natural behavioral stages, not mandatory ceremonial boilerplate. Never force policies or layers into a boundary where a single primitive contract suffices).*
+Every operational boundary encapsulates **exactly one root primitive** ($1 \text{ Boundary} \equiv 1 \text{ Primitive}$). *(Note: $P, \pi, \lambda$ model distinct structural roles, not ceremonial boilerplate. Never force policies or layers into a boundary where the bedrock primitive contract ($P$) is already complete).*
 
 ```text
                   LAYERS  (λ: P ➔ P)
@@ -49,7 +49,7 @@ Every operational boundary encapsulates **exactly one root primitive** ($1 \text
 1. **The Root Primitive ($P$):** The irreducible contract defining *what* the capability is.
    * *Mandatory Interface Contract:* Every primitive and policy **must** be defined by an explicit interface. Never implement an ad-hoc class without an interface contract; doing so allows arbitrary convenience methods and implementation leakage to corrupt the boundary.
    * *The Dual Necessity Test for Primitive Revision:* A primitive contract must never be altered solely to appease an isolated downstream extension or external caller—doing so is narrow, hardcoded appeasement. During design or refinement, a change to $P$ is legitimate if and only if it satisfies both conditions:
-     1. **Universal Enablement:** The revision completes the primitive's domain metaphor such that all potential extensions benefit as a natural, beautiful side-effect.
+     1. **Universal Enablement:** The revision completes the primitive's domain metaphor such that all potential extensions benefit as a natural, necessary side-effect of a complete abstraction.
      2. **Irreducible Necessity:** If the proposed change were removed, the bedrock primitive contract would be fundamentally incomplete in itself.
    * *No Callbacks, Events, or Notifications in Core Primitives:* Callbacks, event emitters, lifecycle hooks, and notification handlers inside a root primitive are severe anti-ATA smells indicating broken contract granularity. Primitives yield state naturally via their output stream; downstream consumers, layers, or reactive extensions attach externally.
    * *Ban Static Classes & Global Mutable State:* Global mutable state, static helper dumping grounds, and singleton registries are anti-ATA antipatterns. Encapsulate dependencies strictly through explicit composition roots.
