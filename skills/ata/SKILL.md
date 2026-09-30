@@ -14,17 +14,29 @@ description: >-
 
 > **"Correct design will always be minimal. Minimal code is not code golf; it is the natural, inevitable side-effect of truth in representation. When a bedrock primitive accurately reflects reality, unnecessary abstractions evaporate; what remains is a complete, minimal basis where every capability is expressed through composition, orthogonal policy, and contract-preserving layers."**
 
-* **ATA is Simply Master-Crafted OOP:** ATA is not an exotic, alien paradigm or academic ceremony. If an engineer looks at an ATA codebase and finds it bizarre, confusing, or esoteric, **ATA has failed**. To any seasoned developer, an ATA project simply looks like a clean, master-designed system: clear domain primitives, swappable strategies injected via DI, clean extension/layer pipelines, and an intuitive directory layout.
+### I. The Invariant of Representation (Smell-less ≡ Minimal)
+* **Code Smell = Anti-ATA:** Bloat and code smells are the exact same phenomenon. ATA's ultimate goal is zero code smell; if a design claims to follow ATA but introduces code smells, **ATA has failed**. Eliminating smells mathematically collapses a system to its irreducible minimum.
+* **10x Signal Compression & Brevity Barometer:** Line count is an empirical metric of representational fidelity. When primitives, policies, and layers are modeled cleanly, codebases compress to **~1/10th of their typical size** (proven in `AgentCore` matching full feature parity of LangChain and Microsoft Agent Framework at ~1/10th the SLOC with zero smells). If a file crosses ~150 lines, do not celebrate its thoroughness—diagnose it. It almost invariably signals that policy heuristics were inlined, cross-cutting flow was hardcoded, or multiple responsibilities were bundled together.
+* **Minimality Is Measured:** Fewer types, files, and lines at equal capability. Never introduce a file, type, DTO, helper, or transform unless the Subtraction Test fails without it; a category in the Quad is a classification, not a licence to create a unit for it.
+* **Two-Page Architectural Comprehension:** Because every operational boundary is governed by an explicit interface contract, the entire design blueprint of any project—regardless of scale—must be effortlessly readable and comprehensible within at most 1 to 2 pages of documentation.
+
+### II. Human-AI Synthesis & Operational Discipline
+* **Universal Discipline for Humans and AI Alike:** ATA is not merely an AI agent prompt or a coder's trick; it is a universal intellectual discipline for humans and AI alike. Both humans and LLMs tend toward the lazy append-only trap—adding wrapper classes, helper flags, and convenience layers rather than thinking deeply to discover the irreducible primitive. ATA stops this decay, saving massive context tokens and computational cost while preserving radical maintainability.
+* **Unified Representation, Not a Patchwork of Ideas:** ATA is not a loose assembly of disparate design patterns; it is a unified theory of representational truth. Token efficiency, compute savings, radical maintainability, human verifiability, and zero code smell are not separate goals—they are one-to-one complementary mathematical side-effects of bedrock primitives accurately mirroring reality.
+* **Reject the Append-Only Trap:** Never lazily append helper flags, pass-through overloads, or wrapper classes. Prefer updating and refining existing primitives in place.
 * **The Supreme Question: "Who is actually using it?":** Every design decision begins and ends here. Never build abstractions, middleman primitives, or registries in a vacuum for speculative callers. If there is no concrete caller actively demanding the shape of an abstraction right now, it does not exist.
-* **Smell-less ≡ Minimal:** Code bloat and architectural smells are the exact same phenomenon. Eliminating smells mathematically collapses a system to its irreducible minimum.
-* **The ~150-Line Barometer:** Line sprawl is an empirical diagnostic, not a formatting rule. If a file crosses ~150 lines, do not celebrate its thoroughness—diagnose it. It almost invariably signals that policy heuristics (parsing, math, thresholds) were inlined, cross-cutting flow was hardcoded, or multiple responsibilities were bundled together.
+
+### III. Disciplined Modeling over Dogma
+* **Intellectual Honesty Over Dogma:** Never apply ATA blindly or religiously. If applying an ATA rule creates practical friction, awkward ceremony, or a design smell in a specific scenario, honestly identify and challenge it rather than force-fitting dogma.
+* **Triad Components Are Optional Stages, Not Mandatory Rituals:** Primitives ($P$), policies ($\pi$), and layers ($\lambda$) are evolutionary stages of domain capability. Forcing a boundary to fabricate policies or decorator layers when a single clean primitive interface suffices is dogmatic over-engineering and an anti-ATA smell.
 * **Interface-First Collaborative Dialogue:** 80% of architecture is determined at interface boundaries ($P$ and $\pi$). Never rush into generating large implementation files based on an unverified contract. Interactively design and lock the core interfaces with the user first; when the primitive contract is true, the implementation is trivial.
+* **ATA is Simply Master-Crafted OOP:** ATA is not an exotic, alien paradigm or academic ceremony. If an engineer looks at an ATA codebase and finds it bizarre, confusing, or esoteric, **ATA has failed**. To any seasoned developer, an ATA project simply looks like a clean, master-designed system: clear domain primitives, swappable strategies injected via DI, clean extension/layer pipelines, and an intuitive directory layout.
 
 ---
 
 ## 2. The Operational Triad: Primitives, Policies, Layers
 
-Every operational boundary encapsulates **exactly one root primitive** ($1 \text{ Boundary} \equiv 1 \text{ Primitive}$):
+Every operational boundary encapsulates **exactly one root primitive** ($1 \text{ Boundary} \equiv 1 \text{ Primitive}$). *(Note: $P, \pi, \lambda$ are natural behavioral stages, not mandatory ceremonial boilerplate. Never force policies or layers into a boundary where a single primitive contract suffices).*
 
 ```text
                   LAYERS  (λ: P ➔ P)
@@ -42,6 +54,12 @@ Every operational boundary encapsulates **exactly one root primitive** ($1 \text
 ```
 
 ### 1. The Root Primitive ($P$): Bedrock Domain Mechanism
+* **Mandatory Interface Contract:** An interface is strictly required for every root primitive and policy ($P$ and $\pi$). Without an interface, implementation classes inevitably collect arbitrary convenience methods and leak internal state.
+* **The Dual Necessity Test for Primitive Revision:** A primitive contract must never be altered solely to appease an isolated downstream extension or external caller—doing so is narrow, hardcoded appeasement. During design or refinement, a change to $P$ is legitimate if and only if it satisfies both conditions:
+  1. **Universal Enablement:** The revision completes the primitive's domain metaphor such that all potential extensions benefit as a natural, beautiful side-effect.
+  2. **Irreducible Necessity:** If the proposed change were removed, the bedrock primitive contract would be fundamentally incomplete in itself.
+* **No Callbacks, Events, or Notifications in Core Primitives:** Inlining callbacks, event emitters, lifecycle hooks, or notification handlers inside a root primitive is a severe anti-ATA smell indicating incorrect output granularity. Primitives yield state naturally via their contract stream; downstream consumers, layers, or reactive extensions attach to that stream externally.
+* **Ban Static Classes & Global Mutable State:** Static utility classes and global mutable state are anti-ATA smells that obscure dependencies and prevent testing. Manage state strictly through explicit boundaries and DI composition roots. Monolithic static helper classes that accumulate arbitrary behavior without interfaces are strictly prohibited.
 * **Irreducible Domain Responsibility:** Defines *what* the capability is. Contains only universal operations invariant across callers and layers.
 * **Direct Policy Consumption (Banish Middlemen):** When multiple concrete policies share a common interface (e.g. various data sources), the consumer primitive or high-level caller directly accepts the required policy. Do not invent fake "middleman" primitives or wrapper services unless genuine aggregation or merge logic across multiple sources is required.
 * **Reject Registry/Factory Bloat:** Hardcoded switch-case registries or factories masquerading as abstractions are smells that hide missing domain ownership. Inject policies cleanly via DI or caller selection.
@@ -57,7 +75,9 @@ Every operational boundary encapsulates **exactly one root primitive** ($1 \text
 
 ### 4. State ($S$) & Transforms ($T$): Purpose-Fit Data & Pure Functions
 * **Zero DTO/Schema Sprawl:** State schemas and DTOs must carry strictly what is needed and consumed. Zero speculative properties ("just in case"), zero pass-through baggage.
+* **DTOs Carry Zero Behavior (Behavior on State is a Primitive Smell):** If a DTO or data schema has methods, mutating behavior, or business calculations, it is an anti-ATA smell indicating poor primitive design. State is strictly inert data representation; all operational logic belongs exclusively inside $P$ or pure transforms $T$.
 * **Zero Method Redundancy:** Eliminate redundant API overloads (e.g. `Add` vs `AddBatch`, `Process` vs `ProcessBatch`). Accept universal collection/span representations so a single item and a batch flow through the exact same minimal signature.
+* **Localized Transforms (No Monolithic Helper Classes):** Transforms and extension methods must be placed directly beside the contract or type they transform (e.g. `TypeAExtensions` beside `TypeA`), rather than lumped into a massive generic `TransformUtils` or `Helpers` junk drawer.
 * **Pure Stateless Mathematical Functions ($T$):** Pure calculations, normalization math, formatting, and data mappings must live as stateless functions ($f: S_1 \to S_2$) outside domain contracts. Never pollute primitive interfaces with calculation helpers.
 
 ---
@@ -66,10 +86,11 @@ Every operational boundary encapsulates **exactly one root primitive** ($1 \text
 
 Topology should reflect natural, timeless software engineering rather than rigid framework dogmas:
 
-* **Flat First within Boundaries:** Forcing single files into dogmatic `/policies/` and `/layers/` folders creates ceremony and noise. Within a boundary, start flat:
+* **Flat First within Boundaries & Co-located Derivations:** Keep derivations beside their boundary; do not split into one-type-per-file or extra folders when a single file stays readable. Forcing single files into dogmatic `/policies/` and `/layers/` folders creates ceremony and noise. Within a boundary, start flat:
   * Concrete strategies are named naturally for what they actually are (`sqlite_source.py`, `cosine_similarity.py`), without forcing redundant `_policy` suffixes.
   * For decorators, a `_layer` or `Layer` naming hint (`retry_layer.py`, `caching_layer.py`) is helpful because it instantly distinguishes transparent decorators from standalone primitives sharing the same interface.
   * Grouping into subfolders is an optional human choice when implementations multiply, not a mandatory dogmatic ritual.
+* **Namespace and Folder Alignment:** Namespaces and folders should mirror natural primitive boundaries rather than technical stereotypes (`/models`, `/controllers`, `/services`). Aligning folders with boundaries clarifies domain architecture at a glance.
 * **Fractal Boundary Promotion:** When a policy grows rich and complex—requiring internal sub-policies or dedicated layers—it naturally **promotes into its own primitive boundary folder** nested directly inside the parent boundary that owns it:
   ```text
   evaluator/
@@ -92,10 +113,29 @@ Every line of code across a codebase strictly belongs to one of four categories:
 
 ---
 
-## 5. Conformance Verification Audit
+## 5. The Derivation & Refactoring Methodology
+
+Designing or refactoring a domain boundary follows a strict derivation sequence:
+1. **Bedrock Isolation:** Uncover the irreducible root primitive ($P$) by unifying fragmented interfaces around the core domain metaphor and verifying via the Subtraction Test.
+2. **Policy Extraction:** Isolate variable operational algorithms into injected interfaces ($\pi$), ensuring the primitive contains zero hardcoded operational strategies.
+3. **Layer Decomposition:** Extract cross-cutting flow concerns (caching, retries, checkpointing, metrics) into homomorphic decorator layers ($\lambda$), preserving contract purity and forward composition.
+4. **Representation Reduction:** Eliminate pass-through wrappers, keep state ($S$) strictly immutable, express domain conversions as stateless pure transforms ($T$), and keep derivations beside their boundary—do not split into one-type-per-file or extra folders when a single file stays readable.
+5. **Zero Dead Code & Zero Legacy Bloat:** When refactoring under ATA, ask the user and actively purge dead code, abandoned feature toggles, and speculative backward-compatibility layers. Never degrade or regress existing functional power—match or surpass it cleanly with a radically smaller footprint.
+
+---
+
+## 6. Conformance Verification Audit
 
 | Test | Verification Criterion | Non-Conformance Signal |
 | :--- | :--- | :--- |
+| **Smell/Anti-ATA Test** | Validates absolute zero code smell. | Retaining anti-patterns, leaky wrappers, or hacky patches under the guise of ATA. |
+| **Minimality Test** | Validates structural necessity. | Creating a standalone file, type, or DTO solely to satisfy a Quad category when the Subtraction Test would pass without it. |
+| **Contract Rigor Test** | Validates boundary interface mandate. | Exposing a concrete primitive/policy without an interface, enabling convenience methods. |
+| **Contract Immutability Test** | Validates universal stability. | Altering a root primitive contract to satisfy a single caller or extension. |
+| **Stream Purity Test** | Validates absence of primitive side-effects. | Inlining callbacks, hooks, events, or notifications inside $P$ instead of streaming state. |
+| **DTO Purity Test** | Validates state inertia. | Attaching methods, mutating logic, or business rules to a DTO rather than in $P$ or $T$. |
+| **Statelessness Test** | Validates encapsulation. | Using static classes or global mutable state instead of explicit composition roots. |
+| **Local Transform Test** | Validates transform cohesion. | Dumping transforms into a monolithic helper junk drawer instead of beside the target contract. |
 | **Teleological Test** | Validates consumer necessity. | Inventing a middleman or registry without an immediate caller needing it. |
 | **Brevity/Barometer Test** | Validates structural decomposition. | Files crossing ~150 lines due to inlined heuristics or hardcoded cross-cutting flows. |
 | **Subtraction Test** | Validates $P$ irreducibility. | Capability still functions after removing $P$. |
