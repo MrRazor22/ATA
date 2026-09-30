@@ -48,7 +48,7 @@ Every operational boundary encapsulates **exactly one root primitive** ($1 \text
 
 1. **The Root Primitive ($P$):** The irreducible contract defining *what* the capability is.
    * *Mandatory Interface Contract:* Every primitive and policy **must** be defined by an explicit interface. Never implement an ad-hoc class without an interface contract; doing so allows arbitrary convenience methods and implementation leakage to corrupt the boundary.
-   * *The Dual Necessity Test for Primitive Revision:* A primitive contract must never be altered solely to appease an isolated downstream extension or external caller—doing so is narrow, hardcoded appeasement. During design or refinement, a change to $P$ is legitimate if and only if it satisfies both conditions:
+   * *Primitive Stability vs. Churn Diagnostic (The Dual Necessity Test):* Continual churn of a root primitive contract for new requirements is a severe code smell indicating lazy, shallow initial domain modeling. While evolving $P$ during design or refactoring to better reflect real-world truth is essential, a well-modeled primitive is invariant: it provides an irreducible, complete foundation where future capabilities attach naturally via policies ($\pi$) and layers ($\lambda$)—without speculative YAGNI methods and without constant contract churn. A modification to $P$ is legitimate if and only if it satisfies both conditions:
      1. **Universal Enablement:** The revision completes the primitive's domain metaphor such that all potential extensions benefit as a natural, necessary side-effect of a complete abstraction.
      2. **Irreducible Necessity:** If the proposed change were removed, the bedrock primitive contract would be fundamentally incomplete in itself.
    * *No Callbacks, Events, or Notifications in Core Primitives:* Callbacks, event emitters, lifecycle hooks, and notification handlers inside a root primitive are severe anti-ATA smells indicating broken contract granularity. Primitives yield state naturally via their output stream; downstream consumers, layers, or reactive extensions attach externally.
@@ -99,7 +99,7 @@ Designing or refactoring a domain boundary follows a strict derivation sequence:
 | **Subtraction Test** | Validates $P$ irreducibility. | Capability still functions after removing $P$. |
 | **Minimality Test** | Validates structural necessity. | Creating a standalone file, type, or DTO solely to satisfy a Quad category when the Subtraction Test would pass without it. |
 | **Contract Rigor Test** | Validates boundary interface mandate. | Exposing a concrete primitive/policy without an interface, enabling convenience methods. |
-| **Immutability Test** | Validates contract universality against downstream drift. | Modifying a root primitive interface to accommodate a single downstream caller or extension. |
+| **Immutability Test** | Validates universal stability & freedom from churn. | Chronic primitive contract churn for new requirements, or altering $P$ for an isolated caller rather than refining domain truth. |
 | **Stream Purity Test** | Validates absence of primitive side-effects. | Inlining callbacks, hooks, events, or notifications inside a root primitive instead of streaming state. |
 | **DTO Purity Test** | Validates state inertia. | Attaching methods, mutating logic, or business rules to a DTO rather than in $P$ or $T$. |
 | **Statelessness Test** | Validates encapsulation. | Using static classes or global mutable state instead of explicit composition roots. |
