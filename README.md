@@ -64,7 +64,7 @@ Every operational boundary encapsulates **exactly one root primitive** ($1 \text
 3. **The Composable Layer ($\lambda: P \to P$):** Transparent outer decorator of the **exact same contract** (Decorator pattern).
    * *External Flow Control:* Intercepting flow (caching, retries, metrics) belongs strictly in layers, never inside $P$.
    * *Forward Composition & Tier Ownership:* Layers are composed around $P$ in forward execution order via external stateless transforms ($T$) rather than nesting constructors inside-out. In multi-tier systems, each primitive decorates its own contract; higher-level boundaries consume clean public contracts without managing underlying layers.
-4. **State ($S$) & Transforms ($T$):** Pure immutable schemas/DTOs with zero behavior. In-place performance buffers remain encapsulated within the owning boundary. Stateless pure functions ($f: S_1 \to S_2$).
+4. **State ($S$) & Transforms ($T$):** Pure immutable schemas/DTOs with zero behavior. In-place performance buffers remain encapsulated within the owning boundary. Transforms ($T$) are stateless pure functions ($f: S_1 \to S_2$) governed by strict restraint—they exist solely for representation mapping and forward layer composition, never as an escape hatch to smuggle domain mechanics outside $P$ or $\pi$.
    * *DTOs Carry Zero Behavior (Behavior on State is a Primitive Smell):* If a DTO or schema contains methods, mutating logic, or business rules, the root primitive has failed to properly encapsulate its domain mechanism. State is strictly inert data; domain operations belong in $P$ or pure transforms $T$.
    * *Single-File Co-location & The 150-Line Barometer:* Transforms, extension methods, and state DTOs belong in the **exact same file** as the contract or type they extend. This co-location implicitly forces respect for the ~150-line barometer: if convenience extensions multiply, the file breaches 150 lines and immediately rings the alarm, preventing extension sprawl and completely eliminating monolithic static helper dumping grounds.
 
@@ -86,7 +86,7 @@ Designing or refactoring a domain boundary follows a strict derivation sequence:
 1. **Bedrock Isolation:** Uncover the irreducible root primitive ($P$) by unifying fragmented interfaces around the core domain metaphor and verifying via the Subtraction Test.
 2. **Policy Extraction:** Isolate variable operational algorithms into injected interfaces ($\pi$), ensuring the primitive contains zero hardcoded operational strategies.
 3. **Layer Decomposition:** Extract cross-cutting flow concerns (caching, retries, checkpointing, metrics) into homomorphic decorator layers ($\lambda$), preserving contract purity and forward composition.
-4. **Representation Reduction & Directory Alignment:** Eliminate pass-through wrappers, keep state ($S$) strictly immutable, express domain conversions as stateless pure transforms ($T$), and keep derivations beside their boundary. Namespaces and directory layouts mirror natural primitive boundaries rather than technical stereotypes (`/models`, `/controllers`, `/services`); do not split into one-type-per-file or extra folders when a single file stays readable.
+4. **Representation Reduction & The Directory Barometer:** Eliminate pass-through wrappers, keep state ($S$) strictly immutable, express domain conversions as stateless pure transforms ($T$), and keep derivations beside their boundary. Namespaces and directory layouts visually narrate the domain story rather than technical stereotypes (`/models`, `/controllers`, `/services`). Just as crossing ~150 lines makes a file questionable, boundary clutter or root dumping grounds make a folder structure questionable: a boundary folder houses strictly its Triad members and promoted child boundaries.
 5. **Zero Legacy Bloat (Irreversibility of Truth):** Historical compatibility shims, abandoned feature toggles, and dead code are treated as architectural debt to be purged rather than preserved. ATA architectures maintain or exceed the functional power of legacy systems with zero regression, achieved through representational density rather than backward-compatibility sprawl.
 
 ---
@@ -109,7 +109,7 @@ Designing or refactoring a domain boundary follows a strict derivation sequence:
 | **Endomorphism Test** | Validates layer contract purity. | A layer that alters method signatures, leaks mechanics, or nests backwards. |
 | **Redundancy Test** | Validates API economy. | Duplicate convenience overloads (e.g., `Add` vs `AddBatch`) or speculative DTO fields. |
 | **Append-Only Test** | Validates anti-bloat discipline. | Appending pass-through wrappers or boolean helper flags to existing classes. |
-| **Brevity Test** | Validates representational fidelity via line economy. | Excessive lines or ceremony required to express domain intent. |
+| **Brevity/Barometer Test** | Validates line economy & directory hygiene. | Files crossing ~150 lines or boundary folders cluttered with miscellaneous non-Triad dumping grounds. |
 
 ---
 

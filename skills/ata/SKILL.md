@@ -79,7 +79,7 @@ Every operational boundary encapsulates **exactly one root primitive** ($1 \text
 * **DTOs Carry Zero Behavior (Behavior on State is a Primitive Smell):** If a DTO or data schema has methods, mutating behavior, or business calculations, it is an anti-ATA smell indicating poor primitive design. State is strictly inert data representation; all operational logic belongs exclusively inside $P$ or pure transforms $T$.
 * **Zero Method Redundancy:** Eliminate redundant API overloads (e.g. `Add` vs `AddBatch`, `Process` vs `ProcessBatch`). Accept universal collection/span representations so a single item and a batch flow through the exact same minimal signature.
 * **Single-File Co-location & The 150-Line Barometer:** Transforms, extension methods, and state DTOs belong in the **exact same file** as the contract or type they extend. This co-location implicitly forces respect for the ~150-line barometer: if convenience extensions multiply, the file breaches 150 lines and immediately rings the alarm, preventing extension sprawl and completely eliminating monolithic static helper dumping grounds.
-* **Pure Stateless Mathematical Functions ($T$):** Pure calculations, normalization math, formatting, and data mappings must live as stateless functions ($f: S_1 \to S_2$) outside domain contracts. Never pollute primitive interfaces with calculation helpers.
+* **Transform Restraint & Mathematical Purity ($T$):** Pure calculations, normalization math, formatting, and data mappings must live as stateless pure functions ($f: S_1 \to S_2$) outside domain contracts. Transforms must never be abused as an escape hatch to smuggle domain mechanics or volatile heuristics outside of $P$ and $\pi$; they exist strictly for pure representation mapping and forward layer composition.
 
 ---
 
@@ -91,7 +91,7 @@ Topology should reflect natural, timeless software engineering rather than rigid
   * Concrete strategies are named naturally for what they actually are (`SqliteSource`, `CosineSimilarity`), without forcing redundant `Policy` suffixes.
   * For decorators, a `Layer` naming hint (`RetryLayer`, `CachingLayer`) is helpful because it instantly distinguishes transparent decorators from standalone primitives sharing the same interface.
   * Grouping into subfolders is an optional human choice when implementations multiply, not a mandatory dogmatic ritual.
-* **Namespace and Folder Alignment:** Namespaces and folders should mirror natural primitive boundaries rather than technical stereotypes (`/models`, `/controllers`, `/services`). Aligning folders with boundaries clarifies domain architecture at a glance.
+* **Namespace & Folder Storytelling (The Directory Barometer):** Namespaces and folders must visually narrate the domain story rather than technical stereotypes (`/models`, `/controllers`, `/services`). Just as a file crossing ~150 lines is questionable, a cluttered root or boundary folder filled with miscellaneous non-Triad files is questionable. A boundary folder holds strictly its Triad members ($P, \pi, \lambda, S, T$) and promoted child boundaries—never miscellaneous "junk drawer" files. If unrelated files accumulate, the boundary abstraction is broken.
 * **Fractal Boundary Promotion:** When a policy grows rich and complex—requiring internal sub-policies or dedicated layers—it naturally **promotes into its own primitive boundary folder** nested directly inside the parent boundary that owns it:
   ```text
   evaluator/
@@ -138,7 +138,7 @@ Designing or refactoring a domain boundary follows a strict derivation sequence:
 | **Statelessness Test** | Validates encapsulation. | Using static classes or global mutable state instead of explicit composition roots. |
 | **Local Transform Test** | Validates transform cohesion. | Dumping transforms into a monolithic helper junk drawer instead of beside the target contract. |
 | **Teleological Test** | Validates consumer necessity. | Inventing a middleman or registry without an immediate caller needing it. |
-| **Brevity/Barometer Test** | Validates structural decomposition. | Files crossing ~150 lines due to inlined heuristics or hardcoded cross-cutting flows. |
+| **Brevity/Barometer Test** | Validates line economy & directory hygiene. | Files crossing ~150 lines or boundary folders cluttered with miscellaneous non-Triad dumping grounds. |
 | **Subtraction Test** | Validates $P$ irreducibility. | Capability still functions after removing $P$. |
 | **Discovery Test** | Validates boundary cohesion. | Splitting one concept (e.g. registry vs. executor) into multiple fake interfaces. |
 | **Policy Atomicity Test** | Validates strategy simplicity. | A policy internally juggling multiple sub-policies or hiding orchestration. |
