@@ -13,6 +13,8 @@ description: >-
 ## 1. The Core Soul & Philosophy of ATA
 
 > **"Correct design will always be minimal. Minimal code is not code golf; it is the natural, inevitable side-effect of truth in representation. When a bedrock primitive accurately reflects reality, unnecessary abstractions evaporate; what remains is a complete, minimal basis where every capability is expressed through composition, orthogonal policy, and contract-preserving layers."**
+>
+> *(The Plain-English Bottom Line: ATA is not code golf. The ultimate goal is **zero code smell**. Radically reduced line count is merely the natural mathematical side-effect of eliminating smells and modeling domain reality truthfully. ATA is simply the directional compass to get there).*
 
 ### I. The Invariant of Representation (Smell-less ≡ Minimal)
 * **Code Smell = Anti-ATA:** Bloat and code smells are the exact same phenomenon. ATA's ultimate goal is zero code smell; if a design claims to follow ATA but introduces code smells, **ATA has failed**. Eliminating smells mathematically collapses a system to its irreducible minimum.
