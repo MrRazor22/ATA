@@ -31,7 +31,7 @@
 
 ## 2. The Operational Triad
 
-Every operational boundary encapsulates **exactly one root primitive** ($1 \text{ Boundary} \equiv 1 \text{ Primitive}$). *(Note: $P, \pi, \lambda$ model distinct structural roles, not ceremonial boilerplate. Never force policies or layers into a boundary where the bedrock primitive contract ($P$) is already complete).*
+Every operational boundary encapsulates **exactly one root primitive** ($1 \text{ Boundary} \equiv 1 \text{ Primitive}$). The three Triad members form a self-reinforcing system: policies keep primitives focused and lean, which makes layers powerful. Layers work because they decorate the same interface that policies are extracted from. Each exists to complement and enable the other two.
 
 ```text
                   LAYERS  (λ: P ➔ P)
@@ -49,23 +49,24 @@ Every operational boundary encapsulates **exactly one root primitive** ($1 \text
 ```
 
 1. **The Root Primitive ($P$):** The irreducible contract defining *what* the capability is.
-   * *Mandatory Interface Contract (Non-Negotiable Boundary Discipline):* Every root primitive ($P$) and policy ($\pi$) **must** define an explicit formal contract (interface, protocol, trait, or abstract contract) — even with a single concrete implementation. The contract captures the primitive's domain concept in its purest form: its definition is entirely self-contained, free from the implementation's own dependencies — reading the contract alone tells you exactly what the primitive is and does, with zero knowledge of its concrete implementation. All callers and consumers depend exclusively on this contract. Accessing or depending on the concrete class directly — bypassing the contract in any way — is unconditionally forbidden. Composable layers ($\lambda: P \to P$), swappable policies, and all future extensions attach strictly through this contract. As an inevitable side-effect, this enforces total decoupling, effortless testing, clean extensibility, and zero code smell across the entire system.
-   * *Primitive Stability vs. Churn Diagnostic (The Dual Necessity Test):* Continual churn of a root primitive contract for new requirements is a severe code smell indicating lazy, shallow initial domain modeling. While evolving $P$ during design or refactoring to better reflect real-world truth is essential, a well-modeled primitive is invariant: it provides an irreducible, complete foundation where future capabilities attach naturally via policies ($\pi$) and layers ($\lambda$)—without speculative YAGNI methods and without constant contract churn. A modification to $P$ is legitimate if and only if it satisfies both conditions:
-     1. **Universal Enablement:** The revision completes the primitive's domain metaphor such that all potential extensions benefit as a natural, necessary side-effect of a complete abstraction.
-     2. **Irreducible Necessity:** If the proposed change were removed, the bedrock primitive contract would be fundamentally incomplete in itself.
-   * *No Callbacks, Events, or Notifications in Core Primitives:* Callbacks, event emitters, lifecycle hooks, and notification handlers inside a root primitive are severe anti-ATA smells indicating broken contract granularity. Primitives yield state naturally via their output stream; downstream consumers, layers, or reactive extensions attach externally.
-   * *Ban Static Classes & Global Mutable State:* Global mutable state, static helper dumping grounds, and singleton registries are anti-ATA antipatterns. Encapsulate dependencies strictly through explicit composition roots.
-   * *The 80/20 Law of the Bedrock Contract:* 80% of architectural integrity is decided at the interface of $P$. This contract demands obsessive care: it must contain only universal, irreducible operations invariant across all callers. Meaningless convenience methods or imprecise signatures in $P$ metastasize into bloat across the entire system.
-   * *Contract Purity (Actions, Not Internals):* The primitive interface ($P$) defines strictly *what action* the capability performs for its callers. An interface captures actions, never internals: it must never expose stored variables or configuration fields (which belong to state $S$), and never expose internal machinery (hardware placement, memory management, or framework lifecycle plumbing). It contains zero pipeline or composition mechanics; layer composition is executed strictly through external Transforms ($T$).
-   * *Subtraction Test:* Removing $P$ causes the domain capability to collapse entirely.
-   * *Discovery Test (Merge-or-Split):* Unify fragmented interfaces around the true real-world metaphor.
-2. **The Injected Policy ($\pi$):** Volatile heuristics and strategies decoupled from the domain mechanism ($P_{\pi} \to P$).
-   * *Decoupling from Mechanism:* Primitives represent irreducible domain mechanisms and must remain completely unopinionated. Policies exist to decouple volatile strategies, heuristics, and algorithmic variations from $P$, ensuring domain bedrock remains free of shifting assumptions.
-   * *Policy as a Primitive:* Policies are subordinate primitives ($P_{\pi}$) governing internal operational steps. They demand the same 80/20 minimalism and Subtraction Test as root primitives.
-   * *Fractal Boundaries:* When an extracted policy primitive expands in complexity to require its own layers or subordinate policies, it promotes into the root primitive ($P$) of an independent operational boundary.
-3. **The Composable Layer ($\lambda: P \to P$):** Transparent outer decorator of the **exact same contract** (Decorator pattern).
-   * *External Flow Control:* Intercepting flow (caching, retries, metrics) belongs strictly in layers, never inside $P$.
-   * *Forward Composition & Tier Ownership:* Layers are composed around $P$ in forward execution order via external stateless transforms ($T$) rather than nesting constructors inside-out. In multi-tier systems, each primitive decorates its own contract; higher-level boundaries consume clean public contracts without managing underlying layers.
+
+   In ATA, everything is an interface. Every object operates strictly through its contract — the concrete class is an implementation detail that no caller ever sees or touches. The only exception is pure DTOs (state $S$), which are inert data with zero behavior.
+
+   The interface is the sovereign artifact: it captures the domain concept in its purest form, entirely self-contained and free from implementation dependencies. Reading the contract alone tells you exactly what the primitive is and does. Every method earns its place, every parameter is scrutinized (recursively for complex types), and every return type is verified. No stored variables, no configuration fields, no internal machinery leaks into the interface — it defines actions, not internals.
+
+   Accessing the concrete class directly — bypassing the contract in any way — is unconditionally forbidden. All callers, all layers, all policies, and all future extensions attach strictly through this contract. Interface purity is what fundamentally solves all code smells; reduced code is merely the side-effect.
+
+2. **The Injected Policy ($\pi$):** Sub-primitive extraction — policies are primitives extracted from inside another primitive ($P_{\pi} \to P$).
+
+   A policy IS a primitive — every rule that applies to root primitives applies identically: same interface contract, same scrutiny, same discipline. We call them "policies" because their purpose is specific: without extracting them, a primitive inevitably becomes a god class, and layers become powerless because everything is hardcoded internally. To change any behavior, you would have to replace the entire primitive.
+
+   By extracting injectable, interfaced sub-primitives, the parent stays focused and lean, and the full power of layers is unlocked. A policy must remain atomic — if it needs subordinate policies, it has matured into its own child primitive managing a sub-boundary.
+
+3. **The Composable Layer ($\lambda: P \to P$):** LEGO-like extension — decorates the exact same contract.
+
+   A layer decorates the exact same interface the application already uses — you literally control the input and output of each method the interface exposes. This gives the same power as middleware without the bloat.
+
+   The core primitive stays pure and general. Layers from different sources add different flavors — like LEGO blocks. Extension, scaling, side-effects, and cross-cutting concerns all compose cleanly without touching the core primitive's code. Layers compose in forward execution order; the primitive has zero awareness of its decorators.
 4. **State ($S$) & Transforms ($T$):** Pure immutable schemas/DTOs with zero behavior. In-place performance buffers remain encapsulated within the owning boundary. Transforms ($T$) are stateless pure functions ($f: S_1 \to S_2$) governed by strict restraint—they exist solely for representation mapping and forward layer composition, never as an escape hatch to smuggle domain mechanics outside $P$ or $\pi$.
    * *DTOs Carry Zero Behavior (Behavior on State is a Primitive Smell):* If a DTO or schema contains methods, mutating logic, or business rules, the root primitive has failed to properly encapsulate its domain mechanism. State is strictly inert data; domain operations belong in $P$ or pure transforms $T$.
    * *Single-File Co-location & The 150-Line Barometer:* Transforms, extension methods, and state DTOs belong in the **exact same file** as the contract or type they extend. This co-location implicitly forces respect for the ~150-line barometer: if convenience extensions multiply, the file breaches 150 lines and immediately rings the alarm, preventing extension sprawl and completely eliminating monolithic static helper dumping grounds.
