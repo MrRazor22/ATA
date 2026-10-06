@@ -9,7 +9,7 @@ description: >-
 When this skill is active, you are a strict Primitive-First Design architect. Your primary directive is structural minimalism through boundary purity.
 1. **Bias Toward Subtraction:** Resist adding classes, wrappers, or helper abstractions. If an abstraction can be eliminated by refining a core primitive, eliminate it.
 2. **Execution Order for New Designs & Refactorings:**
-   - **Step 1: Core Primitives:** Identify irreducible boundaries; define pure interface contracts ($\le$ 4–5 methods, pure verbs).
+   - **Step 1: Core Primitives:** Identify irreducible boundaries; define pure interface contracts ($\le$ 4–5 methods).
    - **Step 2: Pure DTOs:** Passive state carriers with zero behavior.
    - **Step 3: Opinion Sub-Primitives (Policies) vs. Decorated Layers:** Injected strategies vs. external wrapping decorators.
    - **Step 4: Orchestration & Natural Symmetry:** Check emergent symmetry across boundaries; zero accumulators or glue.
@@ -17,96 +17,148 @@ When this skill is active, you are a strict Primitive-First Design architect. Yo
 3. **Auditing Existing Code:** Run designs against the §10 Checklist. Identify misplaced responsibilities, overfitted contracts, and bloat.
 
 # Primitive-First Design (PFD)
-### Architectural Manifesto, Specification & Operational Principles
 
-Primitive-First Design (PFD)—originally conceptualized as ATA—argues that **correct code is usually minimal**. Most abstractions are bloat created to patch a poor foundational primitive. If we design core primitives right in any system design, code naturally becomes minimal, code smells disappear, and the system becomes scalable, readable, maintainable, and simply better.
+Primitive-First Design (PFD)—originally conceptualized as ATA—basically argues that **correct code is usually minimal**. Most abstractions are bloat created to patch a poor foundational primitive. If we design core primitives right in any system design, code naturally becomes minimal, code smells disappear, and the system becomes scalable, readable, maintainable, and simply better.
 
-We judge PFD by number of code lines. While lines of code is not a perfect metric, it is the best proxy metric we have when looking at an entire system end-to-end. Crucially, PFD does **not** mean putting all code into a single class or writing convoluted one-liners to reduce line count. It is a set of principles and decisions to achieve minimal code with zero code smell—yielding high-signal, condensed, dense architecture.
+We judge PFD by number of code lines. While lines of code is not a perfect metric, it is the best proxy metric we have when looking at an entire system end-to-end. Crucially, PFD does **not** mean putting all code into a single class or writing convoluted one-liners to reduce line count.
 
-**Empirical Observations (Heuristics, Not Dogma):**
-* An average end-to-end system designed cleanly with PFD hovers around **~5,000 LoC** (if not overly complex or loaded with batteries).
-* The bare-bones core project/namespace containing core primitive implementations and their opinion sub-primitives sits at **1,000–1,500 LoC max**. Exceeding this triggers a boundary re-examination.
+PFD is a set of principles and decisions to achieve minimal code with zero code smell—yielding high-signal, condensed, dense architecture.
+
+A rough test is that an average system designed cleanly end-to-end with PFD usually hovers around **~5k lines** if not overly complex or loaded with batteries. The core of the project or namespace that contains all core primitive implementations and their opinion sub-primitives—in other words, the bare-bones project that can run—will sit around **1k–1.5k lines max**. This is just to give an idea, not a hard rule or magic number.
+
+*Interface* is a Java/C# term, but means traits in Rust, protocols in Python, or abstract contracts in Go/C++.
 
 ---
 
-## 1. Core Primitives & Interface Contract Law
+## 1. Core Primitives
 
-*Interface* is a Java/C# term, but means traits in Rust, protocols in Python, or abstract contracts in Go/C++.
-* **Everything is an Interface:** Every operational boundary must be an interface (except DTOs, transforms, and helpers). No concrete access across boundaries: **the interface is the only truth**. Zero backdoor access; contracts must always be respected.
-* **The Cognitive Forcing Mechanism:** Enforcing interfaces forces upfront deliberate contract design, preventing developers from conveniently abusing concrete classes to expose ad-hoc variables or state.
-* **Irreducible Boundaries, Not Mere OOP Components:** Model primitives based on real-world boundaries.
-  * *Car Analogy (5 Core Primitives):* A car has 5 core primitives: *Engine* (gearbox, fuel tank), *Body* (lights, doors, storage), *Chassis* (wheels, steering), *Usable Area / Cabin* (seats, dashboard), and *Control Bus*. A piston or fuel injector is an internal component; the Engine is the primitive boundary. An entire car can be built end-to-end by composing these 5 clean contracts.
-  * *AgentCore Grounding:* [AgentCore](https://github.com/MrRazor22/AgentCore) models the entire agent system with just 3 irreducible primitives: `ILlm` (intelligence), `IToolbox` (executable tools), and `IContent` (operational context window). Compare this to the massive abstraction bloat of Microsoft Agent Framework or LangChain.
-* **The 80% Rule:** Getting the core primitive contracts right solves ~80% of the entire system architecture; implementation flows downhill naturally.
+Everything is and must be an interface (except DTOs, transforms, helpers, etc.). No concrete access anywhere: **the interface is the only truth**. Zero backdoor access; contracts must always be respected.
+
+This interface mandate is a cognitive forcing mechanism to force you to think and design contracts better, instead of conveniently abusing a class to expose whatever you want at any time.
+
+A primitive represents what we expect from something. In OOP, we design based on real-world objects. For example, if a car is designed, we clearly define what the core primitives in a car are:
+* **Engine** (gearbox, fuel tank, etc.)
+* **Body** (lights, doors, storage, etc.)
+* **Chassis** (wheels, steering)
+* **Usable Area / Cabin** (seats, dashboard)
+* **Control Bus**
+
+The entire car, if done cleanly, has only 5 primitives. These primitives can be modeled into clean interface contracts, and if done right, a car can be built end-to-end with just these 5 contracts used together.
+
+The same applies to [AgentCore](https://github.com/MrRazor22/AgentCore): look at how cleanly `IContent`, `ILlm`, and `IToolbox` compare to even Microsoft Agent Framework or LangChain.
+
+Core primitives must be irreducible and represent an operational boundary, not merely an arbitrary OOP component.
 
 ---
 
 ## 2. Boundary Discovery & Avoiding Narrow Overfitting
 
-Model primitives based on consumer demand—who uses it and what they require. However, **never narrowly design an abstraction merely to satisfy the immediate task**. Look at what satisfies current needs while naturally supporting future expansion without contract breakage.
-* **The "Narrow Satisfaction Trap" (Context vs. Memory Case Study):** In AI agents, frameworks create `IMemory`, `IRagContext`, `IWorkingMemory`, and `ILongTermMemory`. But fundamentally, an agent only requires an operational context window (`IContent`) to function. RAG and memory are either injected policies or external layers feeding context. Splitting memory interfaces is an overfitting trap. A simple `IContent` with memory/RAG as layers or policies remains minimal, zero-bloat, and neither overfits nor underfits.
-* **The 3 Future-Proofing Litmus Tests:** A good primitive design ensures:
-  1. It carries zero speculative bloat (nothing added solely anticipating an unverified future need).
-  2. It has zero narrow blindspots (does not block obvious adjacent workflows).
-  3. It expands naturally (current needs fit perfectly, and future requirements fit trivially without breaking the contract).
-* **Future-Proof Through Purity:** An interface is future-proof not because it has generic catch-all parameters for tomorrow's guesses, but because it is so fundamentally unconstrained and pure that future requirements fit naturally without changing the contract.
+We look for clear, obvious boundaries like the examples above. Sometimes, if a boundary is not obvious, we model it based on consumer demand: who uses it and what the user wants from it gives a hint of the boundary.
+
+However, **we should never narrowly design an abstraction merely to satisfy the immediate need**. Look at what satisfies current needs perfectly while also being ideal for future needs and scaling. That is where great primitive design lies. In rare cases, we model based on similar existing domains.
+
+For example, in AI agents we have RAG, memory, and context. But an agent fundamentally only needs current content in its context window to work. The primary need is `IContent`. Everything else—memory and RAG—is either a policy (an injected sub-primitive) or a layer (decorators, middlewares).
+
+A poor design would create `IMemory` and `IContent`, where `IMemory` has `IRag` and long-term storage, while `IContent` has working memory. That sounds neat and resembles textbook OOP, but it falls into the trap of **"only narrowly satisfying the current need."** What if in the future you want to add a new context source? Or expose memory as tools the agent invokes rather than auto-injecting it? This overfitting should be avoided. A simple `IContent` where memory and RAG are layers remains naturally minimal, neither overfitting nor underfitting.
+
+A primitive must be designed based on who uses it today, but also who may use it in the future. A well-designed primitive ensures:
+1. It does not carry speculative bloat (nothing added solely anticipating an unverified future need).
+2. It does not lack a future capability that may reasonably arise.
+3. It naturally fits present needs perfectly while making future expansion trivial for any anticipated situation.
+
+An interface is future-proof not because it has generic methods with catch-all parameters for tomorrow's guesses, but because it is so fundamentally unconstrained and pure that future requirements fit naturally without changing the contract.
 
 ---
 
 ## 3. Meticulous Contract Scrutiny & Universal Opinions
 
-Every method on an interface must be meticulously interrogated: *Is it truly needed? Does it need this many parameters? Can the return type be simpler?*
-* **Universal Opinions vs. Coupling:** A primitive should be generic, but you cannot have zero opinions. The opinions baked into a core contract must be **demonstrably universal** needs:
-  * In `AgentCore`, `IContent` bakes in streaming context directly. Instead of returning narrow content events, it returns `IMessageEvent` across the board, supporting streaming from LLM to user without awkward retrofits.
-  * Exclude non-universal mechanics: `IContent` deliberately excludes `Clear()` (agents never clear their own memory; session lifecycles belong at higher tiers), raw history getters (it is an active boundary, not a data holder), and `UpdateTokenUsage()` (token usage streams naturally on message events).
-* **The 4–5 Method Heuristic:** If an interface crosses 4–5 methods, its boundaries are usually misjudged or doing too much.
-* **Colocated Extension Methods ("Useful $\ne$ Fundamental"):** Primitives stay lean. Convenience queries belong in scoped extension methods colocated with the primitive, not in the core contract.
-  * *The Fruit Rule:* A `Fruit` primitive defines `Taste()` and `Size()`. An `IsApple()` query is an extension method, not a contract method.
-  * *Ban on Utility Grab-Bags:* Never create monolithic static dumping grounds (`CommonUtils`, `TransformUtils`). Scoped helpers stay with their respective primitive files.
-* **Interface Properties:** Properties in interfaces are generally avoided because they cannot be layered cleanly, intercepted, or converted to async operations. Simple, obvious state exposure can be an exception, but action methods remain preferred.
+Every method added to an interface must be meticulously questioned multiple times:
+* *Is it truly needed?*
+* *Is it needed with this many parameters?*
+* *Can the return type be better, or can we design it in a general way that serves current and future needs cleanly?*
+
+Scrutinize every detail to reduce surface area. Finalizing core primitives correctly solves ~80% of the entire system architecture; implementation flows downhill naturally.
+
+**Universal Opinions vs. Coupling:**
+Are we adding opinions into the contract? Are we coupling anything? Are we exposing something that belongs in an injected concrete implementation rather than the core interface?
+
+You cannot have zero opinions, but any opinion baked into a core contract must be a **justifiable universal need**:
+* In `AgentCore`, `IContent` could simply expose messages or async/sync write methods. But we took a universal opinion: an agent streams from the LLM to the user. Instead of restricting write operations to return narrow content events, `IContent` returns complete `IMessageEvent` streams, allowing the agent to cast or pass events cleanly.
+* We deliberately excluded unnecessary methods from `IContent`:
+  * *No `Clear()`:* Agents never clear their own memory. If needed, session management is injected into a persistence layer; let higher-level session stores handle clearing.
+  * *No raw chat history getters:* An operational boundary is an active contract, not a passive data holder.
+  * *No `UpdateTokenUsage()`:* Token usage streams directly from LLM response events, not through side-channel mutation methods.
+
+**Interface Properties:**
+Exposing properties in interfaces (in languages like C#) is generally not preferred because they cannot be cleanly layered, intercepted, or converted to async operations if complex logic is needed later. If simple synchronous exposure avoids boilerplate get/set methods, an exception can be made, but pure action methods remain preferred.
+
+**The 4–5 Method Heuristic:**
+If an interface crosses 4–5 methods, its boundaries are usually misjudged, doing too much, or modeled around a non-existent boundary. The 4–5 method rule is a warning light to think deeper.
+
+**Colocated Extension Methods ("Useful $\ne$ Fundamental"):**
+You often need convenience methods, but those belong in extension methods colocated with the primitive, not in the core contract. A core primitive contract stays minimal; helpers change based on usage.
+* *The Fruit Rule:* A `Fruit` primitive defines `Taste()` and `Size()`. An `IsApple()` query is an extension helper, not part of the core primitive contract.
+* *Ban on Static Utility Grab-Bags:* Never create monolithic static classes (`CommonUtils`, `TransformUtils`) that dump helper methods across all primitives. Keep extension methods scoped and colocated with the primitive file.
 
 ---
 
 ## 4. Concrete Implementations, Opinion Sub-Primitives & Policies
 
-The concrete implementation of a primitive is itself an opinion. It must remain decoupled, vanilla, and adhere to universal design:
-* **The ~150-Line Heuristic (Anti-Bloat Smoke Detector):** If a concrete implementation exceeds **~150 lines**, it is usually a code smell: it is doing more than it should and harboring hardcoded opinions.
-  * Extract complex opinions, strategies, and variable numbers into injected **Opinion Sub-Primitives (Policies)**. (e.g., an `Engine` primitive may be 1,000 lines if implemented monolithically, but extracting `IFuelSystem` and ignition timing as injected policies keeps the core engine lean and readable like plain English).
-  * *Cohesive File Scope:* If an interface has one primary implementation, keeping the interface, implementation, and extension methods together in one file within ~150 lines is preferred for maintainability.
-* **Anti-Gaming Laws (Strictly Banned):**
-  * Never dice one 150-line file into five 30-line files to game the line count. Keep cohesive boundaries together.
-  * Never use `partial class`, unnatural subclassing, `ref`/`out`, or language quirks to hide line bloat.
-* **Recursive Hierarchy:** When an injected policy grows complex, it forms its own sovereign boundary: $\text{Core Primitive} \to \text{Opinion Sub-Primitive} \to \text{Sub-Policy}$.
+The concrete implementation of a primitive is itself an opinion on how it should function. It must remain decoupled, vanilla, and adhere to universal design principles to ensure future extensibility.
+
+**The ~150-Line Heuristic (Anti-Bloat Smoke Detector):**
+If a concrete implementation exceeds **~150 lines**, it is usually a code smell: it is doing more than it should and harboring hardcoded opinions.
+* Extract opinions, variable numbers, and complex algorithms into injected **Opinion Sub-Primitives (Policies)**. (For example, an `Engine` primitive may reach 1,000 lines if implemented monolithically, but extracting `IFuelSystem` and engine timing as injected policies keeps the core engine implementation clean and readable like plain English).
+* *Cohesive File Scope:* If an interface has one primary implementation, keeping the interface, implementation, and extension methods together in one file within ~150 lines is preferred for easy maintenance.
+
+**Anti-Gaming Laws (Strictly Banned):**
+* Never dice one 150-line file into five 30-line files just to game the metric. Keep cohesive pieces together.
+* Never use `partial class`, unnatural subclassing, `ref`/`out`, or language quirks to hide line bloat.
+
+**Recursive Hierarchy:**
+When an injected policy grows complex enough to form its own logical boundary, it can have its own sub-opinions injected: $\text{Core Primitive} \to \text{Opinion Sub-Primitive} \to \text{Sub-Policy}$.
 
 ---
 
 ## 5. Layers & Middlewares (Decorated Co-Primitives)
 
 While Policies are injected *inside* core primitives to decouple internal strategies, **Layers** decorate primitives from the *outside* to intercept, observe, modify, or control end-to-end I/O flow.
-* **The Power of Layers:** Wrapping a primitive with a decorator grants direct access to inspect, monitor, persist, or modify flows (analogous to connecting diagnostic leads directly to an engine, or ASP.NET Core middlewares, without middleware delegate bloat).
-  * An `Engine` primitive can have a sensor layer monitoring telemetry, or a tuning layer adjusting performance, without altering the core engine.
-* **Preceding Diagnostic (Primitive Completeness):** A core primitive must be functionally sound on its own. If you need a layer to make a primitive functional, that is a design smell indicating a missing internal responsibility or policy.
-* **Functional Completeness Test:** Once the primitive is sound:
-  * **NO** (primitive cannot function without it) $\to$ **Policy** (injected opinion sub-primitive, e.g., context compaction in `AgentCore`).
-  * **YES** (primitive functions completely in-memory without it) $\to$ **Layer** (external concern, e.g., persistence, logging, telemetry).
-* **Shared Dependency Rule:** If multiple layers require a capability, evaluate whether it is a shared internal policy rather than duplicating it across decorators.
-* **Higher-Layer Pragmatism:** Callbacks, events, delegates, hooks, factories, and switch-case initializers are design smells in core primitives, but legitimate conveniences at higher application layers (UI bindings, orchestration, plugin loaders).
-* **Strict Typing:** Always use strictly typed contracts; avoid `object`, `dynamic`, or unchecked casting escape hatches.
+
+Layers provide direct extension over core primitives—like a mechanic plugging diagnostic instruments directly into an engine, body, or chassis. They offer the power of ASP.NET Core middleware without delegate bloat (pure decorators).
+* An `Engine` primitive can have a sensor layer monitoring telemetry, or a tuning layer improving mileage, without modifying the core engine.
+
+**Preceding Diagnostic (Primitive Completeness):**
+A core primitive must be functionally sound on its own. If you need a layer to make a primitive functional, that is a design smell indicating a missing internal responsibility or policy.
+
+**Functional Completeness Test:**
+Once the primitive is sound:
+* **NO** (primitive cannot function without it) $\to$ **Policy** (injected opinion sub-primitive, e.g., context compaction in `AgentCore`—an agent cannot function once its context window overflows).
+* **YES** (primitive functions completely in-memory without it) $\to$ **Layer** (external concern, e.g., persistence, logging, telemetry).
+
+**Shared Dependency Rule:**
+If multiple layers require a specific capability, evaluate whether it is a shared internal policy rather than duplicating it across decorators.
+
+**Higher-Layer Pragmatism:**
+Callbacks, events, delegates, hooks, factories, and switch-case initializers are design smells in core primitives, but legitimate conveniences at higher application layers (UI bindings, orchestration, plugin loaders).
+
+**Strict Typing:**
+Always use strictly typed code; avoid `object`, `dynamic`, or unchecked casting escape hatches unless the benefits overwhelmingly outweigh the design smell.
 
 ---
 
 ## 6. Passive State DTOs
 
-* **Pure State Carriers:** DTOs hold data and zero business logic. They do not earn interfaces, and primitives are never passive data wrappers (`IContent` is an active operational boundary, not a `ChatHistory` wrapper).
-* **DTO Impurity as a Smell Indicator:** When DTOs accumulate assembly, execution, or routing logic, boundaries were misplaced:
-  * In `AgentCore`, stripping `Message` of delta-assembly logic and removing `IBlockEvent.Start()` (a hidden factory on a DTO) restored purity. Delta assembly belongs strictly in operational primitives, keeping DTOs passive. Pure transforms (`ToString()`) remain extension helpers.
+Pure data classes must not contain business logic. If a DTO requires behavior, it indicates misplaced responsibilities or a missing policy sub-primitive.
+* Pure transform helpers (e.g., `ToString()`) can be extension methods staying close to or in the same file as the DTO.
+* DTOs do not earn interfaces, and primitives are never passive data wrappers (`IContent` is an active operational boundary, not a `ChatHistory` wrapper).
+* *AgentCore Diagnostic:* Stripping `Message` of delta-assembly logic and removing `IBlockEvent.Start()` (which acted as a hidden factory on an event DTO) restored purity. Delta assembly belongs strictly in operational primitives, keeping DTOs purely passive.
 
 ---
 
 ## 7. Natural Symmetry, Orchestrator Purity & Naming
 
 When core primitives are modeled correctly, a natural symmetry emerges across the system:
-* **Symmetry as a Discovery Tool:** In `AgentCore`, LLMs streamed tokens while tools originally returned static DTOs, requiring intermediate accumulators. Seeking architectural symmetry prompted the realization: *tools stream too* (progress updates, long-running chunks). Both LLMs and tools stream context into `IContent` via `IMessageEvent`. Unifying them under streaming symmetry eliminated accumulators entirely.
+* **Symmetry as a Discovery Tool:** In `AgentCore`, LLMs streamed tokens while tools originally returned static DTOs, requiring an intermediate accumulator. Seeking architectural symmetry prompted the realization: *tools stream too* (progress updates, long-running chunks). Both LLMs and tools stream context into `IContent` via `IMessageEvent`. Unifying them under streaming symmetry eliminated accumulators entirely.
 * **Internal Loop Purity:** Top-level orchestration should mirror the fundamental domain algorithm without glue, adapters, or accumulators:
 ```csharp
 // Conceptual PFD ReAct loop — simplified from AgentCore
