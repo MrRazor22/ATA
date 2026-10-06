@@ -8,6 +8,13 @@
 
 ## 2. Core Architectural Invariants
 - **Intellectual Honesty Over Dogma:** Never apply PFD blindly. If applying PFD introduces practical friction, unnatural ceremony, or a design smell in a given scenario, point it out explicitly rather than force-fitting dogma.
+- **Boundary Discovery Precedes Contract Design:** Never begin by converting existing classes, files, or reusable components into primitives or interfaces. First discover the irreducible responsibilities of the system.
+  - *Primitive vs. Collaborator Test:* If this component disappeared, would the surrounding system lose a distinct domain capability, or merely one implementation mechanism? Capability $\to$ Candidate Primitive. Mechanism $\to$ Internal Collaborator (keep encapsulated inside the concrete implementation; zero public contract).
+  - Never create an interface merely because a concrete class has callers, could be mocked, has multiple implementations, or looks reusable.
+- **Global Over Local Minimization:** PFD does not mean minimizing the immediate artifact locally (deleting a component, then patching the signature with `Any`, then narrowing to raw primitives). Find the true domain boundary first, then subtract everything that exists solely because the boundary was wrong.
+- **Substrate Encapsulation:** When an implementation uses an execution substrate (ML runtime, DB engine, message broker, graphics API, OS handle, vendor SDK), substrate mechanics belong strictly inside the implementation. Never leak substrate types (`torch.Tensor`, `DbContext`, `HttpClient`, handles) across primitive contracts unless the substrate is genuinely the domain boundary.
+- **Representation Integrity (Never Degrade Representations to Escape Dependencies):** Boundary representations must express structural domain truth without prematurely specializing to one modality or artificially dumbing down types to raw primitives (`List[int]`, strings). If removing a substrate dependency forces an artificially narrow representation, the boundary was designed from the implementation outward rather than from the domain inward.
+- **An Escape Hatch is Evidence, Not a Solution:** If a boundary requires `Any`, `object`, `dynamic`, unchecked casts, downcasts, or runtime type inspection, stop. The abstraction is either exposing an unmodeled concept or attempting to paper over an incompatible substrate.
 - **Components Are Optional Primitives, Not Mandates:** Primitives, Policies, and Layers are stages of boundaries. Forcing every boundary to have policies or layers when none are needed is an anti-PFD smell.
 - **Why Policy Exists:** Policies exist specifically to extract variable heuristics, algorithms, and volatile strategies out of the core primitive, preserving the primitive as an irreducible, unopinionated domain mechanism. Extract policies only when opinions warrant a boundary.
 - **Policy is an Opinion Sub-Primitive:** Policies are extracted subordinate primitives. Every policy contract demands the exact same minimalism and Subtraction Test as root primitives.
@@ -17,7 +24,7 @@
 - **Preceding Primitive Completeness Diagnostic:** Before classifying an abstraction as a Policy or Layer, always test whether the primitive itself is incomplete. If the primitive cannot function meaningfully without an external concern, the concern represents a missing internal responsibility or policy, not an external layer.
 - **Every Line Must Satisfy PFD:** When adding or modifying code, inspect every line to verify it fits the boundary discipline (State DTO, Action Primitive, Injected Policy, Decorated Layer) without introducing bloat, leaky abstractions, or duplicated branching for the same logic.
 - **Bedrock Contract Purity & Chaining:** The primitive interface encapsulates domain capabilities only. It must never contain chaining, piping, or layer-composition mechanics. Chaining belongs strictly to external transformations.
-- **Zero Language Hardcoding:** Architecture specifications and skills must remain 100% language-agnostic. Never mention language-specific operators or mechanics (`__or__`, `|`, `extension methods`) in foundational doctrine.
+- **Zero Language Hardcoding:** Architecture specifications and skills must remain 100% language-agnostic. Never mention language-specific operators or mechanics in foundational doctrine.
 - **Brevity as the Invariant:** Line count is the empirical mirror of representational fidelity. Code sprawl indicates an incomplete abstraction.
 
 ## 3. Operational & Git Workflow

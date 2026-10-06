@@ -24,6 +24,9 @@ Minimality in PFD means the **minimum structural complexity required to express 
 
 ## Primitives & Interface Contract Law
 
+* **Boundary Discovery Precedes Contract Design:** Never begin by converting existing classes, files, or reusable components into primitives or interfaces. First discover the irreducible responsibilities of the system.
+  * *Primitive vs. Collaborator:* If this component disappeared, would the surrounding system lose a distinct domain capability, or merely lose one implementation mechanism? (Capability $\longrightarrow$ Candidate Primitive; Mechanism $\longrightarrow$ Internal Collaborator; keep encapsulated).
+  * Never create an interface merely because a concrete class has callers, could be mocked, or seems conceptually reusable.
 * **The Interface is the Truth:** Every operational boundary is defined by its contract across any paradigm (C#/Java `interface`, Rust `trait`, Go `interface`, C++ concept). Concrete implementations are never directly exposed across boundaries; zero backdoor access. Passive representations (DTOs) carry state and are the only exception.
 * **The Cognitive Forcing Mechanism:** Concrete access tempts developers to casually leak ad-hoc public methods for temporary convenience. Enforcing strict interface contracts serves as a cognitive forcing function, compelling you to decide upfront whether a capability genuinely belongs to the domain boundary.
 * **Logical Boundaries vs. OOP Objects:** A primitive represents an irreducible logical boundary of conceptual responsibility, not an arbitrary object-oriented class or physical noun. (In an illustrative vehicle model, the *Engine* represents a primitive boundary, while a *piston* is an internal component. Every class is not a primitive).
@@ -40,10 +43,12 @@ Developers often overfit abstractions to narrow, immediate needs, only to break 
 2. **Zero Future Blindspots:** No artificial constraints lock out natural domain capabilities.
 3. **Natural Adaptability:** Present needs are satisfied completely while future expansion remains natural without contract breakage.
 
-### Contract Scrutiny & Universal Opinions
+### Contract Scrutiny, Substrate Encapsulation & Representation Integrity
 Every element of a contract must be scrutinized: method existence, parameters, return shapes, sync/async, lifecycle, and what is deliberately *not* exposed. Before adding another method to handle a new need, ask whether the existing primitive can express it by generalizing its fundamental shape.
 
-Purity does not mean having zero opinions:
+* **Substrate Encapsulation:** When an implementation uses an execution substrate (ML runtime, DB engine, message broker, graphics API, OS handle, vendor SDK), substrate mechanics belong strictly inside the implementation. Never leak substrate types across primitive contracts unless the substrate itself is genuinely the domain boundary.
+* **Representation Integrity:** Boundary representations must express structural domain truth without prematurely specializing to one modality or artificially dumbing down types to raw primitives (`List[int]`, strings) merely to escape a dependency.
+* **Escape Hatches are Evidence, Not Solutions:** If a boundary requires `Any`, `object`, `dynamic`, unchecked casts, or downcasts, stop. The abstraction is either exposing an unmodeled concept or attempting to paper over an incompatible substrate.
 * **Universal Domain Truths** belong directly in the **Core Primitive Contract**.
 * **Variable Strategies & Rules** belong in injected **Policies**.
 * **Convenience Transformations** do not belong in the primitive contract.
