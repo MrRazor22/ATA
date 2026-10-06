@@ -6,27 +6,15 @@
 - **Never Mirror Blindly:** Never copy-paste content between `README.md` and `SKILL.md`. Each file must speak directly to its distinct audience.
 - **Reflect What It Preaches (First-Class Proof Beyond Code):** Both `SKILL.md` and `README.md` must strictly embody PFD itself: rich in detail, high signal density, strictly compressed, with zero convenience bloat or fluff. This serves as primary proof that PFD is a universal creative discipline beyond code.
 
-## 2. Core Architectural Invariants
-- **Intellectual Honesty Over Dogma:** Never apply PFD blindly. If applying PFD introduces practical friction, unnatural ceremony, or a design smell in a given scenario, point it out explicitly rather than force-fitting dogma.
-- **Boundary Discovery Precedes Contract Design:** Never begin by converting existing classes, files, or reusable components into primitives or interfaces. First discover the irreducible responsibilities of the system.
-  - *Primitive vs. Collaborator Test:* If this component disappeared, would the surrounding system lose a distinct domain capability, or merely one implementation mechanism? Capability $\to$ Candidate Primitive. Mechanism $\to$ Internal Collaborator (keep encapsulated inside the concrete implementation; zero public contract).
-  - Never create an interface merely because a concrete class has callers, could be mocked, has multiple implementations, or looks reusable.
-- **Global Over Local Minimization:** PFD does not mean minimizing the immediate artifact locally (deleting a component, then patching the signature with `Any`, then narrowing to raw primitives). Find the true domain boundary first, then subtract everything that exists solely because the boundary was wrong.
-- **Substrate Encapsulation:** When an implementation uses an execution substrate (ML runtime, DB engine, message broker, graphics API, OS handle, vendor SDK), substrate mechanics belong strictly inside the implementation. Never leak substrate types (`torch.Tensor`, `DbContext`, `HttpClient`, handles) across primitive contracts unless the substrate is genuinely the domain boundary.
-- **Representation Integrity (Never Degrade Representations to Escape Dependencies):** Boundary representations must express structural domain truth without prematurely specializing to one modality or artificially dumbing down types to raw primitives (`List[int]`, strings). If removing a substrate dependency forces an artificially narrow representation, the boundary was designed from the implementation outward rather than from the domain inward.
-- **An Escape Hatch is Evidence, Not a Solution:** If a boundary requires `Any`, `object`, `dynamic`, unchecked casts, downcasts, or runtime type inspection, stop. The abstraction is either exposing an unmodeled concept or attempting to paper over an incompatible substrate.
-- **Components Are Optional Primitives, Not Mandates:** Primitives, Policies, and Layers are stages of boundaries. Forcing every boundary to have policies or layers when none are needed is an anti-PFD smell.
-- **Why Policy Exists:** Policies exist specifically to extract variable heuristics, algorithms, and volatile strategies out of the core primitive, preserving the primitive as an irreducible, unopinionated domain mechanism. Extract policies only when opinions warrant a boundary.
-- **Policy is an Opinion Sub-Primitive:** Policies are extracted subordinate primitives. Every policy contract demands the exact same minimalism and Subtraction Test as root primitives.
-- **Fractal Boundaries:** When a policy primitive expands in complexity to require its own layers or subordinate policies, it promotes directly into the root primitive of an independent operational boundary.
-- **Everything is a Primitive Contract:** Layers are primitive decorators. Policies are extracted subordinate primitives. All behavioral boundaries in PFD are expressed as interface contracts.
-- **Stream State, Never Inject Behavior:** A primitive's contract IS its output stream. If consumers need to react to intermediate state, the primitive must yield that state naturally through its contract—never accept injected callbacks, hooks, factory switches, or type dispatch. Granularity belongs in the contract; layers compose on top of the stream.
-- **Preceding Primitive Completeness Diagnostic:** Before classifying an abstraction as a Policy or Layer, always test whether the primitive itself is incomplete. If the primitive cannot function meaningfully without an external concern, the concern represents a missing internal responsibility or policy, not an external layer.
-- **Every Line Must Satisfy PFD:** When adding or modifying code, inspect every line to verify it fits the boundary discipline (State DTO, Action Primitive, Injected Policy, Decorated Layer) without introducing bloat, leaky abstractions, or duplicated branching for the same logic.
-- **Bedrock Contract Purity & Chaining:** The primitive interface encapsulates domain capabilities only. It must never contain chaining, piping, or layer-composition mechanics. Chaining belongs strictly to external transformations.
-- **Zero Language Hardcoding:** Architecture specifications and skills must remain 100% language-agnostic. Never mention language-specific operators or mechanics in foundational doctrine.
-- **Brevity as the Invariant:** Line count is the empirical mirror of representational fidelity. Code sprawl indicates an incomplete abstraction.
+## 2. Core Architectural Invariants (PFD)
+- **Always Apply PFD:** Apply Primitive-First Design (PFD) across all software architecture, boundary definitions, audits, refactorings, and reviews. Always read and strictly adhere to the complete, authoritative PFD doctrine in `skills/pfd/SKILL.md` (and global `~/.gemini/config/skills/pfd/SKILL.md`). Never use partial heuristics, speculative layers, or ad-hoc wrapper abstractions.
+
 
 ## 3. Operational & Git Workflow
 - **Commit on Every Considerable Update:** Always create a clean, descriptive git commit upon completing any considerable architectural, documentation, or skill update. Never leave significant milestones, syntheses, or refactorings uncommitted in the working tree.
 - **Pre-Commit User-Point Audit & Absolute Honesty:** Before or upon committing, always perform a rigorous, exhaustive audit of all user requirements and nuanced insights. Honestly and explicitly confirm to the user whether every single point was captured in full, or openly identify any friction, omission, or necessary adaptation.
+- **Mandatory Synchronization Checklist:** Whenever updating PFD architecture, doctrine, or skills, always synchronize the following three locations:
+  1. `skills/pfd/SKILL.md` (Repo skill file)
+  2. `~/.gemini/config/skills/pfd/SKILL.md` (Global Antigravity skill directory)
+  3. `~/.gemini/config/AGENTS.md` (Global user rules Section 5)
+  *Always run `powershell -File scripts/sync-pfd.ps1` to automatically sync the skill and verify status.*
