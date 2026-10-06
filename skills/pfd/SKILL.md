@@ -23,6 +23,10 @@ Everything is and must be an interface (of course except DTOs, transforms, helpe
 
 This interface mandate is a cognitive forcing mechanism to force you to think and design contracts better, instead of conveniently abusing a class to expose anything you want at any time.
 
+An interface should be a symbol of decoupling—never add coupling into it. A concrete implementation can have hard couplings injected (and even then, injected via interfaces) or have its own internal opinions, but the interface itself is meant to be pure. For example, a car engine primitive contract shouldn't take a `MitsubishiEngineCylinder` as a parameter; it should take `IEngineCylinder`, or simpler types.
+
+Any complex object in a core primitive contract should also be an interface defined by us (our own DTO or sub-primitive). Rarely, we may need something external—for example, like `Newtonsoft.Json` in C# long ago where everyone used it like second nature as if it were a native C# object. Even in those rare cases it is still not preferred. Types crossing a core primitive contract should either be fundamental language primitives (`int`, `string`, `decimal`, etc.), our own passive DTOs, or `I<OurInterface>`.
+
 A primitive represents what we expect from something. In OOP, we design based on real-world objects. For example, if a car is designed, the primitives define clearly what the core primitives in a car are:
 * **Engine** (gearbox, fuel tank, etc.)
 * **Body** (lights, door, storage, etc.)
