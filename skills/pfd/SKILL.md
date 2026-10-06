@@ -68,19 +68,22 @@ A concrete implementation represents an opinionated execution strategy. Baseline
 * **The Anti-Gaming Law:**
   * *The File Fragmentation Trap:* Never dice a 150-line file into five 30-line files just to pass a line check. Keep cohesive units together. The ~150 LoC heuristic is a smoke detector for architectural sprawl, not a formatting mandate.
   * *No Cosmetic Cheats:* Never use `partial class`, unnatural subclassing, `ref`/`out`, or helper indirection to disguise line bloat.
-* **Extracting Policies (Algorithms to Meaningful Values):** Changeable implementation opinions—from complex algorithms down to meaningful thresholds and operating limits—must be extracted as **Opinion Sub-Primitives (Policies)** rather than buried as magic constants (e.g., an `Engine` implementation injects `IFuelSystem`, timing schemes, and operating thresholds).
+* **Extracting Policies (When Opinions Warrant a Boundary):** Changeable implementation opinions—from complex algorithms to variable operating strategies—should be extracted as **Opinion Sub-Primitives (Policies)** *only when they warrant an architectural boundary*, rather than buried as magic constants or mechanically turned into premature abstractions for every configurable number. (e.g., an `Engine` injects `IFuelSystem` or a timing strategy when the mechanism is genuinely variable; simple thresholds can remain plain configuration). Classification is not a mandate to spawn an interface for every variable.
 * **Recursive Hierarchy:** When an injected policy grows complex, it forms its own sovereign boundary: $\text{Core} \to \text{Policy} \to \text{Sub-Policy}$.
 
 ---
 
 ## 5. Taxonomy: Policies vs. Layers
 **A Policy completes the primitive from within; a Layer extends a complete primitive from outside.**
+* **The Preceding Diagnostic (Primitive Completeness):** Before mechanically classifying an abstraction as a Policy or Layer, always ask: **Is the foundational primitive itself poorly conceived or incomplete?**
+  * *The Incomplete Primitive Smell:* A primitive on its own must be functionally sound. If the primitive cannot function meaningfully without the external concern, the concern may represent a missing internal responsibility rather than a Layer (e.g., an agent context that cannot function within finite limits unless an external layer rescues it). Fix the primitive's contract and internal policy first before inventing wrappers.
+  * *Masquerading Bloat:* A missing fundamental responsibility often masquerades as an external abstraction, wrapper, or glue service.
 * **The Power of Layers:** Wrapping a primitive with a decorator grants direct, non-invasive access to inspect, monitor, persist, or modify complete I/O flows (analogous to a mechanic connecting diagnostic leads directly to an engine, or ASP.NET Core middlewares).
-* **Functional Completeness Test (Primary):** Can the primitive function without it?
-  * **NO** $\to$ **Policy** (injected strategy).
+* **Functional Completeness Test (Primary):** Once the primitive is sound, test external concerns: Can the primitive function without it?
+  * **NO** $\to$ **Policy** (injected strategy completing the internal mechanism).
   * **YES** $\to$ **Layer** (external concern: logging, persistence, telemetry).
 * **Case Study (Context Compactor vs. Persistence):**
-  * *Context Compactor is a Policy:* An agent cannot function once its context window overflows. Compaction is functionally required to complete the primitive, though the strategy (sliding window vs. summarizer) varies.
+  * *Context Compactor is a Policy:* An agent cannot function once its context window overflows. Compaction is fundamentally required to complete the primitive, though the strategy (sliding window vs. summarizer) varies. If compaction were an external layer, the core primitive would be incomplete and unable to function meaningfully on its own.
   * *Persistence is a Layer:* The agent functions completely in-memory without a database.
 * **Shared Dependency Diagnostic:** If multiple layers require a specific capability, do not duplicate it across decorators; evaluate whether it represents a shared internal policy.
 * **Higher-Layer Pragmatism:** Callbacks, events, delegates, hooks, factories, and switch-initializers are design smells in core primitives, but entirely legitimate conveniences at higher application layers (UI bindings, orchestration, plugin loaders).
@@ -136,7 +139,7 @@ while (content.NeedsExecution()) {
 | **Contract Scrutiny**| Crossing 4–5 methods? Exposing lifecycle (`Clear`) or side-channels (`TokenUsage`)? | Scrutinize methods; stream metadata on events; delegate lifecycle to higher tiers. |
 | **Extensions** | Are convenience helpers in core contract or in static grab-bags? | Colocate extension methods beside primitive ("Useful $\ne$ Fundamental"). Ban `CommonUtils`. |
 | **Properties/Types**| Exposing mutable properties? Escaping via `object`/`dynamic`? | Prefer methods unless simple synchronous state. Enforce strict typing. |
-| **Implementation** | Exceeding ~150 lines? Arbitrarily dicing files? | Extract policies (algorithms down to thresholds). Obey anti-gaming laws. |
-| **Taxonomy** | Can primitive work without it? Shared across contexts? | NO $\to$ Policy (injected). YES $\to$ Layer. If shared across layers, check if internal policy. |
+| **Implementation** | Exceeding ~150 lines? Arbitrarily dicing files? | Extract policies *only when opinions warrant a boundary*. Obey anti-gaming laws. |
+| **Taxonomy** | Is primitive incomplete on its own? Can it function without concern? | If primitive needs a layer to work $\to$ primitive smell. Otherwise: NO $\to$ Policy, YES $\to$ Layer. |
 | **DTO Boundaries**| DTO holding logic, assembly, or hidden factories (`Start()`)? | Keep DTOs passive. Move delta assembly and orchestration to primitives. |
 | **Topology** | Mismatch between disk and namespaces? Orphan root files? | Small scopes flat; align disk 1:1 to namespaces; mirror primitive trie. |
