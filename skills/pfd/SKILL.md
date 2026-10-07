@@ -141,7 +141,7 @@ Layers provide direct extension over core primitives—like a mechanic plugging 
 **PFD Smells: Core Primitives vs. Higher Layers:**
 * Callbacks, events, delegates, and hooks are usually code smells resulting from poor primitives, but can be used as conveniences at higher layers of an application design (UI bindings, orchestration, plugin loaders)—never as part of core primitive design.
 * Factory patterns and switch-case initializations are usually smells hiding fundamental design issues. Genuine needs can warrant them, but using them is usually a sign of lazy design.
-* Always use strictly typed code where supported (e.g., avoiding `object` in C# to get around design issues).
+* Always use strict, explicit typing system-wide. Never use `Any`, `object`, `dynamic`, or untyped containers as escape hatches across contracts or DTOs. If an abstraction requires `Any` or `object`, it is an architectural smell indicating that domain types were not properly modeled.
 
 **Testing Policy vs. Layer:**
 * If something is needed by other layers, it is an injected opinion sub-primitive, not a layer.
