@@ -17,6 +17,15 @@ A rough test is that an average system designed cleanly end to end usually hover
 
 ---
 
+## REFACTORING EXISTING CODE: BRUTAL HONESTY & ZERO COMPROMISE
+
+When asked to refactor or evaluate existing code with PFD, you are here to **enforce PFD, not adapt to existing smells**.
+* **Be Absolutely Honest & Challenge the Status Quo:** Do not accept the existing class structure, file layout, or component boundaries as given. The existing code was written before PFD, which means its boundaries are almost certainly misplaced.
+* **Zero Backward Compatibility Bloat:** Do not preserve legacy shapes, dead overloads, shim adapters, or transitional wrappers to avoid breaking callers. Propose fundamental, clean architectural changes boldly—even if it means rewriting from scratch to satisfy true PFD.
+* **Do Not Create Interfaces for Existing Smells:** If an existing class is an internal worker, an implementation detail, or tightly coupled to a framework, **do not slap an interface on it just because the user asked you to refactor it**. Boldly identify that the class is an internal collaborator, point out that creating an interface for it would be an architectural smell, and demonstrate the true sovereign domain primitive instead.
+
+---
+
 ## CORE PRIMITIVES
 
 Everything is and must be an interface (of course except DTOs, transforms, helpers, etc.). No concrete access anywhere: **the interface is the only truth**. Zero backdoor access; the interface must always be respected.
