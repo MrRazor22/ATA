@@ -128,7 +128,7 @@ Layers may feel unnecessary at first, but decorating a layer over a core primiti
 Layers provide direct extension over core primitives—like a mechanic plugging measuring instruments directly into an engine, body, chassis, or cabin to diagnose or customize it. That is how powerful they are for extensibility, scaling, and control.
 * An `Engine` primitive can have a sensor layer monitoring engine parameters and telemetry, or a user-mod layer improving mileage, without altering the core engine.
 
-**Smells in Core Primitives vs. Higher Layers:**
+**PFD Smells: Core Primitives vs. Higher Layers:**
 * Callbacks, events, delegates, and hooks are usually code smells resulting from poor primitives, but can be used as conveniences at higher layers of an application design (UI bindings, orchestration, plugin loaders)—never as part of core primitive design.
 * Factory patterns and switch-case initializations are usually smells hiding fundamental design issues. Genuine needs can warrant them, but using them is usually a sign of lazy design.
 * Always use strictly typed code where supported (e.g., avoiding `object` in C# to get around design issues).
