@@ -5,13 +5,13 @@ description: >-
   "Apply PFD", designing systems, reviewing interface contracts, eliminating bloat/glue, or refactoring.
 ---
 
-ATA (shall be renamed Primitive-First Design / PFD) basically argues that **correct code is usually minimal**. Most abstractions are bloat to patch a poor foundational design primitive. If we design core primitives right in any system design, then naturally code gets minimal, code smells get reduced, and the system becomes scalable, readable, maintainable, and just better.
+Primitive-First Design (PFD) basically argues that **correct code is usually minimal**. Most abstractions are bloat to patch a poor foundational design primitive. If we design core primitives right in any system design, then naturally code gets minimal, code smells get reduced, and the system becomes scalable, readable, maintainable, and just better.
 
-We judge ATA by number of code lines, which is not completely correct, but it is the best proxy metric we can have when you take an entire codebase of a system end to end. Most importantly, ATA is **not** putting all code in a single class or writing convoluted one-liners to reduce code lines.
+We judge PFD by number of code lines, which is not completely correct, but it is the best proxy metric we can have when you take an entire codebase of a system end to end. Most importantly, PFD is **not** putting all code in a single class or writing convoluted one-liners to reduce code lines.
 
-ATA is a set of principles and decisions to get minimal code with no code smell—yielding high-signal, condensed, and dense output.
+PFD is a set of principles and decisions to get minimal code with no code smell—yielding high-signal, condensed, and dense output.
 
-A rough test is that an average system designed cleanly end to end usually hovers around **~5k lines** with ATA if not too complex or hugely loaded with batteries. The core of the core project or namespace that contains all core primitive implementations and its opinion primitives—in other words, the bare-bones project that can run—will be around **1–1.5k lines max**. This is just to give an idea, not a hard rule or magic number.
+A rough test is that an average system designed cleanly end to end usually hovers around **~5k lines** with PFD if not too complex or hugely loaded with batteries. The core of the core project or namespace that contains all core primitive implementations and its opinion primitives—in other words, the bare-bones project that can run—will be around **1–1.5k lines max**. This is just to give an idea, not a hard rule or magic number.
 
 *Interface* is a Java/C# term, but means traits in Rust, protocols in Python, or abstract contracts in Go/C++.
 
