@@ -28,9 +28,9 @@ When asked to refactor or evaluate existing code with PFD, you are here to **enf
 
 ## CORE PRIMITIVES
 
-Everything is and must be an interface (of course except DTOs, transforms, helpers, etc.). No concrete access anywhere: **the interface is the only truth**. Zero backdoor access; the interface must always be respected.
+Everything is and must be an interface contract (except pure DTOs and pure transforms). A concrete class exists for strictly two reasons: either to implement an explicit primitive/policy/layer interface contract, or as a pure behaviorless DTO. Anything with behavior must be modeled as a proper primitive contract—zero intermediate classes, zero un-interfaced workers. Pure transform functions or extension classes are colocated directly with the primitive contract or DTO they extend.
 
-This interface mandate is a cognitive forcing mechanism to force you to think and design contracts better, instead of conveniently abusing a class to expose anything you want at any time.
+This interface mandate is a cognitive forcing mechanism to force you to think and design contracts better, instead of conveniently abusing a class to expose anything you want at any time. No concrete access anywhere: **the interface is the only truth**. Zero backdoor access; the interface must always be respected.
 
 An interface is a symbol of decoupling—never add coupling into it. A concrete implementation can have hard couplings injected (via interfaces) or have its own internal opinions, but the interface contract itself is meant to be pure.
 
@@ -135,7 +135,7 @@ Layers are meant for core primitives. Core primitives control the core pillars o
 Layers may feel unnecessary at first, but decorating a layer over a core primitive gives entire input and output control. This offers the power of ASP.NET Core middleware with less bloat (pure decorators with no before/after delegate complexity).
 
 Layers provide direct extension over core primitives—like a mechanic plugging measuring instruments directly into an engine, body, chassis, or cabin to diagnose or customize it. That is how powerful they are for extensibility, scaling, and control.
-* An `Engine` primitive can have a sensor layer monitoring engine parameters and telemetry, or a user-mod layer improving mileage, without altering the core engine.
+* An `Engine` primitive can have a sensor layer monitoring engine parameters and telemetry, or a user-mod layer improving mileage, without altering the core engine. Layer classes typically adopt the `Layer` suffix for immediate architectural clarity.
 
 **PFD Smells: Core Primitives vs. Higher Layers:**
 * Callbacks, events, delegates, and hooks are usually code smells resulting from poor primitives, but can be used as conveniences at higher layers of an application design (UI bindings, orchestration, plugin loaders)—never as part of core primitive design.
@@ -185,7 +185,7 @@ As you plan core primitives, hints of symmetry indicate a clean representation o
 
 Folder structure and namespace boundaries are critical:
 * If a codebase has 2–3 files, keeping them flat in a single folder is fine.
-* When files grow, create clear namespace and folder boundaries for correlated items. Primitives represent file-level boundaries; namespaces represent the layer above.
+* When files grow, create clear namespace and folder boundaries for correlated items. Primitives represent file-level boundaries; namespaces represent the layer above. Colocating transforms and contracts must still strictly respect that no single source file should exceed **~150 lines**; if a file approaches this ceiling, cleanly separate the contract and its colocated helpers into dedicated adjacent files.
 * Folders and namespaces must match 1:1. Disk layout is the physical representation of the namespace hierarchy.
 * Solutions, projects, and folders are boundaries. Scope related items together; **zero orphan files in root** under any boundary.
 * **The Trie Test:** The directory structure should match the trie you would draw of the system's primitives end to end. In `AgentCore`, 3 clean folders mirror the 3 core primitives (`Llm`, `Content`, `Toolbox`), keeping the entire design walkthrough visible at a glance.
