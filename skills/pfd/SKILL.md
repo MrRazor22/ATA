@@ -11,7 +11,7 @@ We judge PFD by number of code lines, which is not completely correct, but it is
 
 PFD is a set of principles and decisions to get minimal code with no code smell—yielding high-signal, condensed, and dense output.
 
-A rough test is that an average system designed cleanly end to end usually hovers around **~5k lines** with PFD if not too complex or hugely loaded with batteries. The core of the core project or namespace that contains all core primitive implementations and its opinion primitives—in other words, the bare-bones project that can run—will be around **1–1.5k lines max**. This is just to give an idea, not a hard rule or magic number.
+Aim for absolute minimal code: a cleanly designed system with PFD should naturally hover around **~1k lines end-to-end**. A human cannot easily comprehend an entire codebase beyond **~3k lines** in working memory. If a project exceeds these limits without immense external domains, it is carrying speculative bloat, redundant boilerplate, or misplaced boundaries.
 
 *Interface* is a Java/C# term, but means traits in Rust, protocols in Python, or abstract contracts in Go/C++.
 
@@ -86,7 +86,7 @@ Sometimes a natural symmetry arises in primitive design across the system. In `A
 
 Exposing properties in interfaces (in languages like C#) is usually not preferred. It cannot be cleanly layered, intercepted, or scaled if a getter or setter requires complex asynchronous operations in the future. If simple synchronous exposure avoids two getter/setter methods, it can be exposed, but pure action methods remain preferred.
 
-A good test is if an interface crosses more than **4–5 methods**: usually its needs are not correctly judged, it is doing too much, or it is modeled around a wrong or non-existent boundary. The 4–5 method rule is not strict, but serves as a warning to think deeper.
+A good test is if an interface crosses more than **4–5 methods**: usually its needs are not correctly judged, it is doing too much, or it is modeled around a wrong or non-existent boundary. Never carelessly dump multiple convenience overloads or parallel variants (like `Do()` and `DoBatch()`) into a contract interface; design a single, sovereign operational signature that handles the general case cleanly. Convenience overloads belong in callers or extension helpers, never polluting the root contract.
 
 You may need more methods, but usually those are helper methods that can be added as extension methods on concrete implementations or colocated extensions. The core primitive stays minimal; helper methods change based on implementation and shouldn't pollute the core contract.
 * *The Fruit Rule:* A `Fruit` primitive defines `Taste()`, `Size()`, etc., but `IsApple()` is an extension method, not part of the core primitive contract.
@@ -132,7 +132,7 @@ While policies are injected into core primitive implementations to decouple inte
 
 Layers are meant for core primitives. Core primitives control the core pillars of the entire system end to end.
 
-Layers may feel unnecessary at first, but decorating a layer over a core primitive gives entire input and output control. This offers the power of ASP.NET Core middleware with less bloat (pure decorators with no before/after delegate complexity).
+Layers may feel unnecessary at first, but decorating a layer over a core primitive gives entire input and output control. This offers the power of classic HTTP/request pipeline middlewares with less bloat (pure decorators with no before/after delegate complexity).
 
 Layers provide direct extension over core primitives—like a mechanic plugging measuring instruments directly into an engine, body, chassis, or cabin to diagnose or customize it. That is how powerful they are for extensibility, scaling, and control.
 * An `Engine` primitive can have a sensor layer monitoring engine parameters and telemetry, or a user-mod layer improving mileage, without altering the core engine. Layer classes typically adopt the `Layer` suffix for immediate architectural clarity.
@@ -145,7 +145,7 @@ Layers provide direct extension over core primitives—like a mechanic plugging 
 **Testing Policy vs. Layer:**
 * If something is needed by other layers, it is an injected opinion sub-primitive, not a layer.
 * If it is an independent extension on top of a core primitive, it is a layer.
-* For example, in `AgentCore`, summarization was originally considered a layer on top of content. But compaction is triggered on token usage: if the context window fills, it must compact. Without a form of compaction, the agent cannot function. **A core primitive on its own must be functionally sound; if a layer is needed to make a primitive functional, that is a design smell.** If compaction were an external layer, the core primitive would be incomplete. Therefore, compaction is an injected policy (opinion sub-primitive) with strategies like sliding window or summarizer, while persistence is clearly a layer because the agent functions completely in-memory without persisting.
+* For example, in `AgentCore`, summarization was originally considered a layer on top of content. But compaction is triggered on token usage: if the context window fills, it must compact. Without a form of compaction, the agent cannot function. **A core primitive on its own must be functionally sound; if a layer is needed to make a primitive functional, that is a design smell.** If compaction were an external layer, the core primitive would be incomplete. Therefore, compaction is an injected policy (opinion sub-primitive) with strategies like sliding window or summarizer, while secondary snapshotting or externalization is clearly a layer because the primary domain primitive functions completely on its own without externalizing state.
 
 ---
 
