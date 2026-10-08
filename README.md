@@ -126,7 +126,7 @@ A concrete implementation is itself an opinion. The same minimality and purity d
 
 * **Purity Defined:** Purity is achieved by removing responsibilities until each construct represents exactly what it fundamentally is.
 * **Symmetry as a Discovery Tool:** Correctly identifying the fundamental boundary often causes naturally symmetrical responsibilities to emerge. When two responsibilities produce or consume the same conceptual flow, their asymmetry may reveal a false boundary. Natural symmetry emerges from correct boundaries, eliminating intermediate accumulators, adapters, and orchestration glue.
-* **Physical Topology:** Conceptual boundaries naturally influence physical directory structure. Folder hierarchies should roughly resemble the architectural trie drawn from actual boundaries—not "every primitive gets a folder." Small scopes stay flat; structure is never manufactured for its own sake.
+* **Physical Topology:** Disk layout directly mirrors the boundary hierarchy 1:1. The sovereign primitive contract and its DTOs anchor the boundary root; injected strategies are grouped in `policies/` and decorators in `layers/`. Single-file directories are avoided; when an injected policy becomes complex enough to warrant its own operational boundary, it recursively promotes into a self-similar primitive folder.
 * **Universal Scope:** PFD is not a coding pattern; the same primitive, policy, layer, and state reasoning applies wherever structured work is produced (UI components, system architecture, documentation, and creative work).
 
 ---
