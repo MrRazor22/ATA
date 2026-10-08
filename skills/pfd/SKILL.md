@@ -170,7 +170,7 @@ while (content.NeedsExecution()) {
 
 When designing correctly, a natural symmetry emerges that unlocks the best interface design for primitives.
 
-Naming must be rigorous domain nouns: never use lazy meta cop-outs (like `Manager`, `Handler`, `Service`, `Helper`, `Processor`, `Common`, or `Utils`). Core primitives, namespaces, and sub-primitives are parallel domain nouns that describe what the thing is in the domain, avoiding awkward verbs or procedural labels. High-level composition roots use clean fluent builders, avoiding god-classes.
+Naming must be rigorous domain nouns across all primitives, namespaces, folders, and files: never use lazy meta cop-outs (like `Manager`, `Handler`, `Service`, `Helper`, `Processor`, `Common`, `Utils`), and never name folders or namespaces after architectural meta-labels like `policies`, `layers`, `primitives`, or `interfaces`. A folder or namespace represents a domain scope; name it with a rich domain noun that accurately represents all domain concepts and content enclosed within it. Core primitives, namespaces, and sub-primitives are parallel domain nouns describing what the entity actually is in the problem domain, avoiding awkward verbs or procedural labels. High-level composition roots use clean fluent builders, avoiding god-classes.
 
 **The Unified Symmetry:**
 * A **Policy** is just a Primitive on the *inside*.
