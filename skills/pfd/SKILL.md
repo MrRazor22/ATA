@@ -170,9 +170,7 @@ while (content.NeedsExecution()) {
 
 When designing correctly, a natural symmetry emerges that unlocks the best interface design for primitives.
 
-Naming should be done meticulously. In `AgentCore`, folder and namespace names are clean, symmetrical nouns (`llm`, `content`, `tools`), and the core primitives are parallel nouns (`ILlm`, `IContent`, `IToolbox`). `IToolbox` is a parallel noun, avoiding awkward verbs like `ITooling` or `IToolExecutor`.
-
-As you plan core primitives, hints of symmetry indicate a clean representation of the system. For purity, high-level orchestration layers (`Agent.cs`) use clean fluent builders, avoiding lazy `var app = app.Start()` god-classes.
+Naming must be rigorous domain nouns: never use lazy meta cop-outs (like `Manager`, `Handler`, `Service`, `Helper`, `Processor`, `Common`, or `Utils`). Core primitives, namespaces, and sub-primitives are parallel domain nouns that describe what the thing is in the domain, avoiding awkward verbs or procedural labels. High-level composition roots use clean fluent builders, avoiding god-classes.
 
 **The Unified Symmetry:**
 * A **Policy** is just a Primitive on the *inside*.
@@ -184,7 +182,7 @@ As you plan core primitives, hints of symmetry indicate a clean representation o
 ## FOLDER / NAMESPACE STRUCTURE
 
 Folder structure and namespace boundaries are critical:
-* If a codebase has 2–3 files, keeping them flat in a single folder is fine. When small, colocate an interface with its concrete implementation, enums, or transforms in the same file named after the concrete implementation (or the interface if alone). When DTOs are grouped together into their own file, name the file after their common shared suffix or concept.
+* If a codebase has 2–3 files, keeping them flat in a single folder is fine. Beyond that, flat folders mixing distinct primitives or sub-primitives is a namespace smell. A sub-primitive or policy belongs scoped directly under its parent core primitive's folder and namespace trie—never dumped flat beside an unrelated primitive. When small, colocate an interface with its concrete implementation, enums, or transforms in the same file named after the concrete implementation (or the interface if alone). When DTOs are grouped together into their own file, name the file after their common shared suffix or concept.
 * When files grow, create clear namespace and folder boundaries for correlated items. Primitives represent file-level boundaries; namespaces represent the layer above. Colocating transforms and contracts must strictly preserve readability: no single source file should exceed **~150 lines** so the entire file fits comfortably within human working memory at a single glance. If a file approaches this cognitive ceiling, cleanly separate the contract, concrete implementation, DTOs, or colocated helpers into dedicated adjacent files.
 * Folders and namespaces must match 1:1. Disk layout is the physical representation of the namespace hierarchy. Solutions, projects, and folders are boundaries. Scope related items together; the root hosts only the sovereign entrypoint or composition root, with zero random orphan files.
 * **The Trie Test:** The directory structure should match the trie you would draw of the system's primitives end to end. In `AgentCore`, 3 clean folders mirror the 3 core primitives (`Llm`, `Content`, `Toolbox`), keeping the entire design walkthrough visible at a glance.
