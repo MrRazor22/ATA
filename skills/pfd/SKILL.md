@@ -212,16 +212,18 @@ Folder structure and namespace boundaries are physical manifestations of the arc
   * Because any true primitive has its own policies (and optional layers), it naturally commands its own directory.
   * **Holistic Directory Naming:** A primitive directory must holistically represent *everything* inside it as a collective capability—never duplicating or shadowing an inner primitive class name, and never using meta-pattern cop-outs (`components`, `helpers`, `utils`, `common`, `services`, `managers`, `dto`).
 * **The Primitive Directory Root:** Reserved exclusively for the sovereign primitive contract, its primary concrete implementation, boundary exports, and root DTOs. This ensures the sovereign operational boundary is immediately identifiable at first glance.
-* **`policies/` and `layers/` Are Flat & Simple Only:**
-  * `policies/` and `layers/` are flat directories directly under a primitive root, reserved exclusively for simple, single-interface implementations.
-  * Never create single-file directory wrappers inside `policies/` or `layers/`.
+* **Simple Injected Policies and Decorators (`policies/`, `layers/` or Domain-Named Folders):**
+  * `policies/` and `layers/` are convenient structural defaults directly under a primitive root for simple, single-interface implementations or decorators.
+  * **Domain Representation is Always Preferred:** While `policies/` and `layers/` are acceptable structural defaults for simple, quick policies, **it is always preferred to give the folder a meaningful domain capability name that holistically represents what is inside** whenever a clear domain noun exists (e.g. `storage/`, `strategies/`, `auth/`), rather than blindly falling back to the meta names `policies/` or `layers/`.
+  * Decorator classes typically adopt the `Layer` suffix in their class name (e.g. `TelemetryLayer`, `CachingLayer`) for immediate boundary recognition.
+  * Keep simple policy/decorator folders flat; never create single-file directory wrappers inside them.
 * **The Natural Primitive Promotion Law (Sibling Placement):**
   * When an injected policy grows complex enough to require its own policies, strategies, or layers, **it has become a primitive in its own right**.
-  * It must **never** remain buried inside the consumer's `policies/` folder.
+  * It must **never** remain buried inside the consumer's policy folder.
   * It is promoted to its own holistic domain directory placed **directly beside (as a sibling to) the primitive that uses it**.
   * This rule is completely fractal: a core primitive can consume a sub-primitive beside it (e.g. `Car/` consumes `Engine/` beside it), and a sub-primitive can itself consume another sub-primitive beside it when that component grows complex enough to have its own policies.
 * **Behavioral File Naming:** Files containing behavior are named directly after the primary concrete class implemented within them (a concrete domain noun). If a file contains exclusively an abstract interface contract without an implementation, it takes the contract's name. Contracts define universal domain roles, while implementations express specific domain strategies; the file adopts the concrete implementation's name. File names must never adopt pattern meta-labels (`contract`, `interface`, `impl`, `base`).
-* **Rigorous Domain Naming & Zero Meta Buckets:** All primitive boundaries, promoted domain folders, and behavioral files must be named using strict domain nouns representing what the entity is in the problem domain, avoiding procedural verbs or gerunds. Subdirectories exist strictly for two architectural reasons: the internal boundary triad (`policies/`, `layers/`) for simple single-implementation files, or promoted sibling domain primitive directories. Directories must NEVER adopt generic bucket or meta-pattern names (`components`, `helpers`, `utils`, `common`, `services`, `managers`, `dto`).
+* **Rigorous Domain Naming & Zero Meta Buckets:** All primitive boundaries, promoted domain folders, and behavioral files must be named using strict domain nouns representing what the entity is in the problem domain, avoiding procedural verbs or gerunds. Directories must NEVER adopt generic bucket or meta-pattern names (`components`, `helpers`, `utils`, `common`, `services`, `managers`, `dto`).
 * **The Cognitive Size Limit (~150 Lines):** A single source file must not exceed **~150 lines**. When small, colocate an interface with its primary concrete implementation and transforms in the same file named after the concrete implementation. If an implementation or contract approaches the cognitive ceiling, cleanly separate the contract, concrete class, or colocated helpers into dedicated adjacent files within their boundary.
 
 ---
