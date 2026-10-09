@@ -45,7 +45,7 @@ A primitive represents what we expect from something. In OOP, we design based on
 
 The entire car, if done cleanly, has only 5 primitives. These primitives can be modeled into clean interface contracts, and if done right, a car can be built end to end with just these 5 contracts used together.
 
-The same applies to [AgentCore](https://github.com/MrRazor22/AgentCore): look at how cleanly `IContent`, `ILlm`, and `IToolbox` compare to even Microsoft Agent Framework or LangChain.
+The same applies to [AgentCore](https://github.com/MrRazor22/AgentCore): look at how cleanly `IContext`, `ILLM`, and `IToolbox` compare to even Microsoft Agent Framework or LangChain.
 
 Core primitives must be irreducible and represent an operational boundary, not simply an arbitrary OOP component.
 
@@ -53,9 +53,9 @@ We see clear, obvious boundaries like the examples given. Sometimes, if a bounda
 
 However, **we should never narrowly design an abstraction to satisfy the immediate need**. Through the current need, look in general at what is expected that satisfies the current need perfectly, but will also be ideal for future needs and scaling. That is where great primitive design lies. In rare cases, we model based on other examples of similar works.
 
-For example, in AI agents we have RAG, memory, and content. But if you see clearly, an agent fundamentally needs current content in its context window to work. The primary need is `IContent`. All the rest—memory and RAG—are either policies (injected sub-primitives) or layers (decorators, middlewares).
+For example, in AI agents we have RAG, memory, and context. But if you see clearly, an agent fundamentally needs context in its context window to work. The primary need is `IContext`. All the rest—memory and RAG—are either policies (injected sub-primitives) or layers (decorators, middlewares).
 
-A poor design would create `IMemory` and `IContent`, saying `IMemory` will have `IRag` and store memory, while `IContent` will have working memory. That sounds neat and resembles textbook OOP, but it falls into the trap of **"only narrowly satisfying the current need."** What if in the future you want to add a new source of context? Or expose memory as tools the AI agent invokes rather than auto-injecting it? This overfitting should be avoided. A simple `IContent` where memory and RAG are layers remains naturally minimal, neither overfitting nor underfitting. In some cases where the domain is very new, boundaries can be unclear to model based on pure OOP.
+A poor design would create `IMemory` and `IContext`, saying `IMemory` will have `IRag` and store memory, while `IContext` will have working memory. That sounds neat and resembles textbook OOP, but it falls into the trap of **"only narrowly satisfying the current need."** What if in the future you want to add a new source of context? Or expose memory as tools the AI agent invokes rather than auto-injecting it? This overfitting should be avoided. A simple `IContext` where memory and RAG are layers remains naturally minimal, neither overfitting nor underfitting. In some cases where the domain is very new, boundaries can be unclear to model based on pure OOP.
 
 A primitive must be designed based on who uses it today, but most importantly who may use it in the future as well. The design should be so well conceived that:
 1. It won't look like it has something obviously added only anticipating a future need with no current use.
@@ -74,15 +74,15 @@ Are we adding opinions into it? Are we coupling anything? Are we exposing someth
 
 You cannot never have zero opinions, but any policy or opinion decided as a core part of the contract must be a **justifiable universal need** that happens to also fit present needs perfectly. This is what it means for a primitive to be generic and universal.
 
-Interface design must be done meticulously. For example, in `AgentCore`, `IContent` could simply expose messages or synchronous/asynchronous write methods. But we took a universal opinion: an agent streams from the LLM level to the user. If needed, let the user accumulate it, or expose helper transfer methods at the top, not as a core contract.
-* In `WriteAsync`, we could have simply returned `IContentEvent` because the user agent only exposes that. That exact narrow trap was avoided. The interface was not restricted: `IContent` returns complete `IMessageEvent` streams with full message and content events, and the agent decides to cast and expose content events as needed. Present needs are satisfied perfectly without awkward, future-only designs.
-* Unnecessary methods were excluded from `IContent`:
+Interface design must be done meticulously. For example, in `AgentCore`, `IContext` could simply expose messages or synchronous/asynchronous write methods. But we took a universal opinion: an agent streams from the LLM level to the user. If needed, let the user accumulate it, or expose helper transfer methods at the top, not as a core contract.
+* In `WriteAsync`, we could have simply returned `IContentEvent` because the user agent only exposes that. That exact narrow trap was avoided. The interface was not restricted: `IContext` returns complete `IMessageEvent` streams with full message and content events, and the agent decides to cast and expose content events as needed. Present needs are satisfied perfectly without awkward, future-only designs.
+* Unnecessary methods were excluded from `IContext`:
   * *No `Clear()`:* Agents in the future do not need to clear their own memory (a universal opinion taken). If needed, session injection exists in the persistence layer; let the session store clear itself at a higher level.
   * *No raw chat history getters:* An operational boundary is an active contract, not a passive data holder.
   * *No narrow methods like `UpdateTokenUsage()`:* Token usage arrives directly from LLM response events (`IMessageEvent`), not through separate mutation methods.
   * *No update full message methods:* We made a universal opinion to support stream injection directly, with helpers to directly append messages if needed via the same primitive.
 
-Sometimes a natural symmetry arises in primitive design across the system. In `AgentCore`, all three pillars have symmetry where they become the core pillars the agent needs, and all three are streaming. Initially, tooling was not streaming. But the motivation to find symmetry pushed the realization: tools stream too (if not literal text like an LLM, tools stream notifications and progress for long-running executions). Since the UI for the agent streams, tooling was designed to stream the same message events. Tooling streams `IContentEvent`, which can also be complete content. Finding symmetry revealed that tools are fundamentally the same as LLMs: both stream context into the agent's content, which is literally the agent loop. Without seeking symmetry, this insight would never have emerged.
+Sometimes a natural symmetry arises in primitive design across the system. In `AgentCore`, all three pillars have symmetry where they become the core pillars the agent needs, and all three are streaming. Initially, tooling was not streaming. But the motivation to find symmetry pushed the realization: tools stream too (if not literal text like an LLM, tools stream notifications and progress for long-running executions). Since the UI for the agent streams, tooling was designed to stream the same message events. Tooling streams `IContentEvent`, which can also be complete content. Finding symmetry revealed that tools are fundamentally the same as LLMs: both stream context into the agent's context, which is literally the agent loop. Without seeking symmetry, this insight would never have emerged.
 
 Exposing properties in interfaces (in languages like C#) is usually not preferred. It cannot be cleanly layered, intercepted, or scaled if a getter or setter requires complex asynchronous operations in the future. If simple synchronous exposure avoids two getter/setter methods, it can be exposed, but pure action methods remain preferred.
 
@@ -153,8 +153,8 @@ Layers provide direct extension over core primitives—like a mechanic plugging 
 
 Pure data classes must not have business behavior in their core class. If they need behavior, it indicates misplaced responsibilities, missing opinion sub-primitives, or poor foundational primitive design.
 * Pure transform methods (e.g., `ToString()`) can be separate extension helpers close to or in the same file as the DTO class.
-* DTOs do not need interfaces because they are data. Conversely, primitives are not mere data holders or wrappers (`IContent` is not a wrapper for chat history in `AgentCore`).
-* In `AgentCore`, `Message` could have been made to hold assembling logic and metadata accessors, but that hurts extensibility. `Message` is purely a DTO. In older drafts, `Message` handled delta assembly, and `IBlockEvent` had a `Start()` method so each content type knew which delta object to receive (acting as a hidden factory on a DTO). Removing those mixed smells made content an operational primitive, messages pure DTOs, and message/content events pure passive DTOs.
+* DTOs do not need interfaces because they are data. Conversely, primitives are not mere data holders or wrappers (`IContext` is not a wrapper for chat history in `AgentCore`).
+* In `AgentCore`, `Message` could have been made to hold assembling logic and metadata accessors, but that hurts extensibility. `Message` is purely a DTO. In older drafts, `Message` handled delta assembly, and `IBlockEvent` had a `Start()` method so each content type knew which delta object to receive (acting as a hidden factory on a DTO). Removing those mixed smells made context an operational primitive, messages pure DTOs, and message/content events pure passive DTOs.
 * **DTO File Naming Invariant:** When multiple related DTOs are colocated in a single file, the file name must commonly represent all items it holds, strongly preferring their shared concept or common suffix. File names must never use architectural pattern labels or meta cop-outs (such as `dto`, `dtos`, `models`, `types`, `contract`, or `schema`).
 
 ---
@@ -166,20 +166,23 @@ Natural symmetry and architectural purity are two complementary, yet fundamental
 ### 1. Architectural Purity (The Deliberate Standard)
 Purity is not an emergent accident; it is an uncompromising standard committed to upfront. It governs the highest-level layer or composition root that consumes the system's core primitives:
 * **The High-Level Consumption Invariant:** When you design a system, look at the highest-level orchestration layer that consumes the core primitives. That layer must read as pure, transparent, and direct as pseudo-code or plain English. If orchestrating the primitives requires intermediate glue, state staging, or awkward mediation, the primitives themselves are improperly modeled. Never hide architectural sprawl behind a lazy god-class or opaque single-line launcher (`var app = app.start()`); provide a pure orchestration flow anchored by a clean, fluent composition builder.
-* **The AgentCore Case Study (Eliminating the Assembler):** In earlier iterations of `AgentCore`, an intermediate `Assembler` component sat between the streaming LLM/tools and content to assemble full messages before adding them to context. Committing to architectural purity—demanding that the central ReAct loop read as cleanly as raw pseudo-code—forced the realization that `Content` should natively consume streaming events directly, making whole-message assembly an internal implementation detail and completely eliminating the assembler abstraction:
+* **The AgentCore Case Study (Eliminating the Assembler):** In earlier iterations of `AgentCore`, an intermediate `Assembler` component sat between the streaming LLM/tools and context to assemble full messages before adding them to working memory. Committing to architectural purity—demanding that the central ReAct loop read as cleanly as raw pseudo-code—forced the realization that `Context` should natively consume streaming events directly via `Context.WriteAsync(...)`, making delta assembly an internal implementation detail and completely eliminating the assembler abstraction from the loop:
 
 ```csharp
-while (content.NeedsExecution()) {
-    for (event in llm.Generate(content))       content.Consume(event);
-    for (event in toolbox.Execute(content))   content.Consume(event);
-}
+do {
+    await foreach (var evt in Context.WriteAsync(LLM.GenerateAsync(prompt, toolDefs)))
+        if (evt is MessageDelta { Content: ToolCall tc }) (toolCalls ??= []).Add(tc);
+
+    if (toolCalls is not null)
+        await foreach (var evt in Context.WriteAsync(Toolbox.ExecuteAsync(toolCalls))) ...
+} while (toolCalls is not null);
 ```
 
 ### 2. Natural Symmetry (The Emergent Discovery)
 While Purity is a deliberate constraint enforced by subtraction, Symmetry is an internal emergence discovered iteratively as you develop:
 * **Symmetry as a Discovery Compass:** As you plan core primitives, you will naturally spot hints of symmetry across peer pillars. When one primitive exhibits a capability or interaction shape, ask why its peer does not. Artificial asymmetry is almost always evidence of an unexamined assumption or an overfitted boundary. Following hints of symmetry unlocks the deepest, most durable interface designs.
-* **The AgentCore Case Study (Streaming Tools as Context Producers):** Initially, `Toolbox` was designed as non-streaming, returning isolated static results. The motivation to find symmetry across all three core pillars pushed the question: *why shouldn't tools stream?* Long-running executions, status notifications, and progress updates naturally stream, and the user interface was already streaming. Designing `Toolbox` to stream the same domain message events (`IContentEvent`) unlocked the breakthrough insight: **tools are fundamentally the same as LLMs—both simply stream context into Content.** Without actively pursuing symmetry, this foundational architectural truth would never have been discovered.
-* **Symmetrical Domain Naming:** Natural symmetry extends to naming. Parallel domain nouns must be chosen meticulously across all peer namespaces and contracts (`llm`, `content`, `tools` $\to$ `ILlm`, `IContent`, `IToolbox`), consciously rejecting procedural verbs or action cop-outs (such as `tooling` or `tool_executor`).
+* **The AgentCore Case Study (Streaming Tools as Context Producers):** Initially, `Toolbox` was designed as non-streaming, returning isolated static results. The motivation to find symmetry across all three core pillars pushed the question: *why shouldn't tools stream?* Long-running executions, status notifications, and progress updates naturally stream, and the user interface was already streaming. Designing `Toolbox` to stream the same domain message events (`IMessageEvent`) unlocked the breakthrough insight: **tools are fundamentally the same as LLMs—both simply stream context into Context.** Without actively pursuing symmetry, this foundational architectural truth would never have been discovered.
+* **Symmetrical Domain Naming:** Natural symmetry extends to naming. Parallel domain nouns must be chosen meticulously across all peer namespaces and contracts (`llm`, `context`, `tool` $\to$ `ILLM`, `IContext`, `IToolbox`), consciously rejecting procedural verbs or action cop-outs (such as `tooling` or `tool_executor`).
 
 ### 3. The Triad: Structural Symmetry & Purity
 The structural convergence of symmetry and purity manifests in the boundary triad:
