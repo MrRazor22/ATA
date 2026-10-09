@@ -124,8 +124,8 @@ A concrete implementation is itself an opinion. The same minimality and purity d
 
 ## Architectural Purity, Symmetry & Topology
 
-* **Purity Defined:** Purity is achieved by removing responsibilities until each construct represents exactly what it fundamentally is.
-* **Symmetry as a Discovery Tool:** Correctly identifying the fundamental boundary often causes naturally symmetrical responsibilities to emerge. When two responsibilities produce or consume the same conceptual flow, their asymmetry may reveal a false boundary. Natural symmetry emerges from correct boundaries, eliminating intermediate accumulators, adapters, and orchestration glue.
+* **Architectural Purity (The Deliberate Standard):** Purity is achieved by removing responsibilities until each construct represents strictly what it fundamentally is. The central orchestration loop remains as minimal and transparent as pseudo-code—containing only core primitives with zero intermediate accumulators or shims—anchored by clean fluent composition roots.
+* **Natural Symmetry (The Emergent Discovery):** Symmetry emerges organically between interacting peer boundaries. When peer primitives share parallel flows, lifecycles, and domain naming, natural symmetry acts as a discovery tool to eliminate false boundaries, intermediate adapters, and glue.
 * **Physical Topology:** Disk layout directly mirrors the boundary hierarchy 1:1. The sovereign primitive contract and its DTOs anchor the boundary root; injected strategies are grouped in `policies/` and decorators in `layers/`. Single-file directories are avoided; when an injected policy becomes complex enough to warrant its own operational boundary, it recursively promotes into a self-similar primitive folder.
 * **Universal Scope:** PFD is not a coding pattern; the same primitive, policy, layer, and state reasoning applies wherever structured work is produced (UI components, system architecture, documentation, and creative work).
 
