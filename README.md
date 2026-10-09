@@ -48,7 +48,7 @@ Every element of a contract must be scrutinized: method existence, parameters, r
 
 * **Substrate Encapsulation:** When an implementation uses an execution substrate (ML runtime, DB engine, message broker, graphics API, OS handle, vendor SDK), substrate mechanics belong strictly inside the implementation. Never leak substrate types across primitive contracts unless the substrate itself is genuinely the domain boundary.
 * **Representation Integrity:** Boundary representations must express structural domain truth without prematurely specializing to one modality or artificially dumbing down types to raw primitives (`List[int]`, strings) merely to escape a dependency.
-* **Escape Hatches are Evidence, Not Solutions:** If a boundary requires `Any`, `object`, `dynamic`, unchecked casts, or downcasts, stop. The abstraction is either exposing an unmodeled concept or attempting to paper over an incompatible substrate.
+* **Escape Hatches are Evidence, Not Solutions:** If a boundary requires nested generic containers (collections of collections, nested dictionaries/maps), `Any`, `object`, `dynamic`, unchecked casts, or downcasts, stop. A nested container or untyped container is an escape hatch for an unmodeled domain concept—model it as an explicit, typed domain DTO.
 * **Universal Domain Truths** belong directly in the **Core Primitive Contract**.
 * **Variable Strategies & Rules** belong in injected **Policies**.
 * **Convenience Transformations** do not belong in the primitive contract.

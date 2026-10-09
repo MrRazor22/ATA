@@ -137,10 +137,15 @@ Layers may feel unnecessary at first, but decorating a layer over a core primiti
 Layers provide direct extension over core primitives—like a mechanic plugging measuring instruments directly into an engine, body, chassis, or cabin to diagnose or customize it. That is how powerful they are for extensibility, scaling, and control.
 * An `Engine` primitive can have a sensor layer monitoring engine parameters and telemetry, or a user-mod layer improving mileage, without altering the core engine. Layer classes typically adopt the `Layer` suffix for immediate architectural clarity.
 
-**PFD Smells: Core Primitives vs. Higher Layers:**
-* Callbacks, events, delegates, and hooks are usually code smells resulting from poor primitives, but can be used as conveniences at higher layers of an application design (UI bindings, orchestration, plugin loaders)—never as part of core primitive design.
-* Factory patterns and switch-case initializations are usually smells hiding fundamental design issues. Genuine needs can warrant them, but using them is usually a sign of lazy design.
-* Always use strict, explicit typing system-wide. Never use `Any`, `object`, `dynamic`, or untyped containers as escape hatches across contracts or DTOs. If an abstraction requires `Any` or `object`, it is an architectural smell indicating that domain types were not properly modeled.
+**Architectural Smells & Invariant Violations:**
+* **Nested Containers Smell:** Never use nested containers (collections of collections, nested dictionaries/maps, lists of tuples, or deep generic wrapper chains) across contracts or DTOs. A nested container is a lazy escape hatch used to dodge modeling a domain concept. If data has internal structure or associations, model them as explicit, typed domain DTOs.
+* **Untyped Escape Hatches:** Always enforce strict, explicit typing system-wide. Never use `Any`, `object`, `dynamic`, or generic property bags (`dict[str, Any]`) across contracts or DTOs. If an abstraction requires `Any` or `object`, domain types were not properly modeled.
+* **Substrate & Runtime Leakage:** Never leak execution substrate types (framework runtime handles, computational tensors, database cursors/connections, HTTP contexts, vendor SDK types) across primitive boundaries. All substrate interactions must be completely encapsulated behind pure DTO boundaries.
+* **The Incomplete Primitive Smell:** A core primitive must be functionally sound and operational on its own. If an external layer or decorator is required for a primitive to perform its primary responsibility, the primitive is incomplete and secretly outsourcing its core mechanism.
+* **Convenience Overload Sprawl:** Never pollute primitive contracts with convenience overloads or parallel method variants (such as `Do()` and `DoBatch()`). Design a single sovereign operational signature that handles the general case cleanly; convenience overloads belong in callers or extension helpers.
+* **Callbacks, Delegates & Hooks in Core Contracts:** Delegates, callbacks, and hooks in core primitive contracts are architectural smells indicating leaky lifecycle control. They are permitted only at higher application layers (UI bindings, event dispatchers, plugin loaders), never inside core primitive interfaces.
+* **Factory Patterns & Switch-Case Dispatch:** Factory patterns and switch-case initializations are usually smells hiding fundamental design issues and lazy polymorphic modeling. Genuine needs can warrant them, but using them is usually a sign of un-extracted primitive boundaries.
+* **Meta-Naming Cop-Outs:** Never name namespaces, directories, or files after architectural patterns (`Manager`, `Service`, `Helper`, `Utils`, `Common`, `DTO`, `Contract`, `Components`). Everything must be named after its domain noun.
 
 **Testing Policy vs. Layer:**
 * If something is needed by other layers, it is an injected opinion sub-primitive, not a layer.
