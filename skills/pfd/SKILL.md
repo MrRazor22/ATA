@@ -164,9 +164,9 @@ Pure data classes must not have business behavior in their core class. If they n
 Natural symmetry and architectural purity are two complementary, yet fundamentally distinct forces in Primitive-First Design:
 
 ### 1. Architectural Purity (The Deliberate Standard)
-Purity is an intentional constraint committed to upfront. It demands stripping away all intermediate glue, stateful accumulators, assemblers, and coordinator shims until the core orchestration loop contains *only* the core primitives interacting directly:
-* **The Pseudo-Code Invariant:** The central orchestration loop of a system must be as lean, transparent, and minimal as pseudo-code or plain English. If the core loop requires intermediate adapters, message assemblers, or state staging variables to pass data between primitives, the primitive contracts are incomplete or improperly shaped. Primitives must own their internal assembly and consumption natively.
-* **Pure Composition Roots:** The highest-level entry point or application root that initializes and binds core primitives must be a clean, fluent builder. Never rely on god-classes, opaque container magic, or lazy single-line app launchers that conceal architectural coupling.
+Purity is not an emergent accident; it is an uncompromising standard committed to upfront. It governs the highest-level layer or composition root that consumes the system's core primitives:
+* **The High-Level Consumption Invariant:** When you design a system, look at the highest-level orchestration layer that consumes the core primitives. That layer must read as pure, transparent, and direct as pseudo-code or plain English. If orchestrating the primitives requires intermediate glue, state staging, or awkward mediation, the primitives themselves are improperly modeled. Never hide architectural sprawl behind a lazy god-class or opaque single-line launcher (`var app = app.start()`); provide a pure orchestration flow anchored by a clean, fluent composition builder.
+* **The AgentCore Case Study (Eliminating the Assembler):** In earlier iterations of `AgentCore`, an intermediate `Assembler` component sat between the streaming LLM/tools and content to assemble full messages before adding them to context. Committing to architectural purity—demanding that the central ReAct loop read as cleanly as raw pseudo-code—forced the realization that `Content` should natively consume streaming events directly, making whole-message assembly an internal implementation detail and completely eliminating the assembler abstraction:
 
 ```csharp
 while (content.NeedsExecution()) {
@@ -176,13 +176,13 @@ while (content.NeedsExecution()) {
 ```
 
 ### 2. Natural Symmetry (The Emergent Discovery)
-While Purity is a deliberate goal enforced by subtraction, Symmetry is an internal emergence discovered through iterative design:
-* **Symmetry as a Boundary Compass:** In any sound system, peer primitives naturally exhibit symmetrical shapes, lifecycles, and data flows. When iterating on primitive contracts, actively look for hints of symmetry. Asymmetry between peer boundaries (e.g., one component streaming rich domain events while an interacting peer returns an ad-hoc synchronous payload) is an architectural smell indicating a compromised or underdeveloped primitive.
-* **Unlocking Deeper Truths:** Seeking symmetry forces you to question arbitrary distinctions. In `AgentCore`, recognizing that tooling and model inference both stream contextual events into content revealed that tools and models are fundamentally parallel streaming boundaries, eliminating separate accumulator pipelines entirely.
-* **Symmetrical Domain Naming:** Symmetrical systems naturally express themselves in parallel domain nouns across all namespaces, folders, and contracts (e.g., `llm`, `content`, `toolbox` $\to$ `ILlm`, `IContent`, `IToolbox`), avoiding awkward mixtures of procedural verbs and nouns.
+While Purity is a deliberate constraint enforced by subtraction, Symmetry is an internal emergence discovered iteratively as you develop:
+* **Symmetry as a Discovery Compass:** As you plan core primitives, you will naturally spot hints of symmetry across peer pillars. When one primitive exhibits a capability or interaction shape, ask why its peer does not. Artificial asymmetry is almost always evidence of an unexamined assumption or an overfitted boundary. Following hints of symmetry unlocks the deepest, most durable interface designs.
+* **The AgentCore Case Study (Streaming Tools as Context Producers):** Initially, `Toolbox` was designed as non-streaming, returning isolated static results. The motivation to find symmetry across all three core pillars pushed the question: *why shouldn't tools stream?* Long-running executions, status notifications, and progress updates naturally stream, and the user interface was already streaming. Designing `Toolbox` to stream the same domain message events (`IContentEvent`) unlocked the breakthrough insight: **tools are fundamentally the same as LLMs—both simply stream context into Content.** Without actively pursuing symmetry, this foundational architectural truth would never have been discovered.
+* **Symmetrical Domain Naming:** Natural symmetry extends to naming. Parallel domain nouns must be chosen meticulously across all peer namespaces and contracts (`llm`, `content`, `tools` $\to$ `ILlm`, `IContent`, `IToolbox`), consciously rejecting procedural verbs or action cop-outs (such as `tooling` or `tool_executor`).
 
 ### 3. The Triad: Structural Symmetry & Purity
-The convergence of symmetry and purity manifests in the architectural boundary triad:
+The structural convergence of symmetry and purity manifests in the boundary triad:
 * A **Policy** is just a Primitive on the *inside* (an injected sub-primitive completing internal strategy).
 * A **Layer** is just the same Primitive on the *outside* (a decorated co-primitive extending I/O externally: $\lambda: P \to P$).
 * **DTOs and Pure Transforms** are the passive binder holding boundaries together without introducing behavioral coupling.
