@@ -105,6 +105,10 @@ If a concrete implementation of a primitive exceeds **~150 lines**, it is usuall
 All opinions and policies inside must be injected. Even simple numbers that can change should be injected rather than hardcoded. Complex opinionated logic can be cleanly separated into its own primitive whose interface follows the same rules described above.
 * For example, the `Engine` primitive of a car, if implemented monolithically, could reach 1,000+ lines even if its interface is only 2–3 methods. Extracting `FuelSystem` as an injected opinion rather than hardcoding it, and handling engine timing separately, keeps the core engine primitive clean, simple, and readable like plain English.
 
+**Policy Injection & Sensible Defaults Invariant:**
+* **Constructor Injection with Built-In Defaults:** Concrete primitive implementations must accept their policy contracts via their constructor so callers have full control to inject custom strategies. However, injection must never be mandatory or burdensome: if the caller passes nothing, the primitive must automatically instantiate and use its own sensible, built-in default policy. The caller is never forced to manually assemble or pass standard policies just to run the primitive.
+* **Constructor-Configurable Policies:** Policies are composed and bound at build-time (instantiation time), never swapped haphazardly at runtime. To allow callers to customize a built-in policy's behavior without rebuilding or replacing the entire policy from scratch, policies must accept their configurable thresholds, options, and parameters directly in their own constructor (or primary constructor). This eliminates the need to pollute the core primitive's contract with policy-specific settings, while giving callers surgical configuration control.
+
 These sub-primitives are not core primitives that define the entire product end to end; they are **opinion and policy component primitives**.
 
 Sometimes these extracted opinion sub-primitives become complex enough to form their own boundary (an interface is decided from a logical boundary), so they can have their own sub-opinions injected.
