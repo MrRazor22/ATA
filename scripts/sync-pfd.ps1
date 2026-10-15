@@ -14,7 +14,6 @@ if (Test-Path $SkillSource) {
     if (-not (Test-Path $GlobalDir)) {
         New-Item -ItemType Directory -Path $GlobalDir -Force | Out-Null
     }
-    
 
     if ($CheckOnly) {
         $srcHash = (Get-FileHash $SkillSource).Hash
