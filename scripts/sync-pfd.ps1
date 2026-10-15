@@ -8,20 +8,26 @@ $GlobalSkill = "$env:USERPROFILE\.gemini\config\skills\pfd\SKILL.md"
 
 Write-Host "=== Primitive-First Design (PFD) Sync Tool ===" -ForegroundColor Cyan
 
-# 1. Sync SKILL.md to Global Antigravity Config
+# 1. Sync SKILL.md to Global Antigravity Config (Only updates Antigravity skill, never touches AGENTS.md)
 if (Test-Path $SkillSource) {
     $GlobalDir = Split-Path -Parent $GlobalSkill
     if (-not (Test-Path $GlobalDir)) {
         New-Item -ItemType Directory -Path $GlobalDir -Force | Out-Null
     }
     
+    # Remove any stale modular subdirectories if present in the global skill directory
+    Get-ChildItem -Path $GlobalDir -Directory | ForEach-Object {
+        Remove-Item -Path $_.FullName -Recurse -Force
+        Write-Host "[CLEANED] Removed modular directory: $($_.Name)" -ForegroundColor DarkGray
+    }
+    
     if ($CheckOnly) {
         $srcHash = (Get-FileHash $SkillSource).Hash
         $dstHash = if (Test-Path $GlobalSkill) { (Get-FileHash $GlobalSkill).Hash } else { "NONE" }
         if ($srcHash -eq $dstHash) {
-            Write-Host "[OK] Global SKILL.md is 100% in sync." -ForegroundColor Green
+            Write-Host "[OK] Global Antigravity SKILL.md is 100% in sync." -ForegroundColor Green
         } else {
-            Write-Host "[MISMATCH] Global SKILL.md needs update!" -ForegroundColor Yellow
+            Write-Host "[MISMATCH] Global Antigravity SKILL.md needs update!" -ForegroundColor Yellow
         }
     } else {
         Copy-Item -Path $SkillSource -Destination $GlobalSkill -Force
