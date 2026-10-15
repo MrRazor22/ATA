@@ -1,138 +1,71 @@
 # Primitive-First Design (PFD)
 
-> **A philosophy for building minimal, high-signal, zero-smell software architectures.**  
-> *Case Studies:* [AgentCore](https://github.com/MrRazor22/AgentCore) | [NanoLLM](https://github.com/MrRazor22/NanoLLM)  
-> *Technical Skill & Audit Rules:* [`skills/pfd/SKILL.md`](skills/pfd/SKILL.md)
+> Correct code is usually minimal.
 
----
+PFD is a design philosophy that simplifies architecture down to irreducible boundaries. It does two things at the same time:
 
-## The Core Thesis
+1. **Makes code genuinely human-readable:** Every implementation reads like plain English pseudo-code. Anyone can open a file, understand the system in minutes, and hold the entire architecture in their head (~1k–3k lines end-to-end).
+2. **Forces AI agents to code clean and minimal:** Agents naturally drift into wrapper sprawl, defensive boilerplate, and patchwork band-aids unless constrained. PFD gives the agent tight, non-negotiable boundaries — forcing it to produce high-signal code that is both clean and minimal.
 
-**Not all minimal code is correct, but correct code will usually be minimal.**
+They complement each other: minimal code shrinks token context and cognitive load; clean boundaries eliminate hallucinated abstractions and regression loops.
 
-Most architectural complexity does not solve genuine domain problems—it solves structural problems created by flawed foundations. Wrappers, accumulators, intermediate adapters, and sprawling patterns exist primarily to patch or support poorly conceived primitives. 
+## The Idea
 
-A poor foundational primitive causes the surrounding abstraction bloat. When the fundamental boundary is modeled correctly:
-* Surrounding bloat disappears because there is nothing broken left to patch.
-* Codebases contract naturally to their minimal theoretical footprint without cosmetic tricks.
-* Many code smells disappear before they emerge.
-* Scalability, readability, and composability emerge organically without defensive scaffolding.
+Every system has a few core boundaries — **primitives** — that define what the system fundamentally does. An agent framework needs context, an LLM interface, and a toolbox. A car needs an engine, body, chassis, cabin, and a control bus. That's it.
 
-Minimality in PFD means the **minimum structural complexity required to express domain truth cleanly**—not code-golfing or textual compression. Cramming an entire system into one god class or abusing language gimmicks to claim fewer files violates PFD. Lines of code (LoC) serve merely as an observational end-to-end signal of structural complexity, never a design target or a rigid law.
+If you get these primitives right, everything else falls into place naturally. The code reads like plain English, scales without rewrites, and stays small. If you get them wrong, you spend the rest of the project writing wrappers, adapters, managers, and utilities to compensate.
 
----
+PFD forces you to discover these primitives upfront — and hold the line.
 
-## Primitives & Interface Contract Law
+## How It Works
 
-* **Boundary Discovery Precedes Contract Design:** Never begin by converting existing classes, files, or reusable components into primitives or interfaces. First discover the irreducible responsibilities of the system.
-  * *Primitive vs. Collaborator:* If this component disappeared, would the surrounding system lose a distinct domain capability, or merely lose one implementation mechanism? (Capability $\longrightarrow$ Candidate Primitive; Mechanism $\longrightarrow$ Internal Collaborator; keep encapsulated).
-  * Never create an interface merely because a concrete class has callers, could be mocked, or seems conceptually reusable.
-* **The Interface is the Truth:** Every operational boundary is defined by its contract across any paradigm (C#/Java `interface`, Rust `trait`, Go `interface`, C++ concept). Concrete implementations are never directly exposed across boundaries; zero backdoor access. Passive representations (DTOs) carry state and are the only exception.
-* **The Cognitive Forcing Mechanism:** Concrete access tempts developers to casually leak ad-hoc public methods for temporary convenience. Enforcing strict interface contracts serves as a cognitive forcing function, compelling you to decide upfront whether a capability genuinely belongs to the domain boundary.
-* **Logical Boundaries vs. OOP Objects:** A primitive represents an irreducible logical boundary of conceptual responsibility, not an arbitrary object-oriented class or physical noun. (In an illustrative vehicle model, the *Engine* represents a primitive boundary, while a *piston* is an internal component. Every class is not a primitive).
-* **Foundational Leverage:** The primitive contract determines most of the architecture that follows. When foundational boundaries are sound, downstream implementation flows naturally downhill.
+Every component in a system falls into one of four roles:
 
----
+- **Core Primitive** — The irreducible boundary. The interface contract. This is the thing itself.
+- **Policy** — An injected opinion inside the primitive. Strategy, algorithm, threshold — anything that can vary.
+- **Layer** — A decorator on the outside. Logging, caching, telemetry — anything that observes or extends without changing the core.
+- **DTO** — Pure data. No behavior. Just carries state between boundaries.
 
-## Future-Proofing by Subtraction
+A policy is a primitive on the inside. A layer is the same primitive on the outside. DTOs are the passive glue. That's the entire model.
 
-> **Future-Proofing is the removal of unnecessary restrictions from today's boundary, not the addition of speculative future capabilities.**
+## The Rules That Matter
 
-Developers often overfit abstractions to narrow, immediate needs, only to break them when requirements evolve. A true primitive simultaneously balances three criteria:
-1. **Zero Speculative Bloat:** Nothing is added for an imagined future use case.
-2. **Zero Future Blindspots:** No artificial constraints lock out natural domain capabilities.
-3. **Natural Adaptability:** Present needs are satisfied completely while future expansion remains natural without contract breakage.
+- **Every boundary is an interface.** No backdoor concrete access. The contract is the only truth.
+- **Interfaces stay small.** 4-5 methods max. More means the boundary is wrong.
+- **Implementations read like English.** If a method body isn't plain sequential logic, something wasn't extracted.
+- **Zero private methods.** Every private method is an un-extracted policy or a mismodeled boundary. Extract it.
+- **~150 lines per file.** Exceeding this signals un-extracted opinions, not genuine complexity.
+- **All opinions are injected.** Even simple numbers that can change. Hardcoded decisions become invisible constraints.
+- **DTOs have zero behavior.** If a data class needs methods, responsibilities are misplaced.
+- **No meta-names.** `Manager`, `Service`, `Helper`, `Utils`, `Common` — all banned. Name things after what they actually are.
+- **No untyped escape hatches.** `Any`, `object`, `dynamic` — if you need these, your domain types aren't modeled.
+- **Folders mirror architecture.** Every primitive gets its own directory. Disk layout = boundary tree.
 
-### Contract Scrutiny, Substrate Encapsulation & Representation Integrity
-Every element of a contract must be scrutinized: method existence, parameters, return shapes, sync/async, lifecycle, and what is deliberately *not* exposed. Before adding another method to handle a new need, ask whether the existing primitive can express it by generalizing its fundamental shape.
+## The End Result
 
-* **Substrate Encapsulation:** When an implementation uses an execution substrate (ML runtime, DB engine, message broker, graphics API, OS handle, vendor SDK), substrate mechanics belong strictly inside the implementation. Never leak substrate types across primitive contracts unless the substrate itself is genuinely the domain boundary.
-* **Representation Integrity:** Boundary representations must express structural domain truth without prematurely specializing to one modality or artificially dumbing down types to raw primitives (`List[int]`, strings) merely to escape a dependency.
-* **Escape Hatches are Evidence, Not Solutions:** If a boundary requires nested generic containers (collections of collections, nested dictionaries/maps), `Any`, `object`, `dynamic`, unchecked casts, or downcasts, stop. A nested container or untyped container is an escape hatch for an unmodeled domain concept—model it as an explicit, typed domain DTO.
-* **Universal Domain Truths** belong directly in the **Core Primitive Contract**.
-* **Variable Strategies & Rules** belong in injected **Policies**.
-* **Convenience Transformations** do not belong in the primitive contract.
+When PFD is applied correctly, total code lines go **down**, not up. Not because you're trying to write less code, but because clean design is naturally minimal. Bug fixes become design fixes where the bug vanishes as a side effect. Regressions disappear because there's nothing fragile left to regress.
 
----
+A well-designed PFD system hovers around ~1k lines end-to-end. A human can't hold more than ~3k lines in working memory. If you're past that without massive external domain logic, something is wrong.
 
-## The Architectural Model: Four Pure Boundaries
+## For AI Agents
 
-PFD classifies architectural responsibilities into four distinct roles:
+PFD ships as an official skill triad for Google Antigravity (AGY) agents:
 
-```text
-┌─────────────────────────────────────────────────────────────┐
-│ LAYER  (Decorated Outside)                                  │
-│ Wraps the primitive to observe, intercept, persist, or adapt│
-│                                                             │
-│   ┌─────────────────────────────────────────────────────┐   │
-│   │ CORE PRIMITIVE  (The Contract)                      │   │
-│   │ The irreducible domain boundary & universal truth   │   │
-│   │                                                     │   │
-│   │   ┌─────────────────────────────────────────────┐   │   │
-│   │   │ POLICY  (Injected Inside)                   │   │   │
-│   │   │ Completes the primitive: strategy, limits   │   │   │
-│   │   └─────────────────────────────────────────────┘   │   │
-│   └─────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
+- **`/pfd`** — The full design philosophy and operational rules
+- **`/pfd-audit`** — 50-rule hard violation checklist + mechanical Python scanner
+- **`/pfd-iterate`** — Forces iterative self-audit and compression until zero violations
 
-                  [ DTO: Passive State Binder ]
-            Pure data carriers holding zero business logic
+Install into your Antigravity environment by running:
+
+```bash
+python scripts/sync-pfd.py install
 ```
 
-* **Universal Truth** $\longrightarrow$ **Core Primitive**
-* **Variable Strategy** $\longrightarrow$ **Policy**
-* **External Concern** $\longrightarrow$ **Layer**
-* **Passive State** $\longrightarrow$ **DTO**
+## Case Studies
 
-> **The Architectural Triad Axiom:**  
-> A **Policy** is just a primitive on the inside.  
-> A **Layer** is just the same primitive on the outside.  
-> **DTOs and pure transformations** provide the passive binding (**binder**) holding boundaries together.
+- **[AgentCore](https://github.com/MrRazor22/AgentCore)** — Where PFD was discovered. An experimental agent framework built end-to-end with 3 core primitives.
+- **[NanoLLM](https://github.com/MrRazor22/NanoLLM)** — PFD applied to high-performance model inference.
 
 ---
 
-## Policies vs. Layers: The Boundary Diagnostics
-
-* **Policy (Inside):** Completes the primitive from within. Governs internal strategy, algorithms, and meaningful operating thresholds.
-* **Layer (Outside):** Extends an already complete primitive from the outside. Acts like an instrument attached directly to the primitive's inputs and outputs, gaining direct access to inspect, monitor, persist, or adapt complete I/O flow without polluting internal mechanics.
-
-### The Diagnostic Sequence: Functional Completeness
-
-```text
-Can the primitive function meaningfully without it?
-        │
-        ├── NO ──► First ask: Is the primitive itself incomplete?
-        │            ├── YES ──► Fix the primitive contract (missing core responsibility)
-        │            └── NO  ──► POLICY (injected strategy or limit completing the mechanism)
-        │
-        └── YES ──► LAYER (external concern: logging, persistence, telemetry, caching)
-```
-
-> **Poor Primitive Diagnostic:** If something is external to the primitive and the primitive remains functionally complete without it, it is a Layer. But if the primitive cannot meaningfully function without the concern, investigate whether the primitive itself is incomplete before automatically inventing a wrapper or policy. A missing fundamental responsibility often masquerades as an external abstraction.
-
----
-
-## Recursive Implementation Discipline
-
-A concrete implementation is itself an opinion. The same minimality and purity discipline applies recursively inside the implementation:
-
-* When an implementation becomes large or complex, do not simply split files. Identify the hidden opinion, strategy, or responsibility inside, and extract it as an injected **Opinion Sub-Primitive (Policy)** when it genuinely warrants a boundary.
-* A large cohesive implementation is a smell signal worth investigating for hidden policies or god-object behavior. Lines of code serve as an observational smell detector, never a target.
-* The anti-gaming principle holds that physical code shapes (arbitrary file fragmentation, partial classes, deep inheritance, helper indirection) must never be used merely to conceal architectural sprawl. Cohesive units remain together.
-
----
-
-## Architectural Purity, Symmetry & Topology
-
-* **Architectural Purity (The Deliberate Standard):** An intentional upfront standard governing the highest-level layer that consumes core primitives. That layer must read as pure and transparent as pseudo-code or plain English. Orchestration must never hide behind god-classes or opaque single-line launchers (`var app = app.start()`), but flow through clean, fluent composition roots where primitives natively handle their own lifecycles without intermediate glue.
-* **Natural Symmetry (The Emergent Discovery):** An internal emergence discovered through iterative development. Questioning artificial asymmetry across peer boundaries acts as a discovery compass—revealing that seemingly different capabilities share parallel shapes, lifecycles, and symmetrical domain naming, unlocking the deepest architectural simplifications.
-* **Physical Topology:** Disk layout directly mirrors the boundary hierarchy 1:1. The sovereign primitive contract and its DTOs anchor the boundary root; injected strategies are grouped in `policies/` and decorators in `layers/`. Single-file directories are avoided; when an injected policy becomes complex enough to warrant its own operational boundary, it recursively promotes into a self-similar primitive folder.
-* **Universal Scope:** PFD is not a coding pattern; the same primitive, policy, layer, and state reasoning applies wherever structured work is produced (UI components, system architecture, documentation, and creative work).
-
----
-
-## Learn More
-
-* **[AgentCore Case Study](https://github.com/MrRazor22/AgentCore):** See how PFD was discovered and applied in an experimental agent framework.
-* **[NanoLLM Case Study](https://github.com/MrRazor22/NanoLLM):** See PFD applied to high-performance model inference and lightweight runtime boundaries.
-* **[PFD Agent Skill (`skills/pfd/SKILL.md`)](skills/pfd/SKILL.md):** The machine-executable technical specification, audit rules, and automation directives.
+*PFD applies to everything — backend, UI, specifications, creative work. Anywhere there are boundaries, there are primitives, policies, layers, and data.*

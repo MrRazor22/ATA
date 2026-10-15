@@ -1,19 +1,22 @@
 # PFD Repository Agent Guidelines
 
 ## 1. Documentation Separation (Human vs. Agent)
-- **`README.md` is for Humans (Strictly Zero Unprompted Edits):** Architectural manifesto and foundational theory for software engineers. Grounded with production case studies (`AgentCore`, `NanoLLM`) and direct comparisons with enterprise frameworks (LangChain, Microsoft Agent Framework). Zero granular operational runbook directions (which belong exclusively in `SKILL.md`), zero AI-prompt checklists, zero YAML frontmatter. **NEVER modify or update `README.md` when updating skills or architecture unless the user explicitly commands an edit to `README.md`.**
-- **`skills/pfd/SKILL.md` is for AI Agents:** Actionable operational runbook, step-by-step audit checklists, and strict execution constraints. Zero hardcoded personal repo links or ephemeral project leakage.
-- **Never Mirror Blindly:** Never copy-paste content between `README.md` and `SKILL.md`. Each file must speak directly to its distinct audience.
-- **Reflect What It Preaches (First-Class Proof Beyond Code):** Both `SKILL.md` and `README.md` must strictly embody PFD itself: rich in detail, high signal density, strictly compressed, with zero convenience bloat or fluff. This serves as primary proof that PFD is a universal creative discipline beyond code.
+- **`README.md` is for Humans (Strictly Zero Unprompted Edits):** Foundational theory for software engineers, written plainly. Zero granular operational runbook directions (which belong exclusively in skills), zero AI-prompt checklists, zero YAML frontmatter. **NEVER modify `README.md` unless the user explicitly commands it.**
+- **Skills are for AI Agents:** The PFD skill triad (`pfd`, `pfd-audit`, `pfd-iterate`) in `~/.gemini/config/skills/` contains the actionable operational runbook, audit checklists, and execution constraints.
+- **Never Mirror Blindly:** Never copy-paste content between `README.md` and skills. Each speaks to its distinct audience.
 
 ## 2. Core Architectural Invariants (PFD)
-- **Always Apply PFD:** Apply Primitive-First Design (PFD) across all software architecture, boundary definitions, audits, refactorings, and reviews. Always read and strictly adhere to the complete, authoritative PFD doctrine in `skills/pfd/SKILL.md` (and global `~/.gemini/config/skills/pfd/SKILL.md`). Never use partial heuristics, speculative layers, or ad-hoc wrapper abstractions.
+- **Always Apply PFD:** Apply Primitive-First Design (PFD) across all software architecture, boundary definitions, audits, refactorings, and reviews. Always read and strictly adhere to the complete, authoritative PFD doctrine in `~/.gemini/config/skills/pfd/SKILL.md` (invocable via `/pfd`). Never use partial heuristics, speculative layers, or ad-hoc wrapper abstractions.
 
+## 3. The Refinement Cycle: Correction -> Proposal -> Sharpen (Never Blindly Append)
+- **Root-Cause Correction:** When gaps, omissions, or smells are identified, diagnose the fundamental structural cause calmly. Zero panic edits, zero blind reverts, zero knee-jerk patches.
+- **Ultra-Concise Proposal First:** State intent in 1–2 crisp sentences or bullets before touching workspace state. Strictly zero code dumps or text previews before editing.
+- **Sharpen, Don't Blindly Append:** When updating skills, rules, or docs, improve and densify existing statements within their strict line budgets. Never blindly append lines or destroy hard-won prior instructions in the name of reckless "improving".
 
-## 3. Operational & Git Workflow
-- **Commit on Every Considerable Update:** Always create a clean, descriptive git commit upon completing any considerable architectural, documentation, or skill update. Never leave significant milestones, syntheses, or refactorings uncommitted in the working tree.
-- **Pre-Commit User-Point Audit & Absolute Honesty:** Before or upon committing, always perform a rigorous, exhaustive audit of all user requirements and nuanced insights. Honestly and explicitly confirm to the user whether every single point was captured in full, or openly identify any friction, omission, or necessary adaptation.
-- **Mandatory Synchronization Checklist:** Whenever updating PFD architecture, doctrine, or skills, synchronize exclusively:
-  1. `skills/pfd/SKILL.md` (Repo skill file)
-  2. `~/.gemini/config/skills/pfd/SKILL.md` (Global Antigravity skill directory)
-  *(Never touch `AGENTS.md` or any global agent rules during PFD sync. Always run `powershell -File scripts/sync-pfd.ps1` to sync the skill).*
+## 4. Skill Synchronization
+- **Repository Triad:** The repo `skills/` folder holds the version-controlled distribution of the PFD triad (`pfd`, `pfd-audit`, `pfd-iterate`).
+- **Sync Tool:** Use `python scripts/sync-pfd.py update-repo` to pull live edits from `~/.gemini/config/skills/` into the repo, or `python scripts/sync-pfd.py install` to install repo skills into Antigravity. Always verify with `python scripts/sync-pfd.py check`.
+
+## 5. Git Workflow
+- **Commit on Every Considerable Update:** Always create a clean, descriptive git commit upon completing any considerable architectural, documentation, or skill update.
+- **Pre-Commit Audit:** Before committing, perform a rigorous audit of all user requirements. Honestly confirm whether every point was captured, or openly identify any omission.
