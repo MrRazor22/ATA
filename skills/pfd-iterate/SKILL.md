@@ -31,10 +31,11 @@ For every bug fix or change, answer honestly:
 - Bonus points if clean architecture naturally improved resilience, throughput, or capabilities as a zero-bloat side effect.
 - **The Outsider Litmus Test:** When PFD is done right, code never looks like an eccentric paradigm — an engineer with zero knowledge of PFD will naturally find it obvious, standard, and clean. If it feels weird or contrived to an outsider, the design is wrong.
 
-## STEP 5: ITERATE UNTIL CLEAN
-If ANY violations were found in Steps 1–4:
-1. Fix all violations.
-2. Re-run the full audit from Step 1.
-3. Repeat until zero violations remain and code lines are at or below the starting count.
+## STEP 5: ITERATE & REPORT CONFIDENCE
+Loop Steps 1–4 until zero violations remain and code lines are at or below starting count. When clean, output a **Confidence Card**:
+1. **1:1 Zero-Regression Proof:** Explicit verification against prior code — all features, behaviors, and edge cases preserved.
+2. **Compression Floor Rationale:** Why lines cannot go lower without hurting readability or domain integrity.
+3. **Collateral Wins:** What improved as a natural side effect (resilience, decoupling, safety).
+4. **Outsider Legibility:** Standard obvious code, zero weird paradigm smells.
 
 **Do NOT report "done" until the audit is completely clean.**

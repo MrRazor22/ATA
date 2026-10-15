@@ -17,6 +17,6 @@
 - **Repository Triad:** The repo `skills/` folder holds the version-controlled distribution of the PFD triad (`pfd`, `pfd-audit`, `pfd-iterate`).
 - **Sync Tool:** Use `python scripts/sync-pfd.py update-repo` to pull live edits from `~/.gemini/config/skills/` into the repo, or `python scripts/sync-pfd.py install` to install repo skills into Antigravity. Always verify with `python scripts/sync-pfd.py check`.
 
-## 5. Git Workflow
-- **Commit on Every Considerable Update:** Always create a clean, descriptive git commit upon completing any considerable architectural, documentation, or skill update.
+## 5. Git Workflow & Immediate Commits
+- **Commit Immediately on Every Sync or Update:** Never leave synced skills or documentation uncommitted in the working tree. Immediately create a clean, descriptive git commit upon completing any sync, architectural refinement, or skill update.
 - **Pre-Commit Audit:** Before committing, perform a rigorous audit of all user requirements. Honestly confirm whether every point was captured, or openly identify any omission.
