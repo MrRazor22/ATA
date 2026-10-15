@@ -13,7 +13,8 @@
 ## 3. Operational & Git Workflow
 - **Commit on Every Considerable Update:** Always create a clean, descriptive git commit upon completing any considerable architectural, documentation, or skill update. Never leave significant milestones, syntheses, or refactorings uncommitted in the working tree.
 - **Pre-Commit User-Point Audit & Absolute Honesty:** Before or upon committing, always perform a rigorous, exhaustive audit of all user requirements and nuanced insights. Honestly and explicitly confirm to the user whether every single point was captured in full, or openly identify any friction, omission, or necessary adaptation.
-- **Mandatory Synchronization Checklist:** Whenever updating PFD architecture, doctrine, or skills, always synchronize the following locations:
+- **Mandatory Synchronization Checklist:** Whenever updating PFD architecture, doctrine, or skills, always synchronize the following three locations:
   1. `skills/pfd/SKILL.md` (Repo skill file)
   2. `~/.gemini/config/skills/pfd/SKILL.md` (Global Antigravity skill directory)
+  3. `~/.gemini/config/AGENTS.md` (Global user rules Section 5)
   *Always run `powershell -File scripts/sync-pfd.ps1` to automatically sync the skill and verify status.*
