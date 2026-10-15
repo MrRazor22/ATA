@@ -15,12 +15,7 @@ if (Test-Path $SkillSource) {
         New-Item -ItemType Directory -Path $GlobalDir -Force | Out-Null
     }
     
-    # Remove any stale modular subdirectories if present in the global skill directory
-    Get-ChildItem -Path $GlobalDir -Directory | ForEach-Object {
-        Remove-Item -Path $_.FullName -Recurse -Force
-        Write-Host "[CLEANED] Removed modular directory: $($_.Name)" -ForegroundColor DarkGray
-    }
-    
+
     if ($CheckOnly) {
         $srcHash = (Get-FileHash $SkillSource).Hash
         $dstHash = if (Test-Path $GlobalSkill) { (Get-FileHash $GlobalSkill).Hash } else { "NONE" }
